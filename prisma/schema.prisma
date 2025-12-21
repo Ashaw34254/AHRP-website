@@ -1,0 +1,1098 @@
+// Aurora Horizon RP - CAD System Database Schema
+// Inspired by Sonoran CAD
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("user") // user, admin
+  discordId     String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // CAD Relations
+  officers      Officer[]
+  createdCalls  Call[]    @relation("CallCreator")
+}
+
+// ============================================
+// EMERGENCY SERVICES
+// ============================================
+
+// Note: SQLite doesn't support enums, so we use String fields with default values
+// Valid values for department: POLICE, FIRE, EMS
+// Valid values for unitStatus: AVAILABLE, BUSY, ENROUTE, ON_SCENE, OUT_OF_SERVICE, PANIC
+// Valid values for callPriority: LOW, MEDIUM, HIGH, CRITICAL
+// Valid values for callStatus: PENDING, DISPATCHED, ACTIVE, CLOSED, CANCELLED
+// Valid values for callType: See list below
+
+// ============================================
+// OFFICERS & UNITS
+// ============================================
+
+model Officer {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  callsign    String     @unique
+  name        String
+  badge       String?
+  department  String     // POLICE, FIRE, EMS
+  rank        String?
+  
+  isActive    Boolean    @default(true)
+  dutyStatus  String     @default("OUT_OF_SERVICE") // AVAILABLE, BUSY, ENROUTE, ON_SCENE, OUT_OF_SERVICE, PANIC
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  unitId      String?
+  unit        Unit?      @relation(fields: [unitId], references: [id])
+  callNotes   CallNote[]
+}
+
+model Unit {
+  id          String     @id @default(cuid())
+  callsign    String     @unique
+  department  String     // POLICE, FIRE, EMS
+  status      String     @default("OUT_OF_SERVICE") // AVAILABLE, BUSY, ENROUTE, ON_SCENE, OUT_OF_SERVICE, PANIC
+  
+  // Current assignment
+  callId      String?
+  call        Call?      @relation(fields: [callId], references: [id])
+  
+  // Location
+  location    String?
+  latitude    Float?
+  longitude   Float?
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  officers    Officer[]
+}
+
+// ============================================
+// CALLS & DISPATCH
+// ============================================
+
+model Call {
+  id          String       @id @default(cuid())
+  callNumber  String       @unique // Auto-generated CAD number (e.g., 2025-001234)
+  
+  type        String       // TRAFFIC_STOP, SUSPICIOUS_ACTIVITY, THEFT, ROBBERY, ASSAULT, etc.
+  priority    String       @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status      String       @default("PENDING") // PENDING, DISPATCHED, ACTIVE, CLOSED, CANCELLED
+  
+  // Location
+  location    String
+  latitude    Float?
+  longitude   Float?
+  postal      String?
+  
+  // Details
+  description String
+  caller      String?
+  callerPhone String?
+  
+  // Timestamps
+  createdAt   DateTime     @default(now())
+  dispatchedAt DateTime?
+  closedAt    DateTime?
+  
+  // Creator
+  createdById String
+  createdBy   User         @relation("CallCreator", fields: [createdById], references: [id])
+  
+  // Relations
+  units       Unit[]
+  notes       CallNote[]
+  attachments CallAttachment[]
+  
+  @@index([status, priority])
+  @@index([createdAt])
+}
+
+model CallNote {
+  id        String   @id @default(cuid())
+  callId    String
+  call      Call     @relation(fields: [callId], references: [id], onDelete: Cascade)
+  
+  officerId String
+  officer   Officer  @relation(fields: [officerId], references: [id])
+  
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model CallAttachment {
+  id        String   @id @default(cuid())
+  callId    String
+  call      Call     @relation(fields: [callId], references: [id], onDelete: Cascade)
+  
+  filename  String
+  url       String
+  type      String   // image, video, document
+  createdAt DateTime @default(now())
+}
+
+// ============================================
+// CIVIL RECORDS
+// ============================================
+
+model Citizen {
+  id          String    @id @default(cuid())
+  
+  // Personal Info
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  gender      String?
+  
+  // Identification
+  stateId     String?   @unique
+  phoneNumber String?
+  address     String?
+  
+  // Status
+  isWanted    Boolean   @default(false)
+  isMissing   Boolean   @default(false)
+  
+  // Licenses
+  driversLicense Boolean @default(false)
+  weaponsPermit  Boolean @default(false)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  vehicles    Vehicle[]
+  warrants    Warrant[]
+  citations   Citation[]
+  arrests     Arrest[]
+}
+
+model Vehicle {
+  id          String   @id @default(cuid())
+  
+  plate       String   @unique
+  model       String
+  color       String
+  year        Int?
+  
+  isStolen    Boolean  @default(false)
+  isWanted    Boolean  @default(false)
+  
+  // Owner
+  ownerId     String
+  owner       Citizen  @relation(fields: [ownerId], references: [id])
+  
+  // Registration
+  registeredAt DateTime @default(now())
+  expiresAt    DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Warrant {
+  id          String   @id @default(cuid())
+  
+  citizenId   String
+  citizen     Citizen  @relation(fields: [citizenId], references: [id])
+  
+  offense     String
+  description String?
+  bail        Int?
+  
+  isActive    Boolean  @default(true)
+  issuedAt    DateTime @default(now())
+  issuedBy    String
+  
+  createdAt   DateTime @default(now())
+}
+
+model Citation {
+  id          String   @id @default(cuid())
+  
+  citizenId   String
+  citizen     Citizen  @relation(fields: [citizenId], references: [id])
+  
+  violation   String
+  fine        Int
+  notes       String?
+  
+  isPaid      Boolean  @default(false)
+  issuedAt    DateTime @default(now())
+  issuedBy    String
+  
+  createdAt   DateTime @default(now())
+}
+
+model Arrest {
+  id          String   @id @default(cuid())
+  
+  citizenId   String
+  citizen     Citizen  @relation(fields: [citizenId], references: [id])
+  
+  charges     String
+  notes       String?
+  
+  arrestedAt  DateTime @default(now())
+  arrestedBy  String
+  
+  createdAt   DateTime @default(now())
+}
+
+// ============================================
+// PANIC ALERTS & EMERGENCY
+// ============================================
+
+model PanicAlert {
+  id          String   @id @default(cuid())
+  
+  unitId      String
+  unitCallsign String
+  department  String   // POLICE, FIRE, EMS
+  
+  location    String?
+  latitude    Float?
+  longitude   Float?
+  
+  reason      String?  // Optional reason/description
+  status      String   @default("ACTIVE") // ACTIVE, RESPONDED, CANCELLED, RESOLVED
+  
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+  
+  @@index([status, createdAt])
+}
+
+// ============================================
+// BOLO SYSTEM (Be On the Lookout)
+// ============================================
+
+model BOLO {
+  id          String   @id @default(cuid())
+  
+  type        String   // PERSON, VEHICLE, OTHER
+  title       String
+  description String
+  
+  // Person details (if applicable)
+  personName  String?
+  personDesc  String?
+  
+  // Vehicle details (if applicable)
+  vehiclePlate String?
+  vehicleModel String?
+  vehicleColor String?
+  
+  // Image
+  imageUrl    String?
+  
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status      String   @default("ACTIVE") // ACTIVE, CANCELLED, RESOLVED
+  
+  issuedBy    String
+  issuedAt    DateTime @default(now())
+  expiresAt   DateTime?
+  resolvedAt  DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status, priority])
+}
+
+// ============================================
+// BACKUP REQUESTS
+// ============================================
+
+model BackupRequest {
+  id          String   @id @default(cuid())
+  
+  requestingUnitId String
+  requestingUnit   String // Callsign
+  department       String // POLICE, FIRE, EMS
+  
+  callId      String?
+  callNumber  String?
+  
+  location    String
+  latitude    Float?
+  longitude   Float?
+  
+  urgency     String   @default("ROUTINE") // ROUTINE, URGENT, EMERGENCY
+  reason      String?
+  
+  status      String   @default("PENDING") // PENDING, ACKNOWLEDGED, ENROUTE, ARRIVED, CANCELLED
+  
+  requestedAt DateTime @default(now())
+  respondedAt DateTime?
+  
+  @@index([status, urgency])
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  
+  type        String   // PANIC, BACKUP, BOLO, CALL, WARRANT, SYSTEM
+  title       String
+  message     String
+  
+  priority    String   @default("NORMAL") // LOW, NORMAL, HIGH, CRITICAL
+  
+  isRead      Boolean  @default(false)
+  
+  // Reference IDs (optional)
+  referenceId   String?
+  referenceType String?  // call, unit, bolo, warrant, etc.
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+// ============================================
+// 10-CODES & QUICK STATUS
+// ============================================
+
+model StatusCode {
+  id          String   @id @default(cuid())
+  
+  code        String   @unique // 10-4, 10-8, 10-23, etc.
+  meaning     String
+  department  String?  // null for universal codes, or POLICE/FIRE/EMS for specific
+  category    String?  // acknowledgment, status, emergency, etc.
+  
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+}
+
+model StatusLog {
+  id          String   @id @default(cuid())
+  
+  unitId      String
+  unitCallsign String
+  
+  code        String   // The 10-code used
+  status      String   // The status change
+  
+  callId      String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([unitId, createdAt])
+}
+
+// ============================================
+// DISPATCHER COORDINATION
+// ============================================
+
+model DispatcherSession {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  name        String
+  
+  status      String   @default("ACTIVE") // ACTIVE, BREAK, OFFLINE
+  
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  
+  @@index([status])
+}
+
+model DispatcherMessage {
+  id          String   @id @default(cuid())
+  
+  fromUserId  String
+  fromName    String
+  
+  toUserId    String?  // null for broadcast
+  
+  message     String
+  priority    String   @default("NORMAL") // NORMAL, HIGH, URGENT
+  
+  isRead      Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([toUserId, isRead])
+}
+
+// ============================================
+// MAPPING & LOCATION
+// ============================================
+
+model Zone {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  type        String   // PATROL, DISTRICT, JURISDICTION
+  department  String?  // POLICE, FIRE, EMS, or null for shared
+  
+  // Polygon coordinates (JSON string of lat/lng points)
+  coordinates String
+  color       String   @default("#3b82f6")
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model PointOfInterest {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // HOSPITAL, POLICE_STATION, FIRE_STATION, LANDMARK
+  address     String
+  latitude    Float
+  longitude   Float
+  
+  description String?
+  icon        String?
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  @@index([type])
+}
+
+// ============================================
+// PERSONNEL MANAGEMENT
+// ============================================
+
+model OfficerProfile {
+  id          String   @id @default(cuid())
+  officerId   String   @unique
+  
+  // Personal Info
+  firstName   String
+  lastName    String
+  badgeNumber String   @unique
+  
+  // Department Info
+  department  String   // POLICE, FIRE, EMS
+  rank        String
+  division    String?  // Patrol, Detective, SWAT, etc.
+  
+  // Status
+  hireDate    DateTime
+  isActive    Boolean  @default(true)
+  
+  // Certifications & Training
+  certifications String? // JSON array
+  specializations String? // JSON array
+  
+  // Statistics
+  totalCalls      Int @default(0)
+  totalArrests    Int @default(0)
+  totalCitations  Int @default(0)
+  hoursLogged     Float @default(0)
+  
+  // Avatar
+  avatarUrl   String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  trainingRecords TrainingRecord[]
+  shiftLogs       ShiftLog[]
+}
+
+model TrainingRecord {
+  id          String   @id @default(cuid())
+  officerId   String
+  officer     OfficerProfile @relation(fields: [officerId], references: [id], onDelete: Cascade)
+  
+  trainingType    String // FIREARMS, DRIVING, FIRST_AID, SWAT, K9, etc.
+  certificationName String
+  completedDate   DateTime
+  expiresAt       DateTime?
+  
+  instructor      String?
+  notes           String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([officerId])
+}
+
+model ShiftLog {
+  id          String   @id @default(cuid())
+  officerId   String
+  officer     OfficerProfile @relation(fields: [officerId], references: [id], onDelete: Cascade)
+  
+  clockIn     DateTime
+  clockOut    DateTime?
+  
+  hoursWorked Float    @default(0)
+  callsHandled Int     @default(0)
+  
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([officerId, clockIn])
+}
+
+// ============================================
+// FLEET MANAGEMENT
+// ============================================
+
+model FleetVehicle {
+  id          String   @id @default(cuid())
+  
+  callsign    String   @unique // CAR-12, TRUCK-5, etc.
+  type        String   // PATROL_CAR, SUV, TRUCK, AMBULANCE, FIRE_ENGINE
+  department  String   // POLICE, FIRE, EMS
+  
+  make        String
+  model       String
+  year        Int
+  plate       String   @unique
+  vin         String?
+  
+  status      String   @default("AVAILABLE") // AVAILABLE, IN_USE, MAINTENANCE, OUT_OF_SERVICE
+  mileage     Int      @default(0)
+  
+  lastMaintenance DateTime?
+  nextMaintenance DateTime?
+  
+  assignedUnitId String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  maintenanceLogs MaintenanceLog[]
+  
+  @@index([department, status])
+}
+
+model MaintenanceLog {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  vehicle     FleetVehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  
+  type        String   // OIL_CHANGE, TIRE_ROTATION, REPAIR, INSPECTION
+  description String
+  cost        Float    @default(0)
+  
+  performedBy String
+  performedAt DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([vehicleId])
+}
+
+// ============================================
+// EXTENDED CIVIL RECORDS
+// ============================================
+
+model Property {
+  id          String   @id @default(cuid())
+  
+  address     String   @unique
+  ownerName   String
+  ownerId     String?  // Link to Citizen if exists
+  
+  propertyType String  // RESIDENTIAL, COMMERCIAL, INDUSTRIAL, VACANT
+  value       Float?
+  
+  latitude    Float?
+  longitude   Float?
+  
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerName])
+}
+
+model BusinessLicense {
+  id          String   @id @default(cuid())
+  
+  businessName String
+  ownerName    String
+  ownerId      String? // Link to Citizen
+  
+  licenseNumber String  @unique
+  licenseType   String  // RESTAURANT, RETAIL, FIREARMS_DEALER, etc.
+  
+  address       String
+  isActive      Boolean @default(true)
+  
+  issuedDate    DateTime
+  expiresAt     DateTime?
+  
+  notes         String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([businessName])
+}
+
+model FirearmRegistry {
+  id          String   @id @default(cuid())
+  
+  ownerName   String
+  ownerId     String?  // Link to Citizen
+  
+  serialNumber String  @unique
+  make        String
+  model       String
+  caliber     String
+  type        String   // HANDGUN, RIFLE, SHOTGUN
+  
+  isStolen    Boolean  @default(false)
+  registrationDate DateTime
+  
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerName])
+  @@index([serialNumber])
+}
+
+// ============================================
+// INCIDENT REPORTS & COURT
+// ============================================
+
+model IncidentReport {
+  id          String   @id @default(cuid())
+  
+  reportNumber String  @unique // IR-2025-001234
+  callId       String?
+  
+  type        String   // ARREST, ACCIDENT, INCIDENT, INVESTIGATION
+  title       String
+  narrative   String
+  
+  location    String
+  occurredAt  DateTime
+  
+  reportedBy  String   // Officer name/callsign
+  approvedBy  String?
+  
+  status      String   @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, ARCHIVED
+  
+  // Involved parties (JSON arrays)
+  suspects    String?
+  victims     String?
+  witnesses   String?
+  
+  evidence    String?  // JSON array
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([reportNumber])
+  @@index([status])
+}
+
+model CourtCase {
+  id          String   @id @default(cuid())
+  
+  caseNumber  String   @unique
+  defendantName String
+  defendantId   String? // Link to Citizen
+  
+  charges     String   // JSON array
+  
+  status      String   @default("PENDING") // PENDING, ACTIVE, SENTENCED, DISMISSED
+  filedDate   DateTime
+  courtDate   DateTime?
+  
+  prosecutor  String?
+  judge       String?
+  
+  verdict     String?  // GUILTY, NOT_GUILTY, DISMISSED
+  sentence    String?
+  
+  fineAmount  Float    @default(0)
+  jailTime    Int      @default(0) // In months
+  
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([defendantName])
+  @@index([status])
+}
+
+// ============================================
+// DEPARTMENT-SPECIFIC SYSTEMS
+// ============================================
+
+model MedicalRecord {
+  id          String   @id @default(cuid())
+  
+  patientName String
+  patientId   String?  // Link to Citizen
+  stateId     String?
+  
+  dateOfBirth String
+  bloodType   String?
+  
+  allergies   String?  // JSON array
+  medications String?  // JSON array
+  conditions  String?  // JSON array
+  
+  emergencyContact String?
+  insuranceInfo    String?
+  
+  lastUpdated DateTime @default(now())
+  updatedBy   String
+  
+  createdAt   DateTime @default(now())
+  
+  medicalIncidents MedicalIncident[]
+  
+  @@index([patientName])
+  @@index([stateId])
+}
+
+model MedicalIncident {
+  id          String   @id @default(cuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  
+  callId      String?
+  incidentDate DateTime
+  
+  chiefComplaint String
+  treatment      String
+  medications    String?
+  
+  vitalSigns     String?  // JSON: BP, HR, RR, O2, Temp
+  
+  transportedTo  String?
+  disposition    String   // TREATED_RELEASED, TRANSPORTED, REFUSED, DOA
+  
+  treatedBy      String
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([medicalRecordId])
+}
+
+model FirePrePlan {
+  id          String   @id @default(cuid())
+  
+  buildingName String
+  address      String   @unique
+  
+  buildingType String   // RESIDENTIAL, COMMERCIAL, INDUSTRIAL, HIGH_RISE
+  floors       Int
+  occupancy    Int?
+  
+  hydrantLocations String? // JSON array of coordinates
+  accessPoints     String? // JSON array
+  hazards          String? // JSON array
+  
+  blueprintUrl     String?
+  notes            String?
+  
+  lastInspection   DateTime?
+  nextInspection   DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([address])
+}
+
+model HazmatEntry {
+  id          String   @id @default(cuid())
+  
+  chemicalName String
+  unNumber     String?  // UN identification number
+  class        String   // Class 1-9
+  
+  description  String
+  hazards      String   // JSON array
+  
+  emergencyProcedures String
+  ppe          String   // Required personal protective equipment
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([chemicalName])
+  @@index([unNumber])
+}
+
+model K9Unit {
+  id          String   @id @default(cuid())
+  
+  dogName     String
+  breed       String
+  handlerName String
+  handlerId   String?  // Link to Officer
+  
+  specialization String // PATROL, NARCOTICS, EXPLOSIVES, SEARCH_RESCUE
+  
+  certifiedDate  DateTime
+  recertDate     DateTime?
+  
+  isActive    Boolean  @default(true)
+  
+  deployments K9Deployment[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model K9Deployment {
+  id          String   @id @default(cuid())
+  k9UnitId    String
+  k9Unit      K9Unit   @relation(fields: [k9UnitId], references: [id], onDelete: Cascade)
+  
+  callId      String?
+  deployedAt  DateTime
+  
+  purpose     String   // SEARCH, TRACK, APPREHENSION, etc.
+  result      String?
+  
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([k9UnitId])
+}
+
+model TacticalCallout {
+  id          String   @id @default(cuid())
+  
+  calloutNumber String  @unique
+  callId        String?
+  
+  type        String   // SWAT, CRISIS_NEGOTIATION, BOMB_SQUAD
+  reason      String
+  location    String
+  
+  priority    String   @default("HIGH") // HIGH, CRITICAL
+  status      String   @default("PENDING") // PENDING, ENROUTE, ON_SCENE, RESOLVED, CANCELLED
+  
+  requestedBy String
+  commander   String?
+  
+  unitsDeployed String? // JSON array
+  
+  activatedAt DateTime @default(now())
+  arrivedAt   DateTime?
+  resolvedAt  DateTime?
+  
+  outcome     String?
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+}
+
+// ============================================
+// MDT MESSAGING & ALERTS
+// ============================================
+
+model MDTMessage {
+  id          String   @id @default(cuid())
+  
+  fromUnitId  String
+  fromCallsign String
+  
+  toUnitId    String?  // null for broadcast
+  toCallsign  String?
+  
+  message     String
+  priority    String   @default("NORMAL") // NORMAL, HIGH, URGENT
+  
+  isRead      Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([toUnitId, isRead])
+}
+
+model SupervisorAlert {
+  id          String   @id @default(cuid())
+  
+  type        String   // PANIC, BACKUP, PURSUIT, USE_OF_FORCE, OFFICER_DOWN
+  unitId      String
+  unitCallsign String
+  department  String
+  
+  location    String?
+  reason      String?
+  
+  status      String   @default("ACTIVE") // ACTIVE, ACKNOWLEDGED, RESOLVED
+  
+  acknowledgedBy String?
+  acknowledgedAt DateTime?
+  
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+  
+  @@index([status, type])
+}
+
+// ============================================
+// CIVILIAN PORTAL
+// ============================================
+
+model CivilianReport {
+  id          String   @id @default(cuid())
+  
+  reportNumber String  @unique
+  type        String   // TIP, COMPLAINT, LOST_PROPERTY, etc.
+  
+  reporterName  String
+  reporterEmail String?
+  reporterPhone String?
+  
+  subject     String
+  description String
+  location    String?
+  
+  status      String   @default("PENDING") // PENDING, REVIEWED, RESOLVED, DISMISSED
+  
+  reviewedBy  String?
+  response    String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+}
+
+model RecordsRequest {
+  id          String   @id @default(cuid())
+  
+  requestNumber String  @unique
+  
+  requesterName  String
+  requesterEmail String
+  requesterPhone String?
+  
+  requestType    String  // POLICE_REPORT, ACCIDENT_REPORT, COURT_RECORDS
+  recordDetails  String
+  
+  status         String  @default("PENDING") // PENDING, PROCESSING, APPROVED, DENIED, FULFILLED
+  
+  reviewedBy     String?
+  notes          String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+}
+
+// ============================================
+// QUICK ACTIONS & TEMPLATES
+// ============================================
+
+model CallTemplate {
+  id          String   @id @default(cuid())
+  
+  name        String
+  type        String   // Pre-filled call type
+  priority    String
+  
+  descriptionTemplate String
+  
+  department  String?  // null for universal
+  isActive    Boolean  @default(true)
+  
+  createdBy   String
+  createdAt   DateTime @default(now())
+}
+
+model QuickAction {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String
+  actionType  String   // STATUS_CHANGE, DISPATCH, NOTIFICATION, etc.
+  
+  config      String   // JSON configuration
+  
+  department  String?
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+}
+
+// ============================================
+// FIVEM INTEGRATION
+// ============================================
+
+model FiveMServer {
+  id          String   @id @default(cuid())
+  
+  name        String
+  ipAddress   String
+  port        Int
+  
+  apiKey      String?
+  webhookUrl  String?
+  
+  isActive    Boolean  @default(true)
+  lastSync    DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FiveMEvent {
+  id          String   @id @default(cuid())
+  
+  eventType   String   // PLAYER_SHOT, VEHICLE_STOLEN, etc.
+  playerId    String?
+  playerName  String?
+  
+  location    String?
+  latitude    Float?
+  longitude   Float?
+  
+  data        String   // JSON event data
+  
+  autoCallCreated Boolean @default(false)
+  callId          String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([eventType, createdAt])
+}

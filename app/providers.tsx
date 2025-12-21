@@ -1,0 +1,27 @@
+"use client";
+
+import { NextUIProvider } from "@nextui-org/react";
+import { SessionProvider } from "next-auth/react";
+import { Toaster } from "@/components/Toaster";
+import { ThemeProvider } from "@/lib/theme-context";
+import { RealtimeProvider } from "@/lib/realtime-context";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const isDev = process.env.NODE_ENV === "development";
+  
+  return (
+    <ThemeProvider>
+      <SessionProvider 
+        refetchInterval={isDev ? 0 : 300}
+        refetchOnWindowFocus={!isDev}
+      >
+        <RealtimeProvider>
+          <NextUIProvider>
+            {children}
+            <Toaster />
+          </NextUIProvider>
+        </RealtimeProvider>
+      </SessionProvider>
+    </ThemeProvider>
+  );
+}
