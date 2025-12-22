@@ -17,24 +17,29 @@ export async function POST(
       );
     }
 
-    // Check if officer exists, if not create a dev officer profile
-    const officerExists = await prisma.officerProfile.findUnique({
+    // Check if officer exists, if not create a dev officer
+    const officerExists = await prisma.officer.findUnique({
       where: { id: officerId },
     });
 
     if (!officerExists) {
-      // Create dev officer profile
-      await prisma.officerProfile.create({
-        data: {
-          id: officerId,
-          firstName: "Dev",
-          lastName: "Officer",
-          badgeNumber: "DEV-001",
-          rank: "Officer",
-          department: "POLICE",
-          status: "ACTIVE",
-        },
+      // Create dev officer - note: this requires a userId
+      // In production, officers should be properly created with user accounts
+      const devUser = await prisma.user.findFirst({
+        where: { email: "dev@ahrp.local" },
       });
+
+      if (devUser) {
+        await prisma.officer.create({
+          data: {
+            id: officerId,
+            userId: devUser.id,
+            callsign: "DEV-001",
+            name: "Dev Officer",
+            department: "POLICE",
+          },
+        });
+      }
     }
 
     const note = await prisma.callNote.create({
@@ -46,9 +51,9 @@ export async function POST(
       include: {
         officer: {
           select: {
-            firstName: true,
-            lastName: true,
-            badgeNumber: true,
+            name: true,
+            badge: true,
+            callsign: true,
           },
         },
       },

@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 // GET /api/departments/[dept] - Get specific department
 export async function GET(
   request: NextRequest,
-  { params }: { params: { dept: string } }
+  { params }: { params: Promise<{ dept: string }> }
 ) {
   try {
-    const deptName = params.dept.toUpperCase();
+    const { dept } = await params;
+    const deptName = dept.toUpperCase();
     
     const department = await prisma.department.findUnique({
       where: { name: deptName },
@@ -48,10 +49,11 @@ export async function GET(
 // PATCH /api/departments/[dept] - Update specific department
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { dept: string } }
+  { params }: { params: Promise<{ dept: string }> }
 ) {
   try {
-    const deptName = params.dept.toUpperCase();
+    const { dept } = await params;
+    const deptName = dept.toUpperCase();
     const body = await request.json();
 
     const department = await prisma.department.update({

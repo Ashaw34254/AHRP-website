@@ -29,9 +29,9 @@ export async function POST(request: NextRequest) {
       data: {
         address,
         ownerName,
+        ownerId: null,
         propertyType: propertyType || "RESIDENTIAL",
-        assessedValue: assessedValue ? parseFloat(assessedValue) : null,
-        zoning: zoning || null,
+        value: assessedValue ? parseFloat(assessedValue) : null,
         notes: notes || null,
       },
     });

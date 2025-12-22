@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 // GET /api/departments/[dept]/ranks
 export async function GET(
   request: NextRequest,
-  { params }: { params: { dept: string } }
+  { params }: { params: Promise<{ dept: string }> }
 ) {
   try {
-    const deptName = params.dept.toUpperCase();
+    const { dept } = await params;
+    const deptName = dept.toUpperCase();
     
     const department = await prisma.department.findUnique({
       where: { name: deptName },
@@ -36,10 +37,11 @@ export async function GET(
 // POST /api/departments/[dept]/ranks - Create rank
 export async function POST(
   request: NextRequest,
-  { params }: { params: { dept: string } }
+  { params }: { params: Promise<{ dept: string }> }
 ) {
   try {
-    const deptName = params.dept.toUpperCase();
+    const { dept } = await params;
+    const deptName = dept.toUpperCase();
     const body = await request.json();
     
     const department = await prisma.department.findUnique({
@@ -73,10 +75,11 @@ export async function POST(
 // PUT /api/departments/[dept]/ranks - Bulk update ranks
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { dept: string } }
+  { params }: { params: Promise<{ dept: string }> }
 ) {
   try {
-    const deptName = params.dept.toUpperCase();
+    const { dept } = await params;
+    const deptName = dept.toUpperCase();
     const body = await request.json();
     const { ranks } = body;
 

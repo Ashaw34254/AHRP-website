@@ -4,11 +4,12 @@ import { prisma } from "@/lib/prisma";
 // DELETE - Remove attachment
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; attachmentId: string } }
+  { params }: { params: Promise<{ id: string; attachmentId: string }> }
 ) {
   try {
+    const { attachmentId } = await params;
     await prisma.callAttachment.delete({
-      where: { id: params.attachmentId },
+      where: { id: attachmentId },
     });
 
     return NextResponse.json({ success: true });

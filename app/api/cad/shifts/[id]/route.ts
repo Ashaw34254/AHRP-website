@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { clockOut, notes, callsHandled } = body;
 
@@ -13,7 +14,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       
       // Calculate hours worked if both clockIn and clockOut exist
       const shift = await prisma.shiftLog.findUnique({
-        where: { id: params.id },
+        where: { id },
       });
       
       if (shift?.clockIn) {
@@ -26,7 +27,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (notes !== undefined) updateData.notes = notes;
 
     const shift = await prisma.shiftLog.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         officer: {
@@ -59,10 +60,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await prisma.shiftLog.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

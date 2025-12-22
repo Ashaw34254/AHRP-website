@@ -5,7 +5,7 @@ import { Server, Users as UsersIcon, Lock } from "lucide-react";
 
 export function ServerInfoSection() {
   return (
-    <section className="py-20 px-4">
+    <section id="server-info" className="py-20 px-4">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center text-white">
           Server Information

@@ -17,6 +17,7 @@ import {
   Chip,
   Textarea,
 } from "@nextui-org/react";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import {
   Shield,
   Flame,
@@ -552,14 +553,20 @@ export default function DepartmentsPage() {
                       onChange={(e) => handleSettingsChange("motto", e.target.value)}
                       description="Motto displayed on department pages"
                     />
-                    <Textarea
-                      label="Short Description"
-                      placeholder="Brief description of the department..."
-                      value={currentSettings.description}
-                      onChange={(e) => handleSettingsChange("description", e.target.value)}
-                      minRows={2}
-                      description="Short description for cards and previews"
-                    />
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-2 block">
+                        Short Description
+                      </label>
+                      <RichTextEditor
+                        value={currentSettings.description}
+                        onChange={(content) => handleSettingsChange("description", content)}
+                        height={200}
+                        placeholder="Brief description of the department..."
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Short description for cards and previews
+                      </p>
+                    </div>
                   </div>
 
                   <Divider className="bg-gray-700" />
@@ -993,17 +1000,16 @@ export default function DepartmentsPage() {
                           <label className="text-sm font-medium text-gray-300 mb-2 block">
                             Homepage Content
                           </label>
-                          <Textarea
+                          <RichTextEditor
                             value={currentSettings.homepageContent}
-                            onChange={(e) =>
-                              handleSettingsChange("homepageContent", e.target.value)
+                            onChange={(content) =>
+                              handleSettingsChange("homepageContent", content)
                             }
-                            placeholder="Full homepage content with markdown support..."
-                            minRows={12}
-                            description="Use **bold**, *italic*, bullet points, and line breaks for formatting"
+                            placeholder="Full homepage content with rich formatting..."
+                            height={400}
                           />
                           <p className="text-xs text-gray-500 mt-1">
-                            Supports basic markdown formatting
+                            Use the toolbar above for rich text formatting
                           </p>
                         </div>
                       </div>

@@ -36,25 +36,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Generate docket number (format: DC-YYYY-XXXXX)
+    // Generate case number (format: DC-YYYY-XXXXX)
     const year = new Date(filingDate).getFullYear();
     const randomNum = Math.floor(10000 + Math.random() * 90000);
-    const docketNumber = `DC-${year}-${randomNum}`;
+    const caseNumber = `DC-${year}-${randomNum}`;
 
     const courtCase = await prisma.courtCase.create({
       data: {
-        docketNumber,
-        title,
-        caseType: caseType || "CRIMINAL",
-        filingDate: new Date(filingDate),
-        hearingDate: hearingDate ? new Date(hearingDate) : null,
-        courtLocation: courtLocation || "",
-        prosecutorName: prosecutorName || null,
+        caseNumber,
         defendantName,
-        charges,
-        status: "FILED",
+        defendantId: null,
+        charges: Array.isArray(charges) ? JSON.stringify(charges) : charges,
+        status: "PENDING",
+        filedDate: new Date(filingDate),
+        courtDate: hearingDate ? new Date(hearingDate) : null,
+        prosecutor: prosecutorName || null,
         notes: notes || null,
-        incidentReportId: incidentReportId || null,
       },
     });
 

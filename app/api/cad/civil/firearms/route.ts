@@ -37,14 +37,14 @@ export async function POST(request: NextRequest) {
     const firearm = await prisma.firearmRegistry.create({
       data: {
         ownerName,
-        ownerStateId: ownerStateId || null,
-        weaponType: weaponType || "HANDGUN",
+        ownerId: ownerStateId || null,
+        type: weaponType || "HANDGUN",
         make,
         model,
         serialNumber,
-        caliber: caliber || null,
+        caliber: caliber || "Unknown",
         registrationDate: new Date(),
-        status: "REGISTERED",
+        isStolen: false,
         notes: notes || null,
       },
     });

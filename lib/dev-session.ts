@@ -6,6 +6,11 @@ export const mockSession = {
     email: "dev@aurorahorizon.local",
     image: "https://api.dicebear.com/7.x/avataaars/svg?seed=DevUser",
     role: "admin", // Change to 'admin' to test admin features, 'user' for regular user
+    bio: "Passionate roleplayer and community member. Love immersive RP scenarios!",
+    discordUsername: "DevUser#1234",
+    discordId: "123456789012345678",
+    bannerImage: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=300&fit=crop",
+    badges: JSON.stringify(["veteran", "active", "helpful"]),
   },
   expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
 };

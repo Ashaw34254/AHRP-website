@@ -3,10 +3,11 @@ import { NextResponse } from "next/server";
 // GET /api/admin/departments/[dept] - Get specific department settings
 export async function GET(
   request: Request,
-  { params }: { params: { dept: string } }
+  { params }: { params: Promise<{ dept: string }> }
 ) {
   try {
-    const dept = params.dept.toUpperCase();
+    const { dept: deptParam } = await params;
+    const dept = deptParam.toUpperCase();
     const validDepts = ["POLICE", "FIRE", "EMS"];
 
     if (!validDepts.includes(dept)) {
@@ -35,10 +36,11 @@ export async function GET(
 // PATCH /api/admin/departments/[dept] - Update specific department
 export async function PATCH(
   request: Request,
-  { params }: { params: { dept: string } }
+  { params }: { params: Promise<{ dept: string }> }
 ) {
   try {
-    const dept = params.dept.toUpperCase();
+    const { dept: deptParam } = await params;
+    const dept = deptParam.toUpperCase();
     const validDepts = ["POLICE", "FIRE", "EMS"];
 
     if (!validDepts.includes(dept)) {

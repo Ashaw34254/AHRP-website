@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const {
       status,
@@ -25,7 +26,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (evidence !== undefined) updateData.evidence = evidence;
 
     const report = await prisma.incidentReport.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
     });
 
@@ -56,10 +57,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await prisma.incidentReport.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

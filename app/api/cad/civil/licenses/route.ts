@@ -43,12 +43,13 @@ export async function POST(request: NextRequest) {
       data: {
         businessName,
         ownerName,
+        ownerId: null,
         licenseType: licenseType || "BUSINESS_OPERATION",
         licenseNumber,
-        issueDate: new Date(issueDate),
-        expiryDate: new Date(expiryDate),
-        status: "ACTIVE",
-        address: address || null,
+        issuedDate: new Date(issueDate),
+        expiresAt: new Date(expiryDate),
+        isActive: true,
+        address: address || "",
         notes: notes || null,
       },
     });

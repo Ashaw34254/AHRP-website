@@ -9,7 +9,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ session }: HeroSectionProps) {
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center brightness-[0.3] [background-image:url('https://images.unsplash.com/photo-1519669417670-68775a50919c?q=80&w=2070')]"

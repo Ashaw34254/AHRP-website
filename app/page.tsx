@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { AboutSection } from "@/components/AboutSection";
 import { DepartmentsSection } from "@/components/DepartmentsSection";
@@ -15,6 +16,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
+      <Header />
       <HeroSection session={session} />
       <AboutSection />
       <DepartmentsSection />

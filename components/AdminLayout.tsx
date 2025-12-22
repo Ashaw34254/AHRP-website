@@ -42,8 +42,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} min-h-screen border-r border-gray-800 bg-black/50 transition-all duration-300`}>
-          <div className="p-6 flex items-center justify-between">
+        <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} min-h-screen border-r border-gray-800 bg-black/50 transition-all duration-300 flex flex-col`}>
+          <div className="p-6 flex items-center justify-between flex-shrink-0">
             <Link href="/admin">
               <h2 className={`text-2xl font-bold bg-gradient-to-r from-red-500 to-pink-500 text-transparent bg-clip-text ${!sidebarOpen && 'hidden'}`}>
                 Admin
@@ -59,7 +59,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </Button>
           </div>
 
-          <nav className="px-3 space-y-1">
+          <nav className="px-3 space-y-1 flex-1 overflow-y-auto">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -84,10 +84,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             })}
           </nav>
 
-          <div className="absolute bottom-6 left-3 right-3">
+          <div className="p-3 space-y-2 border-t border-gray-800 mt-auto flex-shrink-0">
             <Link
               href="/dashboard"
-              className="block mb-2"
+              className="block"
             >
               <Button
                 fullWidth

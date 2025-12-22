@@ -22,12 +22,250 @@ model User {
   image         String?
   role          String    @default("user") // user, admin
   discordId     String?   @unique
+  discordUsername String?
+  bio           String?   @default("")
+  bannerImage   String?   // Profile banner/cover photo
+  badges        String?   // JSON array of badge IDs
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   // CAD Relations
   officers      Officer[]
   createdCalls  Call[]    @relation("CallCreator")
+  characters    Character[]
+  
+  // Community Features
+  applications  Application[]
+  messages      Message[]     @relation("MessageSender")
+  receivedMessages Message[]  @relation("MessageReceiver")
+  eventRSVPs    EventRSVP[]
+  whitelistEntry WhitelistEntry?
+  statistics    UserStatistics?
+}
+
+// ============================================
+// CHARACTER SYSTEM
+// ============================================
+
+model Character {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  firstName     String
+  lastName      String
+  dateOfBirth   String   // Store as string for flexibility
+  gender        String   // MALE, FEMALE, OTHER
+  
+  image         String?  // Character photo/avatar
+  backstory     String?  // Rich text backstory
+  
+  occupation    String?  // Job/profession
+  department    String?  // POLICE, FIRE, EMS, CIVILIAN
+  rank          String?  // Officer rank or position
+  
+  phoneNumber   String?
+  licenseStatus String   @default("NONE") // NONE, VALID, SUSPENDED, REVOKED
+  
+  isActive      Boolean  @default(true)
+  isApproved    Boolean  @default(false)
+  
+  playTime      Int      @default(0) // Minutes played
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([firstName, lastName])
+}
+
+// ============================================
+// APPLICATIONS & RECRUITMENT
+// ============================================
+
+model Application {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  department    String   // POLICE, FIRE, EMS
+  position      String?  // Specific role applying for
+  
+  status        String   @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, DENIED
+  
+  // Application Content
+  characterName String
+  experience    String?  // Previous RP experience
+  motivation    String?  // Why join department
+  availability  String?  // When can you play
+  references    String?  // References or recommendations
+  documents     String?  // JSON array of document URLs
+  
+  // Interview
+  interviewDate DateTime?
+  interviewNotes String?
+  
+  // Review
+  reviewedBy    String?  // Admin user ID
+  reviewedAt    DateTime?
+  reviewNotes   String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([department])
+}
+
+// ============================================
+// WHITELIST & SERVER ACCESS
+// ============================================
+
+model WhitelistEntry {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  steamId       String?  @unique
+  discordId     String?
+  
+  status        String   @default("PENDING") // PENDING, APPROVED, DENIED, BANNED
+  priority      Int      @default(0) // Queue priority level
+  
+  approvedBy    String?
+  approvedAt    DateTime?
+  
+  // Moderation
+  banReason     String?
+  bannedAt      DateTime?
+  kickHistory   String?  // JSON array of kick records
+  warnHistory   String?  // JSON array of warnings
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([steamId])
+  @@index([status])
+}
+
+// ============================================
+// MESSAGING SYSTEM
+// ============================================
+
+model Message {
+  id            String   @id @default(cuid())
+  
+  senderId      String
+  sender        User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId    String?
+  receiver      User?    @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  type          String   @default("DIRECT") // DIRECT, GROUP, ANNOUNCEMENT
+  groupId       String?  // For group chats
+  
+  subject       String?
+  content       String
+  
+  isRead        Boolean  @default(false)
+  readAt        DateTime?
+  
+  attachments   String?  // JSON array of attachment URLs
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([groupId])
+  @@index([isRead])
+}
+
+// ============================================
+// EVENTS & CALENDAR
+// ============================================
+
+model Event {
+  id            String   @id @default(cuid())
+  
+  title         String
+  description   String?
+  
+  type          String   // SERVER_EVENT, RACE, ROBBERY, MEETING, PATROL, OTHER
+  department    String?  // POLICE, FIRE, EMS, ALL, null for community events
+  
+  startTime     DateTime
+  endTime       DateTime?
+  
+  location      String?  // In-game location
+  
+  isRecurring   Boolean  @default(false)
+  recurrence    String?  // DAILY, WEEKLY, MONTHLY
+  
+  maxAttendees  Int?     // Capacity limit
+  requiresRSVP  Boolean  @default(false)
+  
+  createdBy     String
+  
+  rsvps         EventRSVP[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([startTime])
+  @@index([type])
+  @@index([department])
+}
+
+model EventRSVP {
+  id            String   @id @default(cuid())
+  
+  eventId       String
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  status        String   @default("GOING") // GOING, MAYBE, NOT_GOING
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+// ============================================
+// STATISTICS & ANALYTICS
+// ============================================
+
+model UserStatistics {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Playtime
+  totalMinutes  Int      @default(0)
+  monthlyMinutes String? // JSON object by month
+  
+  // Department Stats
+  arrestsMade   Int      @default(0)
+  callsResponded Int     @default(0)
+  patientsTreated Int    @default(0)
+  firesExtinguished Int  @default(0)
+  
+  // Activity
+  lastSeen      DateTime @default(now())
+  loginStreak   Int      @default(0)
+  
+  // Reputation
+  commendations Int      @default(0)
+  warnings      Int      @default(0)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // ============================================

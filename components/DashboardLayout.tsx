@@ -30,7 +30,11 @@ import {
   Server,
   Search,
   Menu,
-  X
+  X,
+  BarChart3,
+  CalendarDays,
+  Inbox,
+  ShieldCheck
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@nextui-org/react";
@@ -46,8 +50,11 @@ interface DashboardLayoutProps {
 // User Section
 const userNav = [
   { name: "Profile", href: "/dashboard", icon: User },
-  { name: "Characters", href: "/dashboard/characters", icon: Users },
   { name: "Applications", href: "/dashboard/applications", icon: FileText },
+  { name: "Statistics", href: "/dashboard/stats", icon: BarChart3 },
+  { name: "Messages", href: "/dashboard/messages", icon: Inbox },
+  { name: "Events", href: "/dashboard/events", icon: CalendarDays },
+  { name: "Whitelist", href: "/dashboard/whitelist", icon: ShieldCheck },
   { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
 ];
 
