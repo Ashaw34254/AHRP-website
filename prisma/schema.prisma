@@ -103,8 +103,129 @@ model Character {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
+  // Police Record Relations
+  characterNotes  CharacterNote[]
+  characterFlags  CharacterFlag[]
+  characterWarrants CharacterWarrant[]
+  characterCitations CharacterCitation[]
+  characterArrests CharacterArrest[]
+  
   @@index([userId])
   @@index([firstName, lastName])
+}
+
+// ============================================
+// CHARACTER POLICE RECORDS
+// ============================================
+
+model CharacterNote {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  title       String
+  content     String
+  category    String?  // GENERAL, INCIDENT, CONTACT, INTELLIGENCE
+  
+  createdBy   String   // Officer name or user ID
+  source      String   @default("user") // "user" or "cad"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([characterId])
+  @@index([source])
+}
+
+model CharacterFlag {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  flagType    String   // ARMED, VIOLENT, GANG, CAUTION, MENTAL, SUICIDAL, BOLO
+  reason      String?
+  severity    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+  
+  createdBy   String
+  source      String   @default("cad") // "user" or "cad" - flags are usually CAD-sourced
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([characterId])
+  @@index([source])
+  @@index([isActive])
+}
+
+model CharacterWarrant {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  offense     String
+  description String?
+  bail        Int?
+  
+  isActive    Boolean  @default(true)
+  issuedAt    DateTime @default(now())
+  issuedBy    String
+  
+  source      String   @default("cad") // "user" or "cad"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([characterId])
+  @@index([source])
+  @@index([isActive])
+}
+
+model CharacterCitation {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  violation   String
+  fine        Int
+  notes       String?
+  location    String?
+  
+  isPaid      Boolean  @default(false)
+  issuedAt    DateTime @default(now())
+  issuedBy    String
+  
+  source      String   @default("user") // "user" or "cad"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([characterId])
+  @@index([source])
+  @@index([isPaid])
+}
+
+model CharacterArrest {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  charges     String   // JSON array of charges
+  narrative   String?
+  location    String?
+  
+  arrestedAt  DateTime @default(now())
+  arrestedBy  String
+  
+  source      String   @default("user") // "user" or "cad"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([characterId])
+  @@index([source])
 }
 
 // ============================================
@@ -655,9 +776,18 @@ model Vehicle {
   model       String
   color       String
   year        Int?
+  vin         String?  // Vehicle Identification Number
+  make        String?  // Manufacturer (e.g., Honda, Ford)
   
   isStolen    Boolean  @default(false)
   isWanted    Boolean  @default(false)
+  isImpounded Boolean  @default(false)
+  
+  // Registration & Insurance
+  registrationStatus String @default("VALID") // VALID, EXPIRED, SUSPENDED, NONE
+  insuranceStatus    String @default("VALID") // VALID, EXPIRED, NONE
+  insuranceCompany   String?
+  insurancePolicy    String?
   
   // Owner
   ownerId     String
@@ -666,6 +796,10 @@ model Vehicle {
   // Registration
   registeredAt DateTime @default(now())
   expiresAt    DateTime?
+  
+  // Notes and History
+  notes       String?  // JSON array of officer notes
+  flags       String?  // JSON array of flags (stolen, wanted, etc.)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -688,6 +822,8 @@ model Warrant {
   issuedAt    DateTime @default(now())
   issuedBy    String
   
+  source      String   @default("cad") // "user" or "cad" - determines edit permissions
+  
   createdAt   DateTime @default(now())
 }
 
@@ -705,6 +841,8 @@ model Citation {
   issuedAt    DateTime @default(now())
   issuedBy    String
   
+  source      String   @default("cad") // "user" or "cad" - determines edit permissions
+  
   createdAt   DateTime @default(now())
 }
 
@@ -719,6 +857,8 @@ model Arrest {
   
   arrestedAt  DateTime @default(now())
   arrestedBy  String
+  
+  source      String   @default("cad") // "user" or "cad" - determines edit permissions
   
   createdAt   DateTime @default(now())
 }

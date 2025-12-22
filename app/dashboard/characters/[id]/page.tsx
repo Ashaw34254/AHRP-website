@@ -1,8 +1,8 @@
 "use client";
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Avatar, Chip, Button, Input, Textarea, Select, SelectItem, Tabs, Tab, Spinner } from "@nextui-org/react";
-import { ArrowLeft, Edit, Save, Plus, Car, Trash2, Shield, User, IdCard, Briefcase, FileText, Crosshair } from "lucide-react";
+import { Card, CardBody, CardHeader, Avatar, Chip, Button, Input, Textarea, Select, SelectItem, Tabs, Tab, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { ArrowLeft, Edit, Save, Plus, Car, Trash2, Shield, User, IdCard, Briefcase, FileText, Crosshair, AlertTriangle, FileWarning, HandCuffs, Receipt, StickyNote, X, Lock, Eye, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import { toast } from "@/lib/toast";
@@ -33,8 +33,18 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
     registered: true,
   });
 
+  // Police Data State
+  const [policeData, setPoliceData] = useState<any>({ notes: [], flags: [], warrants: [], citations: [], arrests: [] });
+  const noteModal = useDisclosure();
+  const citationModal = useDisclosure();
+  const arrestModal = useDisclosure();
+  const [noteForm, setNoteForm] = useState({ id: "", title: "", content: "", category: "GENERAL" });
+  const [citationForm, setCitationForm] = useState({ id: "", violation: "", fine: 0, notes: "", location: "", isPaid: false });
+  const [arrestForm, setArrestForm] = useState({ id: "", charges: "", narrative: "", location: "" });
+
   useEffect(() => {
     loadCharacter();
+    loadPoliceData();
   }, [resolvedParams.id]);
 
   const loadCharacter = async () => {
@@ -53,6 +63,16 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
       toast.error("Failed to load character");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPoliceData = async () => {
+    try {
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}/police`);
+      const data = await res.json();
+      if (data.success) setPoliceData(data.data);
+    } catch (error) {
+      console.error("Error loading police data:", error);
     }
   };
 
@@ -130,6 +150,119 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
       case "FIRE": return "danger";
       case "EMS": return "success";
       default: return "default";
+    }
+  };
+
+  // Police Data Handlers
+  const handleSaveNote = async () => {
+    try {
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}/notes`, {
+        method: noteForm.id ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(noteForm.id ? { noteId: noteForm.id, ...noteForm } : noteForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Note ${noteForm.id ? "updated" : "created"}!`);
+        noteModal.onClose();
+        setNoteForm({ id: "", title: "", content: "", category: "GENERAL" });
+        loadPoliceData();
+      } else toast.error(data.error || "Failed");
+    } catch (error) {
+      toast.error("Failed to save note");
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!confirm("Delete this note?")) return;
+    try {
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}/notes?noteId=${noteId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Note deleted!");
+        loadPoliceData();
+      } else toast.error(data.error);
+    } catch (error) {
+      toast.error("Failed to delete");
+    }
+  };
+
+  const handleSaveCitation = async () => {
+    try {
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}/citations`, {
+        method: citationForm.id ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(citationForm.id ? { citationId: citationForm.id, ...citationForm } : citationForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Citation ${citationForm.id ? "updated" : "created"}!`);
+        citationModal.onClose();
+        setCitationForm({ id: "", violation: "", fine: 0, notes: "", location: "", isPaid: false });
+        loadPoliceData();
+      } else toast.error(data.error);
+    } catch (error) {
+      toast.error("Failed");
+    }
+  };
+
+  const handleDeleteCitation = async (citationId: string) => {
+    if (!confirm("Delete citation?")) return;
+    try {
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}/citations?citationId=${citationId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Deleted!");
+        loadPoliceData();
+      } else toast.error(data.error);
+    } catch (error) {
+      toast.error("Failed");
+    }
+  };
+
+  const handleSaveArrest = async () => {
+    try {
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}/arrests`, {
+        method: arrestForm.id ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(arrestForm.id ? { arrestId: arrestForm.id, ...arrestForm } : arrestForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Arrest ${arrestForm.id ? "updated" : "created"}!`);
+        arrestModal.onClose();
+        setArrestForm({ id: "", charges: "", narrative: "", location: "" });
+        loadPoliceData();
+      } else toast.error(data.error);
+    } catch (error) {
+      toast.error("Failed");
+    }
+  };
+
+  const handleDeleteArrest = async (arrestId: string) => {
+    if (!confirm("Delete arrest?")) return;
+    try {
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}/arrests?arrestId=${arrestId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Deleted!");
+        loadPoliceData();
+      } else toast.error(data.error);
+    } catch (error) {
+      toast.error("Failed");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case "CRITICAL": return "danger";
+      case "HIGH": return "warning";
+      case "MEDIUM": return "primary";
+      default: return "success";
     }
   };
 
@@ -368,10 +501,240 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
               )}
             </div>
           </Tab>
+
+          {/* Police Data Tabs */}
+          <Tab key="notes" title={<div className="flex items-center gap-2"><StickyNote className="w-4 h-4" />Notes ({policeData.notes.length})</div>}>
+            <div className="space-y-4 mt-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold">Police Notes</h3>
+                <Button color="primary" startContent={<Plus className="w-4 h-4" />} onPress={() => { setNoteForm({ id: "", title: "", content: "", category: "GENERAL" }); noteModal.onOpen(); }}>Add Note</Button>
+              </div>
+              <div className="grid gap-4">
+                {policeData.notes.map((note: any) => (
+                  <Card key={note.id} className="bg-gray-900/50 border border-gray-800">
+                    <CardBody className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-bold">{note.title}</h4>
+                            <Chip size="sm" color="secondary" variant="flat">{note.category}</Chip>
+                            <Chip size="sm" color={note.source === "user" ? "success" : "warning"} variant="flat" startContent={note.source === "cad" ? <Lock className="w-3 h-3" /> : null}>
+                              {note.source === "user" ? "User" : "CAD"}
+                            </Chip>
+                          </div>
+                          <p className="text-gray-300 mb-2">{note.content}</p>
+                          <div className="text-xs text-gray-500">By {note.createdBy} • {formatDate(note.createdAt)}</div>
+                        </div>
+                        {note.source === "user" ? (
+                          <div className="flex gap-2">
+                            <Button isIconOnly size="sm" color="primary" variant="flat" onPress={() => { setNoteForm({ ...note }); noteModal.onOpen(); }}><Edit className="w-4 h-4" /></Button>
+                            <Button isIconOnly size="sm" color="danger" variant="flat" onPress={() => handleDeleteNote(note.id)}><Trash2 className="w-4 h-4" /></Button>
+                          </div>
+                        ) : (
+                          <Chip size="sm" color="warning" variant="flat" startContent={<Eye className="w-3 h-3" />}>Read-Only</Chip>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
+              {policeData.notes.length === 0 && (
+                <Card className="bg-gray-900/50 border border-gray-800"><CardBody className="p-12 text-center"><StickyNote className="w-16 h-16 text-gray-600 mx-auto mb-4" /><p className="text-gray-400">No notes</p></CardBody></Card>
+              )}
+            </div>
+          </Tab>
+
+          <Tab key="flags" title={<div className="flex items-center gap-2"><AlertTriangle className="w-4 h-4" />Flags & Warrants</div>}>
+            <div className="space-y-6 mt-6">
+              <div>
+                <h3 className="text-xl font-bold mb-4">Active Flags</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {policeData.flags.filter((f: any) => f.isActive).map((flag: any) => (
+                    <Card key={flag.id} className="bg-gray-900/50 border border-gray-800">
+                      <CardBody className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                              <h4 className="text-lg font-bold">{flag.flagType}</h4>
+                              <Chip size="sm" color={getSeverityColor(flag.severity) as any} variant="flat">{flag.severity}</Chip>
+                            </div>
+                            {flag.reason && <p className="text-gray-300 mb-2">{flag.reason}</p>}
+                            <div className="text-xs text-gray-500">By {flag.createdBy} • {formatDate(flag.createdAt)}</div>
+                          </div>
+                          <Chip size="sm" color="warning" variant="flat" startContent={<Lock className="w-3 h-3" />}>CAD</Chip>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+                {policeData.flags.filter((f: any) => f.isActive).length === 0 && <Card className="bg-gray-900/50 border border-gray-800"><CardBody className="p-8 text-center"><p className="text-gray-400">No flags</p></CardBody></Card>}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-4">Active Warrants</h3>
+                <div className="grid gap-4">
+                  {policeData.warrants.filter((w: any) => w.isActive).map((warrant: any) => (
+                    <Card key={warrant.id} className="bg-gray-900/50 border border-red-900/50">
+                      <CardBody className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <FileWarning className="w-5 h-5 text-red-500" />
+                              <h4 className="text-lg font-bold">{warrant.offense}</h4>
+                              {warrant.bail && <Chip size="sm" color="danger" variant="flat">Bail: ${warrant.bail.toLocaleString()}</Chip>}
+                            </div>
+                            {warrant.description && <p className="text-gray-300 mb-2">{warrant.description}</p>}
+                            <div className="text-xs text-gray-500">Issued by {warrant.issuedBy} • {formatDate(warrant.issuedAt)}</div>
+                          </div>
+                          <Chip size="sm" color="warning" variant="flat" startContent={<Lock className="w-3 h-3" />}>CAD</Chip>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+                {policeData.warrants.filter((w: any) => w.isActive).length === 0 && <Card className="bg-gray-900/50 border border-gray-800"><CardBody className="p-8 text-center"><p className="text-gray-400">No warrants</p></CardBody></Card>}
+              </div>
+            </div>
+          </Tab>
+
+          <Tab key="citations" title={<div className="flex items-center gap-2"><Receipt className="w-4 h-4" />Citations ({policeData.citations.length})</div>}>
+            <div className="space-y-4 mt-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold">Citations</h3>
+                <Button color="primary" startContent={<Plus className="w-4 h-4" />} onPress={() => { setCitationForm({ id: "", violation: "", fine: 0, notes: "", location: "", isPaid: false }); citationModal.onOpen(); }}>Add Citation</Button>
+              </div>
+              <div className="grid gap-4">
+                {policeData.citations.map((citation: any) => (
+                  <Card key={citation.id} className="bg-gray-900/50 border border-gray-800">
+                    <CardBody className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Receipt className="w-5 h-5 text-orange-400" />
+                            <h4 className="text-lg font-bold">{citation.violation}</h4>
+                            <Chip size="sm" color="warning" variant="flat">${citation.fine}</Chip>
+                            <Chip size="sm" color={citation.isPaid ? "success" : "danger"} variant="flat">{citation.isPaid ? "Paid" : "Unpaid"}</Chip>
+                            <Chip size="sm" color={citation.source === "user" ? "success" : "warning"} variant="flat">{citation.source === "user" ? "User" : "CAD"}</Chip>
+                          </div>
+                          {citation.location && <p className="text-sm text-gray-300 mb-1">Location: {citation.location}</p>}
+                          {citation.notes && <p className="text-gray-300 mb-2">{citation.notes}</p>}
+                          <div className="text-xs text-gray-500">Issued by {citation.issuedBy} • {formatDate(citation.issuedAt)}</div>
+                        </div>
+                        {citation.source === "user" ? (
+                          <div className="flex gap-2">
+                            <Button isIconOnly size="sm" color="primary" variant="flat" onPress={() => { setCitationForm({ ...citation }); citationModal.onOpen(); }}><Edit className="w-4 h-4" /></Button>
+                            <Button isIconOnly size="sm" color="danger" variant="flat" onPress={() => handleDeleteCitation(citation.id)}><Trash2 className="w-4 h-4" /></Button>
+                          </div>
+                        ) : (
+                          <Chip size="sm" color="warning" variant="flat" startContent={<Eye className="w-3 h-3" />}>Read-Only</Chip>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
+              {policeData.citations.length === 0 && <Card className="bg-gray-900/50 border border-gray-800"><CardBody className="p-12 text-center"><Receipt className="w-16 h-16 text-gray-600 mx-auto mb-4" /><p className="text-gray-400">No citations</p></CardBody></Card>}
+            </div>
+          </Tab>
+
+          <Tab key="arrests" title={<div className="flex items-center gap-2"><HandCuffs className="w-4 h-4" />Arrests ({policeData.arrests.length})</div>}>
+            <div className="space-y-4 mt-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold">Arrest Records</h3>
+                <Button color="primary" startContent={<Plus className="w-4 h-4" />} onPress={() => { setArrestForm({ id: "", charges: "", narrative: "", location: "" }); arrestModal.onOpen(); }}>Add Arrest</Button>
+              </div>
+              <div className="grid gap-4">
+                {policeData.arrests.map((arrest: any) => (
+                  <Card key={arrest.id} className="bg-gray-900/50 border border-red-900/30">
+                    <CardBody className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <HandCuffs className="w-5 h-5 text-red-500" />
+                            <h4 className="text-lg font-bold">Arrest Record</h4>
+                            <Chip size="sm" color={arrest.source === "user" ? "success" : "warning"} variant="flat">{arrest.source === "user" ? "User" : "CAD"}</Chip>
+                          </div>
+                          <div className="space-y-2">
+                            <div><p className="text-xs text-gray-400 mb-1">Charges:</p><p className="text-white font-medium">{arrest.charges}</p></div>
+                            {arrest.location && <div><p className="text-xs text-gray-400 mb-1">Location:</p><p className="text-gray-300">{arrest.location}</p></div>}
+                            {arrest.narrative && <div><p className="text-xs text-gray-400 mb-1">Narrative:</p><p className="text-gray-300">{arrest.narrative}</p></div>}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-2">Arrested by {arrest.arrestedBy} • {formatDate(arrest.arrestedAt)}</div>
+                        </div>
+                        {arrest.source === "user" ? (
+                          <div className="flex gap-2">
+                            <Button isIconOnly size="sm" color="primary" variant="flat" onPress={() => { setArrestForm({ ...arrest }); arrestModal.onOpen(); }}><Edit className="w-4 h-4" /></Button>
+                            <Button isIconOnly size="sm" color="danger" variant="flat" onPress={() => handleDeleteArrest(arrest.id)}><Trash2 className="w-4 h-4" /></Button>
+                          </div>
+                        ) : (
+                          <Chip size="sm" color="warning" variant="flat" startContent={<Eye className="w-3 h-3" />}>Read-Only</Chip>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
+              {policeData.arrests.length === 0 && <Card className="bg-gray-900/50 border border-gray-800"><CardBody className="p-12 text-center"><HandCuffs className="w-16 h-16 text-gray-600 mx-auto mb-4" /><p className="text-gray-400">No arrests</p></CardBody></Card>}
+            </div>
+          </Tab>
+
         </Tabs>
           </>
         )}
       </div>
+
+      {/* Modals */}
+      <Modal isOpen={noteModal.isOpen} onClose={noteModal.onClose} size="2xl">
+        <ModalContent>
+          <ModalHeader>{noteForm.id ? "Edit Note" : "Add Note"}</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <Input label="Title" value={noteForm.title} onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })} isRequired />
+              <Textarea label="Content" value={noteForm.content} onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })} minRows={4} isRequired />
+              <Input label="Category" value={noteForm.category} onChange={(e) => setNoteForm({ ...noteForm, category: e.target.value })} placeholder="GENERAL, INCIDENT, CONTACT" />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={noteModal.onClose}>Cancel</Button>
+            <Button color="primary" onPress={handleSaveNote}>{noteForm.id ? "Update" : "Create"}</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={citationModal.isOpen} onClose={citationModal.onClose} size="2xl">
+        <ModalContent>
+          <ModalHeader>{citationForm.id ? "Edit Citation" : "Add Citation"}</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <Input label="Violation" value={citationForm.violation} onChange={(e) => setCitationForm({ ...citationForm, violation: e.target.value })} placeholder="Speeding, Reckless Driving" isRequired />
+              <Input label="Fine" type="number" value={citationForm.fine.toString()} onChange={(e) => setCitationForm({ ...citationForm, fine: parseInt(e.target.value) || 0 })} startContent="$" isRequired />
+              <Input label="Location" value={citationForm.location} onChange={(e) => setCitationForm({ ...citationForm, location: e.target.value })} placeholder="Highway 1" />
+              <Textarea label="Notes" value={citationForm.notes} onChange={(e) => setCitationForm({ ...citationForm, notes: e.target.value })} minRows={3} />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={citationModal.onClose}>Cancel</Button>
+            <Button color="primary" onPress={handleSaveCitation}>{citationForm.id ? "Update" : "Create"}</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={arrestModal.isOpen} onClose={arrestModal.onClose} size="2xl">
+        <ModalContent>
+          <ModalHeader>{arrestForm.id ? "Edit Arrest" : "Add Arrest"}</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <Textarea label="Charges" value={arrestForm.charges} onChange={(e) => setArrestForm({ ...arrestForm, charges: e.target.value })} minRows={3} isRequired />
+              <Input label="Location" value={arrestForm.location} onChange={(e) => setArrestForm({ ...arrestForm, location: e.target.value })} />
+              <Textarea label="Narrative" value={arrestForm.narrative} onChange={(e) => setArrestForm({ ...arrestForm, narrative: e.target.value })} minRows={4} />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={arrestModal.onClose}>Cancel</Button>
+            <Button color="primary" onPress={handleSaveArrest}>{arrestForm.id ? "Update" : "Create"}</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </DashboardLayout>
   );
 }

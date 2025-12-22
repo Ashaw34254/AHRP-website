@@ -76,9 +76,24 @@ interface Vehicle {
   model: string;
   color: string;
   year: number | null;
+  vin: string | null;
+  make: string | null;
   isStolen: boolean;
   isWanted: boolean;
+  isImpounded: boolean;
+  registrationStatus: string;
+  insuranceStatus: string;
+  insuranceCompany: string | null;
+  insurancePolicy: string | null;
+  flags: string | null;
+  notes: Array<{
+    text: string;
+    officerId: string;
+    officerName: string;
+    createdAt: string;
+  }>;
   owner: {
+    id: string;
     firstName: string;
     lastName: string;
     phoneNumber: string | null;
@@ -95,6 +110,25 @@ export function CADCivilSearch() {
   const [citizen, setCitizen] = useState<Citizen | null>(null);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Check for URL parameters on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlSearch = params.get('search');
+    const urlType = params.get('type');
+    
+    if (urlSearch) {
+      setSearchQuery(urlSearch);
+      if (urlType === 'vehicle') {
+        setSearchType('vehicle');
+      }
+      // Auto-search after a brief delay to allow state to settle
+      setTimeout(() => {
+        const searchBtn = document.querySelector('[data-search-trigger]') as HTMLButtonElement;
+        if (searchBtn) searchBtn.click();
+      }, 100);
+    }
+  }, []);
 
   // Warrant modal
   const { isOpen: isWarrantOpen, onOpen: onWarrantOpen, onClose: onWarrantClose } = useDisclosure();
@@ -163,6 +197,24 @@ export function CADCivilSearch() {
   const [gangStatus, setGangStatus] = useState("");
   const [gangNotes, setGangNotes] = useState("");
   const [savingGang, setSavingGang] = useState(false);
+
+  // Vehicle Note modal
+  const { isOpen: isVehicleNoteOpen, onOpen: onVehicleNoteOpen, onClose: onVehicleNoteClose } = useDisclosure();
+  const [vehicleNoteText, setVehicleNoteText] = useState("");
+  const [addingVehicleNote, setAddingVehicleNote] = useState(false);
+
+  // Vehicle Status modal
+  const { isOpen: isVehicleStatusOpen, onOpen: onVehicleStatusOpen, onClose: onVehicleStatusClose } = useDisclosure();
+  const [vehicleRegistrationStatus, setVehicleRegistrationStatus] = useState("");
+  const [vehicleInsuranceStatus, setVehicleInsuranceStatus] = useState("");
+  const [vehicleInsuranceCompany, setVehicleInsuranceCompany] = useState("");
+  const [vehicleInsurancePolicy, setVehicleInsurancePolicy] = useState("");
+  const [savingVehicleStatus, setSavingVehicleStatus] = useState(false);
+
+  // Vehicle Flag modal
+  const { isOpen: isVehicleFlagOpen, onOpen: onVehicleFlagOpen, onClose: onVehicleFlagClose } = useDisclosure();
+  const [vehicleFlagType, setVehicleFlagType] = useState("");
+  const [addingVehicleFlag, setAddingVehicleFlag] = useState(false);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -751,6 +803,122 @@ export function CADCivilSearch() {
     }
   };
 
+  // Vehicle handlers
+  const handleAddVehicleNote = async () => {
+    if (!vehicle || !vehicleNoteText.trim()) {
+      toast.error("Please enter a note");
+      return;
+    }
+
+    setAddingVehicleNote(true);
+    try {
+      const response = await fetch("/api/cad/civil/vehicle-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vehicleId: vehicle.id,
+          note: vehicleNoteText,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to add note");
+
+      toast.success("Vehicle note added successfully");
+      onVehicleNoteClose();
+      setVehicleNoteText("");
+      handleSearch();
+    } catch (error) {
+      console.error("Error adding vehicle note:", error);
+      toast.error("Failed to add vehicle note");
+    } finally {
+      setAddingVehicleNote(false);
+    }
+  };
+
+  const handleUpdateVehicleStatus = async () => {
+    if (!vehicle) return;
+
+    setSavingVehicleStatus(true);
+    try {
+      const response = await fetch("/api/cad/civil/vehicle-status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vehicleId: vehicle.id,
+          registrationStatus: vehicleRegistrationStatus,
+          insuranceStatus: vehicleInsuranceStatus,
+          insuranceCompany: vehicleInsuranceCompany,
+          insurancePolicy: vehicleInsurancePolicy,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update vehicle status");
+
+      toast.success("Vehicle status updated successfully");
+      onVehicleStatusClose();
+      handleSearch();
+    } catch (error) {
+      console.error("Error updating vehicle status:", error);
+      toast.error("Failed to update vehicle status");
+    } finally {
+      setSavingVehicleStatus(false);
+    }
+  };
+
+  const handleToggleVehicleFlag = async (flagType: "stolen" | "wanted" | "impounded") => {
+    if (!vehicle) return;
+
+    try {
+      const response = await fetch("/api/cad/civil/vehicle-flags", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vehicleId: vehicle.id,
+          flagType,
+          value: !vehicle[flagType === "stolen" ? "isStolen" : flagType === "wanted" ? "isWanted" : "isImpounded"],
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to toggle flag");
+
+      toast.success(`Vehicle flag updated`);
+      handleSearch();
+    } catch (error) {
+      console.error("Error toggling vehicle flag:", error);
+      toast.error("Failed to update vehicle flag");
+    }
+  };
+
+  const handleDeleteVehicleNote = async (noteIndex: number) => {
+    if (!vehicle) return;
+
+    try {
+      const response = await fetch(`/api/cad/civil/vehicle-notes/${vehicle.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ noteIndex }),
+      });
+
+      if (!response.ok) throw new Error("Failed to delete note");
+
+      toast.success("Note deleted");
+      handleSearch();
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      toast.error("Failed to delete note");
+    }
+  };
+
+  const openVehicleStatusModal = () => {
+    if (vehicle) {
+      setVehicleRegistrationStatus(vehicle.registrationStatus);
+      setVehicleInsuranceStatus(vehicle.insuranceStatus);
+      setVehicleInsuranceCompany(vehicle.insuranceCompany || "");
+      setVehicleInsurancePolicy(vehicle.insurancePolicy || "");
+      onVehicleStatusOpen();
+    }
+  };
+
   const calculateRiskScore = (citizen: Citizen): { score: number; level: string; color: string } => {
     let score = 0;
     
@@ -965,6 +1133,7 @@ export function CADCivilSearch() {
               color="primary"
               onPress={handleSearch}
               isLoading={loading}
+              data-search-trigger
             >
               Search
             </Button>
@@ -1467,38 +1636,155 @@ export function CADCivilSearch() {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-xl font-bold text-white">
-                  {vehicle.color} {vehicle.model}
+                  {vehicle.make && `${vehicle.make} `}{vehicle.model}
                 </h3>
                 <p className="text-sm text-gray-400">Plate: {vehicle.plate}</p>
                 {vehicle.year && (
                   <p className="text-sm text-gray-400">Year: {vehicle.year}</p>
                 )}
+                {vehicle.vin && (
+                  <p className="text-sm text-gray-400">VIN: {vehicle.vin}</p>
+                )}
+                <p className="text-sm text-gray-400">Color: {vehicle.color}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {vehicle.isStolen && (
-                  <div className="px-3 py-1 bg-red-900/50 border border-red-700 rounded-full">
-                    <span className="text-xs font-semibold text-red-400">STOLEN</span>
-                  </div>
+                  <Chip color="danger" variant="flat" size="sm">STOLEN</Chip>
                 )}
                 {vehicle.isWanted && (
-                  <div className="px-3 py-1 bg-yellow-900/50 border border-yellow-700 rounded-full">
-                    <span className="text-xs font-semibold text-yellow-400">WANTED</span>
-                  </div>
+                  <Chip color="warning" variant="flat" size="sm">WANTED</Chip>
+                )}
+                {vehicle.isImpounded && (
+                  <Chip color="primary" variant="flat" size="sm">IMPOUNDED</Chip>
                 )}
               </div>
             </div>
 
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" color="primary" startContent={<FileText className="w-4 h-4" />} onPress={onVehicleNoteOpen}>
+                Add Note
+              </Button>
+              <Button size="sm" color="secondary" startContent={<Edit className="w-4 h-4" />} onPress={openVehicleStatusModal}>
+                Update Status
+              </Button>
+              <Button 
+                size="sm" 
+                color={vehicle.isStolen ? "default" : "danger"}
+                variant={vehicle.isStolen ? "flat" : "solid"}
+                onPress={() => handleToggleVehicleFlag("stolen")}
+              >
+                {vehicle.isStolen ? "Clear Stolen" : "Mark Stolen"}
+              </Button>
+              <Button 
+                size="sm" 
+                color={vehicle.isWanted ? "default" : "warning"}
+                variant={vehicle.isWanted ? "flat" : "solid"}
+                onPress={() => handleToggleVehicleFlag("wanted")}
+              >
+                {vehicle.isWanted ? "Clear Wanted" : "Mark Wanted"}
+              </Button>
+              <Button 
+                size="sm" 
+                color={vehicle.isImpounded ? "default" : "primary"}
+                variant="flat"
+                onPress={() => handleToggleVehicleFlag("impounded")}
+              >
+                {vehicle.isImpounded ? "Release Vehicle" : "Mark Impounded"}
+              </Button>
+              <Button size="sm" variant="flat" startContent={<Printer className="w-4 h-4" />} onPress={handlePrint}>
+                Print
+              </Button>
+            </div>
+
+            {/* Status Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="bg-gray-800/50 border border-gray-700">
+                <CardBody className="p-4">
+                  <h4 className="text-sm font-semibold text-white mb-2">Registration</h4>
+                  <Chip 
+                    color={vehicle.registrationStatus === "VALID" ? "success" : vehicle.registrationStatus === "EXPIRED" ? "warning" : "danger"}
+                    size="sm"
+                    variant="flat"
+                  >
+                    {vehicle.registrationStatus}
+                  </Chip>
+                </CardBody>
+              </Card>
+              <Card className="bg-gray-800/50 border border-gray-700">
+                <CardBody className="p-4">
+                  <h4 className="text-sm font-semibold text-white mb-2">Insurance</h4>
+                  <Chip 
+                    color={vehicle.insuranceStatus === "VALID" ? "success" : vehicle.insuranceStatus === "EXPIRED" ? "warning" : "danger"}
+                    size="sm"
+                    variant="flat"
+                  >
+                    {vehicle.insuranceStatus}
+                  </Chip>
+                  {vehicle.insuranceCompany && (
+                    <p className="text-xs text-gray-400 mt-2">{vehicle.insuranceCompany}</p>
+                  )}
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Registered Owner */}
             <div>
               <h4 className="text-sm font-semibold text-white mb-2">Registered Owner</h4>
-              <div className="p-3 bg-gray-800/50 border border-gray-700 rounded">
+              <div className="p-3 bg-gray-800/50 border border-gray-700 rounded cursor-pointer hover:border-indigo-500 transition-colors"
+                   onClick={() => {
+                     setSearchType("citizen");
+                     setSearchQuery(`${vehicle.owner.firstName} ${vehicle.owner.lastName}`);
+                     handleSearch();
+                   }}>
                 <p className="text-white font-medium">
                   {vehicle.owner.firstName} {vehicle.owner.lastName}
                 </p>
                 {vehicle.owner.phoneNumber && (
                   <p className="text-sm text-gray-400">{vehicle.owner.phoneNumber}</p>
                 )}
+                <p className="text-xs text-indigo-400 mt-1">Click to view citizen record →</p>
               </div>
             </div>
+
+            {/* Vehicle Notes */}
+            {vehicle.notes && vehicle.notes.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-400" />
+                  Vehicle Notes ({vehicle.notes.length})
+                </h4>
+                <div className="space-y-2">
+                  {vehicle.notes.slice(-5).reverse().map((note, idx) => {
+                    const actualIndex = vehicle.notes.length - idx - 1;
+                    return (
+                      <div key={idx} className="p-3 bg-blue-900/20 border border-blue-800 rounded">
+                        <div className="flex justify-between items-start">
+                          <p className="text-sm text-gray-300 mb-2 flex-1">{note.text}</p>
+                          <button
+                            onClick={() => handleDeleteVehicleNote(actualIndex)}
+                            className="text-blue-400 hover:text-blue-300 transition-colors ml-2"
+                            title="Delete note"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {note.officerName}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {new Date(note.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </CardBody>
         </Card>
       )}
@@ -2050,6 +2336,146 @@ export function CADCivilSearch() {
               isLoading={savingGang}
             >
               Save Gang Info
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Vehicle Note Modal */}
+      <Modal isOpen={isVehicleNoteOpen} onClose={onVehicleNoteClose} size="lg">
+        <ModalContent>
+          <ModalHeader>
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-400" />
+              <span>Add Vehicle Note</span>
+            </div>
+          </ModalHeader>
+          <ModalBody>
+            <Textarea
+              label="Note"
+              placeholder="Enter details about this vehicle (stops, incidents, observations)..."
+              value={vehicleNoteText}
+              onChange={(e) => setVehicleNoteText(e.target.value)}
+              minRows={5}
+              isRequired
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={onVehicleNoteClose}>
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              onPress={handleAddVehicleNote}
+              isLoading={addingVehicleNote}
+            >
+              Add Note
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Vehicle Status Modal */}
+      <Modal isOpen={isVehicleStatusOpen} onClose={onVehicleStatusClose} size="lg">
+        <ModalContent>
+          <ModalHeader>
+            <div className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-secondary-400" />
+              <span>Update Vehicle Status</span>
+            </div>
+          </ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Registration Status</label>
+                <div className="flex gap-2">
+                  <Button
+                    color={vehicleRegistrationStatus === "VALID" ? "success" : "default"}
+                    variant={vehicleRegistrationStatus === "VALID" ? "solid" : "flat"}
+                    onPress={() => setVehicleRegistrationStatus("VALID")}
+                    size="sm"
+                  >
+                    Valid
+                  </Button>
+                  <Button
+                    color={vehicleRegistrationStatus === "EXPIRED" ? "warning" : "default"}
+                    variant={vehicleRegistrationStatus === "EXPIRED" ? "solid" : "flat"}
+                    onPress={() => setVehicleRegistrationStatus("EXPIRED")}
+                    size="sm"
+                  >
+                    Expired
+                  </Button>
+                  <Button
+                    color={vehicleRegistrationStatus === "SUSPENDED" ? "danger" : "default"}
+                    variant={vehicleRegistrationStatus === "SUSPENDED" ? "solid" : "flat"}
+                    onPress={() => setVehicleRegistrationStatus("SUSPENDED")}
+                    size="sm"
+                  >
+                    Suspended
+                  </Button>
+                  <Button
+                    color={vehicleRegistrationStatus === "NONE" ? "default" : "default"}
+                    variant={vehicleRegistrationStatus === "NONE" ? "solid" : "flat"}
+                    onPress={() => setVehicleRegistrationStatus("NONE")}
+                    size="sm"
+                  >
+                    None
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Insurance Status</label>
+                <div className="flex gap-2">
+                  <Button
+                    color={vehicleInsuranceStatus === "VALID" ? "success" : "default"}
+                    variant={vehicleInsuranceStatus === "VALID" ? "solid" : "flat"}
+                    onPress={() => setVehicleInsuranceStatus("VALID")}
+                    size="sm"
+                  >
+                    Valid
+                  </Button>
+                  <Button
+                    color={vehicleInsuranceStatus === "EXPIRED" ? "warning" : "default"}
+                    variant={vehicleInsuranceStatus === "EXPIRED" ? "solid" : "flat"}
+                    onPress={() => setVehicleInsuranceStatus("EXPIRED")}
+                    size="sm"
+                  >
+                    Expired
+                  </Button>
+                  <Button
+                    color={vehicleInsuranceStatus === "NONE" ? "default" : "default"}
+                    variant={vehicleInsuranceStatus === "NONE" ? "solid" : "flat"}
+                    onPress={() => setVehicleInsuranceStatus("NONE")}
+                    size="sm"
+                  >
+                    None
+                  </Button>
+                </div>
+              </div>
+              <Input
+                label="Insurance Company"
+                placeholder="e.g., State Farm, Geico"
+                value={vehicleInsuranceCompany}
+                onChange={(e) => setVehicleInsuranceCompany(e.target.value)}
+              />
+              <Input
+                label="Policy Number"
+                placeholder="Policy #"
+                value={vehicleInsurancePolicy}
+                onChange={(e) => setVehicleInsurancePolicy(e.target.value)}
+              />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={onVehicleStatusClose}>
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              onPress={handleUpdateVehicleStatus}
+              isLoading={savingVehicleStatus}
+            >
+              Save Status
             </Button>
           </ModalFooter>
         </ModalContent>

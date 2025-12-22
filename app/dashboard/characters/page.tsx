@@ -21,7 +21,7 @@ import {
   Tab,
   Skeleton,
 } from "@nextui-org/react";
-import { Plus, User, Edit, Trash2, Users, Calendar } from "lucide-react";
+import { Plus, User, Edit, Trash2, Users, Calendar, Shield } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { OfficerProfiles } from "@/components/OfficerProfiles";
 
@@ -314,6 +314,16 @@ export default function CharactersPage() {
                             startContent={<Edit className="w-4 h-4" />}
                           >
                             View Details
+                          </Button>
+                          <Button
+                            as={Link}
+                            href={`/dashboard/police/cad?search=${encodeURIComponent(character.firstName + ' ' + character.lastName)}&type=citizen`}
+                            size="sm"
+                            color="secondary"
+                            variant="flat"
+                            startContent={<Shield className="w-4 h-4" />}
+                          >
+                            CAD
                           </Button>
                           <Button
                             size="sm"

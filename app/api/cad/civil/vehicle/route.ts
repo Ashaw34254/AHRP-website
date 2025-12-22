@@ -22,6 +22,7 @@ export async function GET(request: Request) {
       include: {
         owner: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             phoneNumber: true,
@@ -37,7 +38,22 @@ export async function GET(request: Request) {
       );
     }
 
-    return NextResponse.json({ vehicle });
+    // Parse notes
+    let notes: any[] = [];
+    if (vehicle.notes) {
+      try {
+        notes = JSON.parse(vehicle.notes);
+      } catch (e) {
+        notes = [];
+      }
+    }
+
+    const vehicleData = {
+      ...vehicle,
+      notes,
+    };
+
+    return NextResponse.json({ vehicle: vehicleData });
   } catch (error) {
     console.error("Error searching vehicle:", error);
     return NextResponse.json(
