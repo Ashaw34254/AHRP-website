@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { getDepartmentSettings } from "@/lib/department-settings";
 import { 
   Card, 
   CardBody, 
@@ -35,6 +37,7 @@ import { useSession } from "next-auth/react";
 
 export default function EMSDashboardPage() {
   const { data: session } = useSession();
+  const deptSettings = useMemo(() => getDepartmentSettings("EMS"), []);
   const [selectedTab, setSelectedTab] = useState("home");
   const [totalParamedics] = useState(18);
   const [onDuty] = useState(9);
@@ -77,13 +80,15 @@ export default function EMSDashboardPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Banner */}
-        <div className="relative h-32 bg-gradient-to-r from-green-600 via-green-700 to-emerald-800 rounded-lg overflow-hidden">
+        <div className="relative h-32 rounded-lg overflow-hidden" style={{
+          background: `linear-gradient(to right, ${deptSettings.theme.primaryColor}, ${deptSettings.theme.secondaryColor}, ${deptSettings.theme.accentColor})`
+        }}>
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative h-full flex items-center px-6">
             <Heart className="w-16 h-16 text-white mr-4" />
             <div>
-              <h1 className="text-3xl font-bold text-white">Emergency Medical Services</h1>
-              <p className="text-green-100">Providing Emergency Medical Care</p>
+              <h1 className="text-3xl font-bold text-white">{deptSettings.theme.displayName}</h1>
+              <p className="text-green-100">{deptSettings.motto}</p>
             </div>
           </div>
         </div>
@@ -95,13 +100,16 @@ export default function EMSDashboardPage() {
               selectedKey={selectedTab} 
               onSelectionChange={(key) => setSelectedTab(key as string)}
               variant="underlined"
-              color="success"
               classNames={{
                 tabList: "w-full relative rounded-none p-0 border-b border-divider",
-                cursor: "w-full bg-green-500",
+                cursor: "w-full",
                 tab: "max-w-fit px-6 h-12",
-                tabContent: "group-data-[selected=true]:text-green-400"
+                tabContent: "group-data-[selected=true]:font-semibold"
               }}
+              style={{
+                '--nextui-cursor': deptSettings.theme.primaryColor,
+                '--nextui-tab-color': deptSettings.theme.primaryColor
+              } as React.CSSProperties}
             >
               <Tab key="home" title={
                 <div className="flex items-center space-x-2">
@@ -155,17 +163,55 @@ export default function EMSDashboardPage() {
             {/* Welcome Message */}
             <Card className="bg-gray-900/50 border border-gray-800">
               <CardBody className="p-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Welcome to BeehiveRP - EMS</h2>
-                <p className="text-gray-300 mb-4">
-                  Kia ora! At BeehiveRP EMS, we're dedicated to providing top-tier medical roleplay. Our VMenu system makes it 
-                  easy to grab your medical gear and respond to emergencies across the city - from cardiac arrests to vehicle 
-                  accidents.
-                </p>
-                <p className="text-gray-300">
-                  Whether you're stabilizing a patient at a crash scene or providing critical care during transport, 
-                  you've got the tools and freedom to deliver realistic medical RP - just remember to follow protocols 
-                  and work as a team.
-                </p>
+                <div className="flex items-start gap-4">
+                  <Heart 
+                    className="w-12 h-12 flex-shrink-0" 
+                    style={{ color: deptSettings.theme.accentColor }}
+                  />
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-white mb-2">
+                      {deptSettings.theme.displayName}
+                    </h2>
+                    {deptSettings.motto && (
+                      <p 
+                        className="text-lg italic mb-3"
+                        style={{ color: deptSettings.theme.accentColor }}
+                      >
+                        "{deptSettings.motto}"
+                      </p>
+                    )}
+                    {deptSettings.description && (
+                      <p className="text-gray-300 mb-4 font-semibold">
+                        {deptSettings.description}
+                      </p>
+                    )}
+                    <div className="prose prose-invert max-w-none">
+                      {deptSettings.homepageContent.split("\n\n").map((paragraph, i) => {
+                        if (paragraph.startsWith("**") && paragraph.endsWith(":**")) {
+                          return (
+                            <h3 key={i} className="text-lg font-bold text-white mt-4 mb-2">
+                              {paragraph.replace(/\*\*/g, "").replace(":", "")}
+                            </h3>
+                          );
+                        }
+                        if (paragraph.startsWith("-")) {
+                          return (
+                            <ul key={i} className="list-disc list-inside text-gray-300 space-y-1 mb-3">
+                              {paragraph.split("\n").map((item, j) => (
+                                <li key={j}>{item.replace(/^- /, "")}</li>
+                              ))}
+                            </ul>
+                          );
+                        }
+                        return (
+                          <p key={i} className="text-gray-300 mb-3">
+                            {paragraph}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               </CardBody>
             </Card>
 
@@ -174,8 +220,8 @@ export default function EMSDashboardPage() {
               <Card className="bg-gradient-to-br from-green-900/30 to-gray-900/50 border border-green-800">
                 <CardBody className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <Users className="w-8 h-8 text-green-400" />
-                    <Chip color="success" variant="flat" size="sm">Active</Chip>
+                    <Users className="w-8 h-8" style={{ color: deptSettings.theme.accentColor }} />
+                    <Chip style={{ backgroundColor: deptSettings.theme.primaryColor + '40', color: deptSettings.theme.primaryColor }} variant="flat" size="sm">Active</Chip>
                   </div>
                   <div className="text-3xl font-bold text-white mb-1">{totalParamedics}</div>
                   <p className="text-sm text-gray-400">Total Medics</p>
@@ -270,7 +316,7 @@ export default function EMSDashboardPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="text-white font-medium">{medic.name}</p>
-                            <Chip size="sm" variant="flat" color="success">{medic.unit}</Chip>
+                            <Chip size="sm" variant="flat" style={{ backgroundColor: deptSettings.theme.primaryColor + '40', color: deptSettings.theme.primaryColor }}>{medic.unit}</Chip>
                           </div>
                           <p className="text-xs text-gray-400">{medic.rank} - {medic.specialty}</p>
                         </div>
@@ -299,7 +345,7 @@ export default function EMSDashboardPage() {
                         <span className="text-gray-400">Response Time (Avg)</span>
                         <span className="text-white font-medium">2.8 min</span>
                       </div>
-                      <Progress value={92} color="success" size="sm" />
+                      <Progress value={92} size="sm" className="mt-2" style={{ '--nextui-progress-indicator': deptSettings.theme.primaryColor } as React.CSSProperties} />
                     </div>
                     <div>
                       <div className="flex justify-between text-sm mb-2">
@@ -386,7 +432,7 @@ export default function EMSDashboardPage() {
         {selectedTab === "leadership" && (
           <Card className="bg-gray-900/50 border border-gray-800">
             <CardBody className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-4">EMS Leadership</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">{deptSettings.theme.displayName} Leadership</h2>
               <p className="text-gray-400">Leadership roster and chain of command coming soon...</p>
             </CardBody>
           </Card>
@@ -395,7 +441,7 @@ export default function EMSDashboardPage() {
         {selectedTab === "roster" && (
           <Card className="bg-gray-900/50 border border-gray-800">
             <CardBody className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-4">EMS Roster</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">{deptSettings.theme.displayName} Roster</h2>
               <p className="text-gray-400">Full department roster coming soon...</p>
             </CardBody>
           </Card>
@@ -404,7 +450,7 @@ export default function EMSDashboardPage() {
         {selectedTab === "ranks" && (
           <Card className="bg-gray-900/50 border border-gray-800">
             <CardBody className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-4">EMS Ranks</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">{deptSettings.theme.displayName} Ranks</h2>
               <p className="text-gray-400">Rank structure and progression information coming soon...</p>
             </CardBody>
           </Card>
@@ -441,7 +487,7 @@ export default function EMSDashboardPage() {
                 <div>
                   <h3 className="text-xl font-bold text-white">{session?.user?.name || "Anonymous"}</h3>
                   <p className="text-gray-400">{session?.user?.email}</p>
-                  <Chip color="success" variant="flat" className="mt-2">EMS Personnel</Chip>
+                  <Chip style={{ backgroundColor: deptSettings.theme.primaryColor }} variant="flat" className="mt-2">{deptSettings.theme.displayName} Personnel</Chip>
                 </div>
               </div>
               <p className="text-gray-400">Profile information and statistics coming soon...</p>

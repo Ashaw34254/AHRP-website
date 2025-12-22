@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { getDepartmentSettings } from "@/lib/department-settings";
 import { 
   Card, 
   CardBody, 
@@ -33,6 +35,7 @@ import { useSession } from "next-auth/react";
 
 export default function FireDashboardPage() {
   const { data: session } = useSession();
+  const deptSettings = useMemo(() => getDepartmentSettings("FIRE"), []);
   const [selectedTab, setSelectedTab] = useState("home");
   const [totalFirefighters] = useState(22);
   const [onDuty] = useState(11);
@@ -73,13 +76,15 @@ export default function FireDashboardPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Banner */}
-        <div className="relative h-32 bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 rounded-lg overflow-hidden">
+        <div className="relative h-32 rounded-lg overflow-hidden" style={{
+          background: `linear-gradient(to right, ${deptSettings.theme.primaryColor}, ${deptSettings.theme.secondaryColor}, ${deptSettings.theme.accentColor})`
+        }}>
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative h-full flex items-center px-6">
             <Flame className="w-16 h-16 text-white mr-4" />
             <div>
-              <h1 className="text-3xl font-bold text-white">Fire & Rescue Department</h1>
-              <p className="text-orange-100">Fighting Fires, Saving Lives</p>
+              <h1 className="text-3xl font-bold text-white">{deptSettings.theme.displayName}</h1>
+              <p className="text-orange-100">{deptSettings.motto}</p>
             </div>
           </div>
         </div>
@@ -91,13 +96,16 @@ export default function FireDashboardPage() {
               selectedKey={selectedTab} 
               onSelectionChange={(key) => setSelectedTab(key as string)}
               variant="underlined"
-              color="danger"
               classNames={{
                 tabList: "w-full relative rounded-none p-0 border-b border-divider",
-                cursor: "w-full bg-red-500",
+                cursor: "w-full",
                 tab: "max-w-fit px-6 h-12",
-                tabContent: "group-data-[selected=true]:text-red-400"
+                tabContent: "group-data-[selected=true]:font-semibold"
               }}
+              style={{
+                '--nextui-cursor': deptSettings.theme.primaryColor,
+                '--nextui-tab-color': deptSettings.theme.primaryColor
+              } as React.CSSProperties}
             >
               <Tab key="home" title={
                 <div className="flex items-center space-x-2">
@@ -157,17 +165,55 @@ export default function FireDashboardPage() {
             {/* Welcome Message */}
             <Card className="bg-gray-900/50 border border-gray-800">
               <CardBody className="p-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Welcome to BeehiveRP - Fire & Rescue</h2>
-                <p className="text-gray-300 mb-4">
-                  Kia ora! At BeehiveRP Fire & Rescue, we provide realistic firefighting and rescue operations. From structure 
-                  fires to vehicle extrications, our VMenu system lets you quickly gear up and respond to emergencies across 
-                  the city.
-                </p>
-                <p className="text-gray-300">
-                  Whether you're battling a blaze in Vinewood Hills or performing a high-angle rescue downtown, 
-                  you have the tools and training to handle any emergency - just remember to work as a team and follow 
-                  safety protocols.
-                </p>
+                <div className="flex items-start gap-4">
+                  <Flame 
+                    className="w-12 h-12 flex-shrink-0" 
+                    style={{ color: deptSettings.theme.accentColor }}
+                  />
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-white mb-2">
+                      {deptSettings.theme.displayName}
+                    </h2>
+                    {deptSettings.motto && (
+                      <p 
+                        className="text-lg italic mb-3"
+                        style={{ color: deptSettings.theme.accentColor }}
+                      >
+                        "{deptSettings.motto}"
+                      </p>
+                    )}
+                    {deptSettings.description && (
+                      <p className="text-gray-300 mb-4 font-semibold">
+                        {deptSettings.description}
+                      </p>
+                    )}
+                    <div className="prose prose-invert max-w-none">
+                      {deptSettings.homepageContent.split("\n\n").map((paragraph, i) => {
+                        if (paragraph.startsWith("**") && paragraph.endsWith(":**")) {
+                          return (
+                            <h3 key={i} className="text-lg font-bold text-white mt-4 mb-2">
+                              {paragraph.replace(/\*\*/g, "").replace(":", "")}
+                            </h3>
+                          );
+                        }
+                        if (paragraph.startsWith("-")) {
+                          return (
+                            <ul key={i} className="list-disc list-inside text-gray-300 space-y-1 mb-3">
+                              {paragraph.split("\n").map((item, j) => (
+                                <li key={j}>{item.replace(/^- /, "")}</li>
+                              ))}
+                            </ul>
+                          );
+                        }
+                        return (
+                          <p key={i} className="text-gray-300 mb-3">
+                            {paragraph}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               </CardBody>
             </Card>
 
@@ -176,8 +222,8 @@ export default function FireDashboardPage() {
               <Card className="bg-gradient-to-br from-red-900/30 to-gray-900/50 border border-red-800">
                 <CardBody className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <Users className="w-8 h-8 text-red-400" />
-                    <Chip color="danger" variant="flat" size="sm">Active</Chip>
+                    <Users className="w-8 h-8" style={{ color: deptSettings.theme.accentColor }} />
+                    <Chip style={{ backgroundColor: deptSettings.theme.primaryColor + '40', color: deptSettings.theme.primaryColor }} variant="flat" size="sm">Active</Chip>
                   </div>
                   <div className="text-3xl font-bold text-white mb-1">{totalFirefighters}</div>
                   <p className="text-sm text-gray-400">Total Firefighters</p>
@@ -272,7 +318,7 @@ export default function FireDashboardPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="text-white font-medium">{firefighter.name}</p>
-                            <Chip size="sm" variant="flat" color="danger">{firefighter.unit}</Chip>
+                            <Chip size="sm" variant="flat" style={{ backgroundColor: deptSettings.theme.primaryColor + '40', color: deptSettings.theme.primaryColor }}>{firefighter.unit}</Chip>
                           </div>
                           <p className="text-xs text-gray-400">{firefighter.rank} - {firefighter.station}</p>
                         </div>
@@ -388,7 +434,7 @@ export default function FireDashboardPage() {
         {selectedTab === "leadership" && (
           <Card className="bg-gray-900/50 border border-gray-800">
             <CardBody className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-4">Fire Department Leadership</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">{deptSettings.theme.displayName} Leadership</h2>
               <p className="text-gray-400">Leadership roster and chain of command coming soon...</p>
             </CardBody>
           </Card>
@@ -397,7 +443,7 @@ export default function FireDashboardPage() {
         {selectedTab === "roster" && (
           <Card className="bg-gray-900/50 border border-gray-800">
             <CardBody className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-4">Fire Department Roster</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">{deptSettings.theme.displayName} Roster</h2>
               <p className="text-gray-400">Full department roster coming soon...</p>
             </CardBody>
           </Card>
@@ -406,7 +452,7 @@ export default function FireDashboardPage() {
         {selectedTab === "ranks" && (
           <Card className="bg-gray-900/50 border border-gray-800">
             <CardBody className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-4">Fire Department Ranks</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">{deptSettings.theme.displayName} Ranks</h2>
               <p className="text-gray-400">Rank structure and progression information coming soon...</p>
             </CardBody>
           </Card>
@@ -452,7 +498,7 @@ export default function FireDashboardPage() {
                 <div>
                   <h3 className="text-xl font-bold text-white">{session?.user?.name || "Anonymous"}</h3>
                   <p className="text-gray-400">{session?.user?.email}</p>
-                  <Chip color="danger" variant="flat" className="mt-2">Fire Department</Chip>
+                  <Chip style={{ backgroundColor: deptSettings.theme.primaryColor }} variant="flat" className="mt-2">{deptSettings.theme.displayName}</Chip>
                 </div>
               </div>
               <p className="text-gray-400">Profile information and statistics coming soon...</p>

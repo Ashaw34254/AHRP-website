@@ -26,9 +26,12 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { getDepartmentSettings } from "@/lib/department-settings";
+import { useMemo } from "react";
 
 export default function PoliceDashboardPage() {
   const { data: session } = useSession();
+  const deptSettings = useMemo(() => getDepartmentSettings("POLICE"), []);
 
   const stations = [
     {
@@ -89,31 +92,78 @@ export default function PoliceDashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Los Santos Police Department</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">{deptSettings.theme.displayName}</h1>
             <p className="text-gray-400">Welcome back, {session?.user?.name || "Officer"}</p>
           </div>
-          <Chip color="primary" variant="flat" size="lg" startContent={<Shield className="w-4 h-4" />}>
-            LSPD
+          <Chip 
+            size="lg" 
+            variant="flat" 
+            startContent={<Shield className="w-4 h-4" />}
+            style={{ 
+              backgroundColor: `${deptSettings.theme.primaryColor}20`,
+              color: deptSettings.theme.primaryColor 
+            }}
+          >
+            {deptSettings.theme.name.split(" ")[0].toUpperCase()}
           </Chip>
         </div>
 
         {/* Welcome Section */}
-        <Card className="bg-gradient-to-br from-blue-900/20 to-gray-900/50 border border-blue-800">
+        <Card 
+          className="border-2"
+          style={{
+            background: `${deptSettings.theme.primaryColor}10`,
+            borderColor: deptSettings.theme.primaryColor,
+          }}
+        >
           <CardBody className="p-6">
             <div className="flex items-start gap-4">
-              <Shield className="w-12 h-12 text-blue-400 flex-shrink-0" />
+              <Shield 
+                className="w-12 h-12 flex-shrink-0" 
+                style={{ color: deptSettings.theme.accentColor }}
+              />
               <div>
-                <h2 className="text-2xl font-bold text-white mb-3">Welcome to LSPD</h2>
-                <p className="text-gray-300 mb-3">
-                  At the Los Santos Police Department, we're committed to serving and protecting our community. 
-                  Our officers work around the clock to maintain law and order across the city. Whether responding 
-                  to emergency calls, conducting traffic enforcement, or building community relationships, we strive 
-                  for excellence in every interaction.
-                </p>
-                <p className="text-gray-300">
-                  Join us in our mission to make Los Santos a safer place for everyone. Check out your roster assignments, 
-                  review department policies, and stay updated with the latest announcements below.
-                </p>
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  {deptSettings.theme.displayName}
+                </h2>
+                {deptSettings.motto && (
+                  <p 
+                    className="text-lg italic mb-3"
+                    style={{ color: deptSettings.theme.accentColor }}
+                  >
+                    "{deptSettings.motto}"
+                  </p>
+                )}
+                {deptSettings.description && (
+                  <p className="text-gray-300 mb-4 font-semibold">
+                    {deptSettings.description}
+                  </p>
+                )}
+                <div className="prose prose-invert max-w-none">
+                  {deptSettings.homepageContent.split("\n\n").map((paragraph, i) => {
+                    if (paragraph.startsWith("**") && paragraph.endsWith(":**")) {
+                      return (
+                        <h3 key={i} className="text-lg font-bold text-white mt-4 mb-2">
+                          {paragraph.replace(/\*\*/g, "").replace(":", "")}
+                        </h3>
+                      );
+                    }
+                    if (paragraph.startsWith("-")) {
+                      return (
+                        <ul key={i} className="list-disc list-inside text-gray-300 space-y-1 mb-3">
+                          {paragraph.split("\n").map((item, j) => (
+                            <li key={j}>{item.replace(/^- /, "")}</li>
+                          ))}
+                        </ul>
+                      );
+                    }
+                    return (
+                      <p key={i} className="text-gray-300 mb-3">
+                        {paragraph}
+                      </p>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </CardBody>

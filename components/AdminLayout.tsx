@@ -27,6 +27,8 @@ const navigation = [
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Applications", href: "/admin/applications", icon: FileText },
   { name: "Roles", href: "/admin/roles", icon: Shield },
+  { name: "Departments", href: "/admin/departments", icon: Shield },
+  { name: "Analytics", href: "/admin/analytics", icon: FileBarChart },
   { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Audit Logs", href: "/admin/audit-logs", icon: FileBarChart },
   { name: "Settings", href: "/admin/settings", icon: Settings },

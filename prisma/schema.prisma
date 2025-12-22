@@ -31,6 +31,127 @@ model User {
 }
 
 // ============================================
+// DEPARTMENT CONFIGURATION
+// ============================================
+
+model Department {
+  id                    String    @id @default(cuid())
+  name                  String    @unique // POLICE, FIRE, EMS
+  displayName           String    // Aurora Horizon Police Department
+  motto                 String?   // To Protect and Serve
+  description           String?   // Department description
+  homepageContent       String?   // Markdown content for homepage
+  
+  // Theme
+  primaryColor          String    @default("#3B82F6")
+  secondaryColor        String    @default("#2563EB")
+  accentColor           String    @default("#1D4ED8")
+  logoUrl               String?
+  badgeUrl              String?
+  bannerUrl             String?
+  customCSS             String?
+  enableGradient        Boolean   @default(true)
+  gradientDirection     String    @default("to right")
+  borderStyle           String    @default("solid")
+  cardOpacity           Float     @default(0.5)
+  
+  // Settings
+  enabled               Boolean   @default(true)
+  maxUnits              Int       @default(20)
+  requireCertification  Boolean   @default(false)
+  autoApprove           Boolean   @default(false)
+  allowRecruitment      Boolean   @default(true)
+  minPlaytime           Int       @default(0)
+  discordRole           String?
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  stations              Station[]
+  divisions             Division[]
+  ranks                 Rank[]
+  members               Member[]
+}
+
+model Station {
+  id              String     @id @default(cuid())
+  departmentId    String
+  department      Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  
+  name            String
+  address         String?
+  phone           String?
+  staffCount      Int        @default(0)
+  status          String     @default("Active") // Active, Inactive, Under Construction
+  imageUrl        String?
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  @@index([departmentId])
+}
+
+model Division {
+  id              String     @id @default(cuid())
+  departmentId    String
+  department      Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  
+  name            String
+  icon            String?    // Icon name from lucide-react
+  memberCount     Int        @default(0)
+  description     String?
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  @@index([departmentId])
+}
+
+model Rank {
+  id              String     @id @default(cuid())
+  departmentId    String
+  department      Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  
+  name            String
+  abbreviation    String?
+  level           Int        // 1 = lowest, higher = more senior
+  permissions     String?    // JSON array of permissions
+  payGrade        Int?
+  color           String?    // For UI display
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  // Relations
+  members         Member[]
+  
+  @@index([departmentId])
+  @@index([level])
+}
+
+model Member {
+  id              String     @id @default(cuid())
+  departmentId    String
+  department      Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  
+  rankId          String
+  rank            Rank       @relation(fields: [rankId], references: [id])
+  
+  name            String
+  badgeNumber     String?
+  status          String     @default("active") // active, loa, suspended, terminated
+  joinDate        DateTime   @default(now())
+  certifications  String?    // JSON array of certifications
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  @@index([departmentId])
+  @@index([rankId])
+}
+
+// ============================================
 // EMERGENCY SERVICES
 // ============================================
 
