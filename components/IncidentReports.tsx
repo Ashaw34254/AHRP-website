@@ -38,21 +38,20 @@ import { toast } from "@/lib/toast";
 
 interface IncidentReport {
   id: string;
-  caseNumber: string;
+  reportNumber: string;
   title: string;
-  reportingOfficerId: string;
-  reportingOfficerName: string;
-  reportingOfficerBadge: string | null;
-  incidentDate: string;
-  incidentLocation: string;
-  incidentType: string;
+  reportedBy: string;
+  occurredAt: string;
+  location: string;
+  type: string;
   status: string;
-  priority: string;
-  narrative: string | null;
-  evidenceNotes: string | null;
-  witnessCount: number;
-  suspectCount: number;
-  victimCount: number;
+  narrative: string;
+  suspects?: string | null;
+  victims?: string | null;
+  witnesses?: string | null;
+  evidence?: string | null;
+  approvedBy?: string | null;
+  callId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -130,16 +129,25 @@ export function IncidentReports() {
 
     setLoading(true);
     try {
+      const officer = officers.find(o => o.id === formData.reportingOfficerId);
+      
       const response = await fetch("/api/cad/incidents", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          incidentDate: new Date(formData.incidentDate).toISOString(),
+          title: formData.title,
+          reportedBy: officer ? `${officer.badge || officer.name} - ${officer.name}` : 'Unknown',
+          occurredAt: new Date(formData.incidentDate).toISOString(),
+          location: formData.incidentLocation,
+          type: formData.incidentType,
+          narrative: formData.narrative,
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to create report");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create report");
+      }
 
       toast.success("Incident report created");
       fetchReports();
@@ -147,7 +155,7 @@ export function IncidentReports() {
       resetForm();
     } catch (error) {
       console.error("Failed to create report:", error);
-      toast.error("Failed to create incident report");
+      toast.error(error instanceof Error ? error.message : "Failed to create incident report");
     } finally {
       setLoading(false);
     }
@@ -246,9 +254,9 @@ export function IncidentReports() {
 
   const filteredReports = reports.filter((report) => {
     const matchesSearch =
-      report.caseNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.incidentLocation.toLowerCase().includes(searchQuery.toLowerCase());
+      (report.reportNumber?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (report.title?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (report.location?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === "ALL" || report.status === statusFilter;
     
@@ -411,7 +419,7 @@ export function IncidentReports() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-bold text-white font-mono">{report.caseNumber}</h3>
+                          <h3 className="text-lg font-bold text-white font-mono">{report.reportNumber}</h3>
                           <Chip
                             size="sm"
                             color={getPriorityColor(report.priority) as any}
@@ -429,7 +437,7 @@ export function IncidentReports() {
                             {report.status.replace("_", " ")}
                           </Chip>
                           <Chip size="sm" variant="flat" className="uppercase">
-                            {report.incidentType.replace("_", " ")}
+                            {(report.type || 'INCIDENT').replace("_", " ")}
                           </Chip>
                         </div>
 
@@ -437,16 +445,13 @@ export function IncidentReports() {
 
                         <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
                           <div className="flex items-center gap-2">
-                            <Avatar name={report.reportingOfficerName} size="sm" className="w-6 h-6" />
-                            <span>{report.reportingOfficerName}</span>
-                            {report.reportingOfficerBadge && (
-                              <span className="font-mono text-gray-500">#{report.reportingOfficerBadge}</span>
-                            )}
+                            <Avatar name={report.reportedBy} size="sm" className="w-6 h-6" />
+                            <span>{report.reportedBy}</span>
                           </div>
                           <span className="text-gray-600">•</span>
-                          <span>{report.incidentLocation}</span>
+                          <span>{report.location}</span>
                           <span className="text-gray-600">•</span>
-                          <span>{new Date(report.incidentDate).toLocaleDateString()}</span>
+                          <span>{new Date(report.occurredAt).toLocaleDateString()}</span>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -510,9 +515,9 @@ export function IncidentReports() {
                 <CardBody className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-white">{report.caseNumber}</span>
+                      <span className="font-mono font-bold text-white">{report.reportNumber}</span>
                       <span className="text-white">{report.title}</span>
-                      <Chip size="sm" variant="flat">{report.incidentType.replace("_", " ")}</Chip>
+                      <Chip size="sm" variant="flat">{(report.type || 'INCIDENT').replace("_", " ")}</Chip>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-400">{new Date(report.updatedAt).toLocaleString()}</span>
@@ -547,7 +552,7 @@ export function IncidentReports() {
                 <CardBody className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-white">{report.caseNumber}</span>
+                      <span className="font-mono font-bold text-white">{report.reportNumber}</span>
                       <span className="text-white">{report.title}</span>
                       <Chip size="sm" color={getStatusColor(report.status) as any} variant="bordered">
                         {report.status.replace("_", " ")}
@@ -584,10 +589,10 @@ export function IncidentReports() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="w-4 h-4 text-green-400" />
-                      <span className="font-mono font-bold text-white">{report.caseNumber}</span>
+                      <span className="font-mono font-bold text-white">{report.reportNumber}</span>
                       <span className="text-white">{report.title}</span>
                     </div>
-                    <span className="text-sm text-gray-400">{new Date(report.incidentDate).toLocaleDateString()}</span>
+                    <span className="text-sm text-gray-400">{new Date(report.occurredAt).toLocaleDateString()}</span>
                   </div>
                 </CardBody>
               </Card>
@@ -761,10 +766,7 @@ export function IncidentReports() {
                   </div>
                   <div>
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-lg">{selectedReport.caseNumber}</span>
-                      <Chip size="sm" color={getPriorityColor(selectedReport.priority) as any} variant="solid">
-                        {selectedReport.priority}
-                      </Chip>
+                      <span className="font-mono text-lg">{selectedReport.reportNumber}</span>
                       <Chip size="sm" color={getStatusColor(selectedReport.status) as any} variant="bordered">
                         {selectedReport.status.replace("_", " ")}
                       </Chip>
@@ -782,15 +784,15 @@ export function IncidentReports() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-gray-400">Type:</span>
-                          <p className="text-white font-semibold">{selectedReport.incidentType.replace("_", " ")}</p>
+                          <p className="text-white font-semibold">{(selectedReport.type || 'INCIDENT').replace("_", " ")}</p>
                         </div>
                         <div>
                           <span className="text-gray-400">Date & Time:</span>
-                          <p className="text-white font-semibold">{new Date(selectedReport.incidentDate).toLocaleString()}</p>
+                          <p className="text-white font-semibold">{new Date(selectedReport.occurredAt).toLocaleString()}</p>
                         </div>
                         <div className="col-span-2">
                           <span className="text-gray-400">Location:</span>
-                          <p className="text-white font-semibold">{selectedReport.incidentLocation}</p>
+                          <p className="text-white font-semibold">{selectedReport.location}</p>
                         </div>
                       </div>
                     </CardBody>
@@ -801,12 +803,9 @@ export function IncidentReports() {
                     <CardBody className="p-4">
                       <h4 className="font-bold text-white mb-3">Reporting Officer</h4>
                       <div className="flex items-center gap-3">
-                        <Avatar name={selectedReport.reportingOfficerName} size="md" />
+                        <Avatar name={selectedReport.reportedBy} size="md" />
                         <div>
-                          <p className="font-semibold text-white">{selectedReport.reportingOfficerName}</p>
-                          {selectedReport.reportingOfficerBadge && (
-                            <p className="text-sm text-gray-400 font-mono">Badge #{selectedReport.reportingOfficerBadge}</p>
-                          )}
+                          <p className="font-semibold text-white">{selectedReport.reportedBy}</p>
                         </div>
                       </div>
                     </CardBody>

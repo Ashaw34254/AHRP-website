@@ -2,9 +2,11 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardBody, CardHeader, Button, Input, Switch } from "@nextui-org/react";
-import { Settings, User, Bell, Lock, Palette, Globe } from "lucide-react";
+import { Settings, User, Bell, Lock, Palette, Globe, Volume2, Radio, TestTube } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/lib/toast";
+import Link from "next/link";
+import { useVoice } from "@/lib/voice-context";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -17,6 +19,8 @@ export default function SettingsPage() {
     callsignPrefix: "",
     displayName: "",
   });
+  
+  const { isEnabled: voiceEnabled, toggle: toggleVoice, testVoice } = useVoice();
 
   const handleSave = () => {
     toast.success("Settings saved successfully");
@@ -30,6 +34,60 @@ export default function SettingsPage() {
             Settings
           </h1>
           <p className="text-gray-400 mt-1">Manage your preferences and account settings</p>
+        </div>
+
+        {/* Quick Access Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link href="/dashboard/settings/voice">
+            <Card className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-blue-800/50 hover:border-blue-600/50 transition-all cursor-pointer">
+              <CardBody className="text-center py-6">
+                <Volume2 className="w-12 h-12 mx-auto mb-3 text-blue-400" />
+                <h3 className="text-lg font-bold text-white mb-1">Voice Alerts</h3>
+                <p className="text-sm text-gray-400">Configure AI voice notifications</p>
+                <div className="mt-3">
+                  <span className={`text-xs px-3 py-1 rounded-full ${voiceEnabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'}`}>
+                    {voiceEnabled ? '● Enabled' : '○ Disabled'}
+                  </span>
+                </div>
+              </CardBody>
+            </Card>
+          </Link>
+
+          <Card 
+            className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border border-purple-800/50 hover:border-purple-600/50 transition-all cursor-pointer"
+            as={Link}
+            href="/dashboard/settings/test"
+          >
+            <CardBody className="text-center py-6">
+              <TestTube className="w-12 h-12 mx-auto mb-3 text-purple-400" />
+              <h3 className="text-lg font-bold text-white mb-1">Test Modules</h3>
+              <p className="text-sm text-gray-400">Run system diagnostics</p>
+              <div className="mt-3">
+                <span className="text-xs px-3 py-1 rounded-full bg-purple-500/20 text-purple-400">
+                  Available Now
+                </span>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card 
+            className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 border border-cyan-800/50 hover:border-cyan-600/50 transition-all cursor-pointer"
+            isPressable
+            onPress={() => {
+              toast.info("Radio settings feature coming soon!");
+            }}
+          >
+            <CardBody className="text-center py-6">
+              <Radio className="w-12 h-12 mx-auto mb-3 text-cyan-400" />
+              <h3 className="text-lg font-bold text-white mb-1">Radio System</h3>
+              <p className="text-sm text-gray-400">Configure radio channels</p>
+              <div className="mt-3">
+                <span className="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">
+                  Coming Soon
+                </span>
+              </div>
+            </CardBody>
+          </Card>
         </div>
 
         {/* Profile Settings */}

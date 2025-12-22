@@ -66,6 +66,7 @@ model Officer {
   unitId      String?
   unit        Unit?      @relation(fields: [unitId], references: [id])
   callNotes   CallNote[]
+  plateScans  PlateScan[]
 }
 
 model Unit {
@@ -88,6 +89,7 @@ model Unit {
 
   // Relations
   officers    Officer[]
+  plateScans  PlateScan[]
 }
 
 // ============================================
@@ -211,6 +213,9 @@ model Vehicle {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  // Relations
+  plateScans  PlateScan[]
 }
 
 model Warrant {
@@ -260,6 +265,36 @@ model Arrest {
   arrestedBy  String
   
   createdAt   DateTime @default(now())
+}
+
+// ============================================
+// PLATE SCANNER / ALPR SYSTEM
+// ============================================
+
+model PlateScan {
+  id          String   @id @default(cuid())
+  
+  plate       String
+  camera      String   // front, rear, manual, wars2x
+  location    String?
+  result      String   @default("CHECKED") // CHECKED, BOLO_HIT, STOLEN, WANTED, CLEAR
+  
+  // Officer who scanned
+  officerId   String
+  officer     Officer  @relation(fields: [officerId], references: [id])
+  
+  // Unit that scanned
+  unitId      String?
+  unit        Unit?    @relation(fields: [unitId], references: [id])
+  
+  // Vehicle if found in database
+  vehicleId   String?
+  vehicle     Vehicle? @relation(fields: [vehicleId], references: [id])
+  
+  scannedAt   DateTime @default(now())
+  
+  @@index([plate, scannedAt])
+  @@index([officerId, scannedAt])
 }
 
 // ============================================

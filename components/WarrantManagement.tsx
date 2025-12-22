@@ -219,14 +219,14 @@ export function WarrantManagement() {
 
   const filteredWarrants = warrants.filter(
     (w) =>
-      w.citizenName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      w.charge.toLowerCase().includes(searchQuery.toLowerCase())
+      (w.citizenName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (w.charge?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
   const filteredCitations = citations.filter(
     (c) =>
-      c.citizenName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.violation.toLowerCase().includes(searchQuery.toLowerCase())
+      (c.citizenName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (c.violation?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
   return (

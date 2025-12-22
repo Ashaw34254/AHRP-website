@@ -36,6 +36,7 @@ import { signOut } from "next-auth/react";
 import { Button } from "@nextui-org/react";
 import { useTheme } from "@/lib/theme-context";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import EnhancedVoiceWidget from "@/components/EnhancedVoiceWidget";
 import { useState } from "react";
 
 interface DashboardLayoutProps {
@@ -393,6 +394,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       
       {/* Global Search Modal */}
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      
+      {/* Enhanced Voice Control Widget */}
+      <EnhancedVoiceWidget />
     </div>
   );
 }

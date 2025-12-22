@@ -29,6 +29,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { useCADVoiceAlerts } from "@/lib/use-voice-alerts";
 
 interface Call {
   id: string;
@@ -77,7 +78,9 @@ export function CADDispatchConsole({
   const [loading, setLoading] = useState(true);
   const [selectedCall, setSelectedCall] = useState<Call | null>(null);
   const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
+  const [previousCallIds, setPreviousCallIds] = useState<Set<string>>(new Set());
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const voiceAlerts = useCADVoiceAlerts();
 
   useEffect(() => {
     fetchData();
@@ -118,6 +121,26 @@ export function CADDispatchConsole({
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       });
 
+      // Check for new calls and announce them
+      const currentCallIds = new Set(filteredCalls.map(c => c.id));
+      const newCalls = filteredCalls.filter(c => 
+        !previousCallIds.has(c.id) && 
+        (c.status === 'PENDING' || c.status === 'DISPATCHED')
+      );
+      
+      // Announce new high priority calls
+      newCalls.forEach(call => {
+        if (call.priority === 'HIGH' || call.priority === 'CRITICAL') {
+          voiceAlerts.announceNewCall({
+            callNumber: call.callNumber,
+            type: call.type,
+            priority: call.priority,
+            location: call.location
+          });
+        }
+      });
+      
+      setPreviousCallIds(currentCallIds);
       setCalls(filteredCalls);
       setUnits(filteredUnits);
     } catch (error) {

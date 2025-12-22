@@ -27,10 +27,10 @@
 | 🌓 Theme Toggle | ✅ Complete | 1 core + 2 modified | N/A | Low |
 | 🗺️ Zone Management | ✅ Complete | 1 component + 1 page | 5 endpoints | Medium |
 | 📍 Nearest Unit Assignment | ✅ Complete | API only | 1 endpoint | Medium |
-| 🎮 FiveM Integration | ✅ Complete (Stub) | 1 component + 1 page | 2 endpoints | High* |
+| 🎮 FiveM Integration | ✅ Complete | Full resource + API | 8+ endpoints | High |
 | 👥 Civilian Portal | ✅ Complete | 1 standalone page | 4 endpoints | Medium |
 
-*Stub implementation - full integration requires FiveM server access
+**UPDATE**: FiveM integration now includes complete Lua resource with client/server scripts!
 
 ### 🔗 Quick Links
 
@@ -200,8 +200,17 @@
 - 📁 **Records Systems**: Incidents, Court, Civil, Medical
 - 🗺️ **Geographic Features**: Live Map, Zone Management, Nearest Unit
 - 💬 **Communication**: MDT Messaging, Call Templates, Keyboard Shortcuts
-- 🎮 **External Integration**: FiveM Connection (stub)
+- 🎮 **External Integration**: Complete FiveM Resource (Lua scripts + API)
 - 👥 **Public Services**: Civilian Portal
+
+**🎮 FiveM Integration Now Includes:**
+- Full Lua resource with 15+ script files
+- Client-side UI with CAD interface
+- Server-side API integration
+- Real-time location and status sync
+- Panic button system
+- Complete documentation (README, API-SETUP, QUICK-START)
+- See `FIVEM-INTEGRATION.md` for full details
 
 ---
 
@@ -230,8 +239,21 @@ Total navigation items: **18 main + 3 department + 2 settings = 23 items**
   - Returns: Top 5 nearest units with distances
 
 ### FiveM Integration
-- `GET /api/fivem/status` - Get server status (mock)
-- `POST /api/fivem/sync` - Trigger sync (mock)
+- `GET /api/fivem/status` - Get server status
+- `POST /api/fivem/sync` - Trigger sync
+- `GET /api/cad/units` - List units (used by FiveM)
+- `POST /api/cad/units` - Create unit (used by FiveM)
+- `PATCH /api/cad/units/[id]` - Update unit (used by FiveM)
+- `POST /api/cad/calls/[id]/assign` - Assign unit (used by FiveM)
+- `GET /api/cad/civil/citizen` - Search citizens (used by FiveM)
+- `GET /api/cad/civil/vehicle` - Search vehicles (used by FiveM)
+
+**📦 Full FiveM Resource Available:**
+- Location: `fivem-resource/ahrp-cad/`
+- 15+ Lua script files (client + server)
+- HTML/CSS/JS UI interface
+- Complete documentation
+- See `FIVEM-INTEGRATION.md` for details
 
 ### Civilian Portal
 - `GET /api/civilian/reports` - List all reports
