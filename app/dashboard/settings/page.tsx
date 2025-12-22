@@ -69,10 +69,10 @@ export default function SettingsPage() {
         },
       });
 
-      toast("Profile updated successfully!", "success");
+      toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Profile update error:", error);
-      toast(error.message || "Failed to update profile", "error");
+      toast.error(error.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -80,7 +80,7 @@ export default function SettingsPage() {
 
   const handleImageUpdate = async () => {
     if (!imageUrl) {
-      toast("Please enter an image URL", "error");
+      toast.error("Please enter an image URL");
       return;
     }
 
@@ -107,9 +107,9 @@ export default function SettingsPage() {
         },
       });
 
-      toast("Avatar updated!", "success");
+      toast.success("Avatar updated!");
     } catch (error) {
-      toast("Failed to update avatar", "error");
+      toast.error("Failed to update avatar");
     } finally {
       setSaving(false);
     }
@@ -191,7 +191,7 @@ export default function SettingsPage() {
                     color="primary"
                     onClick={async () => {
                       if (!bannerUrl) {
-                        toast("Please enter a banner URL", "error");
+                        toast.error("Please enter a banner URL");
                         return;
                       }
                       setSaving(true);
@@ -207,12 +207,12 @@ export default function SettingsPage() {
                             ...session,
                             user: { ...user, ...updatedUser },
                           });
-                          toast("Banner updated!", "success");
+                          toast.success("Banner updated!");
                         } else {
-                          toast("Failed to update banner", "error");
+                          toast.error("Failed to update banner");
                         }
                       } catch (error) {
-                        toast("Failed to update banner", "error");
+                        toast.error("Failed to update banner");
                       } finally {
                         setSaving(false);
                       }
@@ -313,9 +313,9 @@ export default function SettingsPage() {
                                 body: JSON.stringify({ discordId: null, discordUsername: null }),
                               });
                               setFormData({ ...formData, discordId: "", discordUsername: "" });
-                              toast("Discord disconnected", "success");
+                              toast.success("Discord disconnected");
                             } catch (error) {
-                              toast("Failed to disconnect Discord", "error");
+                              toast.error("Failed to disconnect Discord");
                             } finally {
                               setSaving(false);
                             }
@@ -368,7 +368,7 @@ export default function SettingsPage() {
                           size="lg"
                           onClick={async () => {
                             if (!formData.discordUsername) {
-                              toast("Please enter your Discord username", "error");
+                              toast.error("Please enter your Discord username");
                               return;
                             }
                             setSaving(true);
@@ -382,12 +382,12 @@ export default function SettingsPage() {
                                 }),
                               });
                               if (response.ok) {
-                                toast("Discord account linked!", "success");
+                                toast.success("Discord account linked!");
                               } else {
-                                toast("Failed to link Discord", "error");
+                                toast.error("Failed to link Discord");
                               }
                             } catch (error) {
-                              toast("Failed to link Discord", "error");
+                              toast.error("Failed to link Discord");
                             } finally {
                               setSaving(false);
                             }

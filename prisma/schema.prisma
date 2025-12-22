@@ -57,15 +57,43 @@ model Character {
   dateOfBirth   String   // Store as string for flexibility
   gender        String   // MALE, FEMALE, OTHER
   
+  // Physical Appearance
+  height        String?  // e.g., "6'2\"" or "188cm"
+  weight        String?  // e.g., "180lbs" or "82kg"
+  eyeColor      String?  // Brown, Blue, Green, Hazel, etc.
+  hairColor     String?  // Black, Brown, Blonde, Red, etc.
+  build         String?  // Slim, Athletic, Muscular, Heavy, etc.
+  distinguishingFeatures String? // Tattoos, scars, piercings
+  
   image         String?  // Character photo/avatar
   backstory     String?  // Rich text backstory
   
+  // Identification
+  stateId       String?  // Auto-generated or custom ID number
+  bloodType     String?  // A+, A-, B+, B-, AB+, AB-, O+, O-
+  licenseStatus String   @default("NONE") // NONE, VALID, SUSPENDED, REVOKED
+  firearmPermit Boolean  @default(false) // Has firearm/concealed carry permit
+  organDonor    Boolean  @default(false) // Organ donor status
+  veteranStatus Boolean  @default(false) // Military veteran status
+  
+  // Medical Information
+  allergies     String?  // Known allergies (for medical scenarios)
+  medicalConditions String? // Chronic conditions, disabilities
+  
+  // Employment
   occupation    String?  // Job/profession
   department    String?  // POLICE, FIRE, EMS, CIVILIAN
   rank          String?  // Officer rank or position
   
+  // Contact & Background
   phoneNumber   String?
-  licenseStatus String   @default("NONE") // NONE, VALID, SUSPENDED, REVOKED
+  placeOfBirth  String?  // City, State
+  nationality   String?  // Country
+  education     String?  // High School, College, etc.
+  
+  // Personality & Skills (JSON strings)
+  personalityTraits String? // JSON array: ["Friendly", "Aggressive"]
+  skills        String?  // JSON object: {"driving": 75, "shooting": 50}
   
   isActive      Boolean  @default(true)
   isApproved    Boolean  @default(false)

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
+import type { Session } from "next-auth";
 import {
   Navbar,
   NavbarBrand,
@@ -20,8 +21,18 @@ import {
 } from "@nextui-org/react";
 import { ChevronDown, LogOut, LayoutDashboard, Shield } from "lucide-react";
 
+// Extend session type to include role
+interface ExtendedSession extends Session {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role?: string;
+  };
+}
+
 export function Header() {
-  const { data: session } = useSession();
+  const { data: session } = useSession() as { data: ExtendedSession | null };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
@@ -115,7 +126,7 @@ export function Header() {
               >
                 Dashboard
               </DropdownItem>
-              {session.user?.role === "admin" && (
+              {session.user?.role === "admin" ? (
                 <DropdownItem
                   key="admin"
                   startContent={<Shield className="w-4 h-4" />}
@@ -124,7 +135,7 @@ export function Header() {
                 >
                   Admin Panel
                 </DropdownItem>
-              )}
+              ) : null}
               <DropdownItem
                 key="logout"
                 color="danger"

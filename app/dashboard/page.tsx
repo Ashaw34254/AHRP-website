@@ -168,12 +168,12 @@ export default function DashboardPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {mockCharacters.map((character) => (
-              <Card 
-                key={character.id} 
-                className={`border-2 ${getDepartmentColor(character.department)} hover:scale-105 transition-transform cursor-pointer`}
-                isPressable
-              >
-                <CardBody className="p-4">
+              <Link key={character.id} href={`/dashboard/characters/${character.id}`}>
+                <Card 
+                  className={`border-2 ${getDepartmentColor(character.department)} hover:scale-105 transition-transform cursor-pointer`}
+                  isPressable
+                >
+                  <CardBody className="p-4">
                   <div className="flex items-start gap-4">
                     <div className="relative">
                       <Avatar
@@ -212,6 +212,7 @@ export default function DashboardPage() {
                   </div>
                 </CardBody>
               </Card>
+              </Link>
             ))}
           </div>
         </div>
