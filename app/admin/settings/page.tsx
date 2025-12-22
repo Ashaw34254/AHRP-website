@@ -1,266 +1,460 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { 
   Card, 
-  CardBody, 
+  CardBody,
+  CardHeader,
+  Tabs,
+  Tab,
   Button,
   Input,
-  Textarea,
   Switch,
+  Textarea,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
   Select,
   SelectItem,
-  Divider
+  Divider,
 } from "@nextui-org/react";
-import { 
-  Save,
-  Server,
-  MessageSquare,
-  Shield,
-  Bell,
-  Globe,
-  Database
-} from "lucide-react";
-import { useState } from "react";
+import { Settings as SettingsIcon, Save, Plus, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
 
-export default function SettingsPage() {
-  const [serverName, setServerName] = useState("Aurora Horizon Roleplay");
-  const [serverDescription, setServerDescription] = useState("A premium FiveM roleplay experience");
-  const [maxPlayers, setMaxPlayers] = useState("64");
-  const [discordWebhook, setDiscordWebhook] = useState("");
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [autoApprove, setAutoApprove] = useState(false);
-  const [requireWhitelist, setRequireWhitelist] = useState(true);
-  const [enableNotifications, setEnableNotifications] = useState(true);
+interface Setting {
+  id: string;
+  category: string;
+  key: string;
+  value: string;
+  parsedValue: any;
+  description: string | null;
+  dataType: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-  const handleSave = () => {
-    toast.success("Settings saved successfully");
+interface GroupedSettings {
+  [category: string]: Setting[];
+}
+
+export default function SettingsPage() {
+  const [settings, setSettings] = useState<GroupedSettings>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editedValues, setEditedValues] = useState<Record<string, any>>({});
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  // New setting form
+  const [newSetting, setNewSetting] = useState({
+    category: "general",
+    key: "",
+    value: "",
+    description: "",
+    dataType: "string",
+  });
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/settings");
+      const data = await res.json();
+      
+      if (data.success) {
+        setSettings(data.settings);
+        // Initialize edited values
+        const initial: Record<string, any> = {};
+        data.allSettings.forEach((s: Setting) => {
+          initial[s.key] = s.parsedValue;
+        });
+        setEditedValues(initial);
+      } else {
+        toast.error("Failed to load settings");
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+      toast.error("Failed to load settings");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleSaveSettings = async () => {
+    setSaving(true);
+    try {
+      // Get all settings that have been edited
+      const promises = Object.entries(editedValues).map(([key, value]) => {
+        // Find the setting to get its dataType
+        let dataType = "string";
+        Object.values(settings).forEach(categorySettings => {
+          const setting = categorySettings.find(s => s.key === key);
+          if (setting) dataType = setting.dataType;
+        });
+
+        return fetch("/api/admin/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key, value, dataType }),
+        });
+      });
+
+      await Promise.all(promises);
+      toast.success("Settings saved successfully");
+      loadSettings();
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      toast.error("Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCreateSetting = async () => {
+    if (!newSetting.key || !newSetting.category) {
+      toast.error("Key and category are required");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSetting),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Setting created successfully");
+        onClose();
+        setNewSetting({
+          category: "general",
+          key: "",
+          value: "",
+          description: "",
+          dataType: "string",
+        });
+        loadSettings();
+      } else {
+        toast.error(data.message || "Failed to create setting");
+      }
+    } catch (error) {
+      console.error("Error creating setting:", error);
+      toast.error("Failed to create setting");
+    }
+  };
+
+  const handleDeleteSetting = async (key: string) => {
+    if (!confirm("Are you sure you want to delete this setting?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/settings?key=${key}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Setting deleted successfully");
+        loadSettings();
+      } else {
+        toast.error(data.message || "Failed to delete setting");
+      }
+    } catch (error) {
+      console.error("Error deleting setting:", error);
+      toast.error("Failed to delete setting");
+    }
+  };
+
+  const renderSettingInput = (setting: Setting) => {
+    const value = editedValues[setting.key];
+
+    switch (setting.dataType) {
+      case "boolean":
+        return (
+          <Switch
+            isSelected={Boolean(value)}
+            onValueChange={(checked) => 
+              setEditedValues(prev => ({ ...prev, [setting.key]: checked }))
+            }
+          >
+            {value ? "Enabled" : "Disabled"}
+          </Switch>
+        );
+      case "number":
+        return (
+          <Input
+            type="number"
+            value={String(value || "")}
+            onChange={(e) => 
+              setEditedValues(prev => ({ ...prev, [setting.key]: parseFloat(e.target.value) || 0 }))
+            }
+            classNames={{
+              inputWrapper: "bg-gray-800 border-gray-700",
+            }}
+          />
+        );
+      case "json":
+        return (
+          <Textarea
+            value={typeof value === "object" ? JSON.stringify(value, null, 2) : String(value || "")}
+            onChange={(e) => {
+              try {
+                const parsed = JSON.parse(e.target.value);
+                setEditedValues(prev => ({ ...prev, [setting.key]: parsed }));
+              } catch {
+                setEditedValues(prev => ({ ...prev, [setting.key]: e.target.value }));
+              }
+            }}
+            minRows={3}
+            classNames={{
+              inputWrapper: "bg-gray-800 border-gray-700",
+            }}
+          />
+        );
+      default:
+        return (
+          <Input
+            value={String(value || "")}
+            onChange={(e) => 
+              setEditedValues(prev => ({ ...prev, [setting.key]: e.target.value }))
+            }
+            classNames={{
+              inputWrapper: "bg-gray-800 border-gray-700",
+            }}
+          />
+        );
+    }
+  };
+
+  const categories = Object.keys(settings).sort();
+  const hasSettings = categories.length > 0;
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Server Settings</h1>
-          <p className="text-gray-400">Configure server and application settings</p>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-600 text-transparent bg-clip-text">
+              System Settings
+            </h1>
+            <p className="text-gray-400 mt-2">
+              Configure application-wide settings
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              startContent={<RefreshCw size={18} />}
+              variant="flat"
+              onPress={loadSettings}
+              isLoading={loading}
+            >
+              Refresh
+            </Button>
+            <Button
+              startContent={<Plus size={18} />}
+              color="secondary"
+              onPress={onOpen}
+            >
+              Add Setting
+            </Button>
+            <Button
+              startContent={<Save size={18} />}
+              color="primary"
+              onPress={handleSaveSettings}
+              isLoading={saving}
+            >
+              Save Changes
+            </Button>
+          </div>
         </div>
 
-        {/* Server Configuration */}
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody className="p-6">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Server className="w-5 h-5" />
-              Server Configuration
-            </h3>
-            <div className="space-y-4">
-              <Input
-                label="Server Name"
-                placeholder="Enter server name"
-                value={serverName}
-                onChange={(e) => setServerName(e.target.value)}
-              />
-              <Textarea
-                label="Server Description"
-                placeholder="Enter server description"
-                value={serverDescription}
-                onChange={(e) => setServerDescription(e.target.value)}
-                minRows={3}
-              />
-              <Input
-                label="Max Players"
-                type="number"
-                placeholder="64"
-                value={maxPlayers}
-                onChange={(e) => setMaxPlayers(e.target.value)}
-              />
-              <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                <div>
-                  <p className="text-white font-medium">Maintenance Mode</p>
-                  <p className="text-sm text-gray-400">Prevent non-admin access to the server</p>
-                </div>
-                <Switch
-                  isSelected={maintenanceMode}
-                  onValueChange={setMaintenanceMode}
-                  color="warning"
-                />
+        {/* Settings Content */}
+        {loading ? (
+          <Card className="bg-gray-900/50 border border-gray-800">
+            <CardBody className="py-12">
+              <p className="text-center text-gray-400">Loading settings...</p>
+            </CardBody>
+          </Card>
+        ) : !hasSettings ? (
+          <Card className="bg-gray-900/50 border border-gray-800">
+            <CardBody className="py-12 text-center space-y-4">
+              <SettingsIcon className="w-16 h-16 text-gray-600 mx-auto" />
+              <div>
+                <p className="text-gray-300 font-semibold">No settings found</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Create your first setting to get started
+                </p>
               </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Discord Integration */}
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody className="p-6">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" />
-              Discord Integration
-            </h3>
-            <div className="space-y-4">
-              <Input
-                label="Webhook URL"
-                placeholder="https://discord.com/api/webhooks/..."
-                value={discordWebhook}
-                onChange={(e) => setDiscordWebhook(e.target.value)}
-                description="Used for sending notifications to Discord"
-              />
-              <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                <div>
-                  <p className="text-white font-medium">Enable Notifications</p>
-                  <p className="text-sm text-gray-400">Send events to Discord webhook</p>
-                </div>
-                <Switch
-                  isSelected={enableNotifications}
-                  onValueChange={setEnableNotifications}
-                  color="success"
-                />
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Application Settings */}
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody className="p-6">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              Application Settings
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                <div>
-                  <p className="text-white font-medium">Auto-Approve Applications</p>
-                  <p className="text-sm text-gray-400">Automatically approve all new applications</p>
-                </div>
-                <Switch
-                  isSelected={autoApprove}
-                  onValueChange={setAutoApprove}
-                  color="primary"
-                />
-              </div>
-              <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                <div>
-                  <p className="text-white font-medium">Require Whitelist</p>
-                  <p className="text-sm text-gray-400">Users must be whitelisted to join</p>
-                </div>
-                <Switch
-                  isSelected={requireWhitelist}
-                  onValueChange={setRequireWhitelist}
-                  color="warning"
-                />
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Department Settings */}
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody className="p-6">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Globe className="w-5 h-5" />
-              Department Settings
-            </h3>
-            <div className="space-y-4">
-              <Select
-                label="Police Rank Structure"
-                placeholder="Select rank structure"
-                defaultSelectedKeys={["default"]}
+              <Button
+                startContent={<Plus size={18} />}
+                color="primary"
+                onPress={onOpen}
               >
-                <SelectItem key="default" value="default">
-                  Default (Cadet, Officer, Senior Officer, Sergeant, Lieutenant, Captain, Chief)
-                </SelectItem>
-                <SelectItem key="custom" value="custom">
-                  Custom Ranks
-                </SelectItem>
-              </Select>
-              <Select
-                label="EMS Rank Structure"
-                placeholder="Select rank structure"
-                defaultSelectedKeys={["default"]}
+                Create Setting
+              </Button>
+            </CardBody>
+          </Card>
+        ) : (
+          <Card className="bg-gray-900/50 border border-gray-800">
+            <CardBody>
+              <Tabs
+                aria-label="Settings categories"
+                color="primary"
+                variant="underlined"
+                classNames={{
+                  tabList: "gap-6",
+                  cursor: "w-full bg-primary",
+                  tab: "max-w-fit px-0 h-12",
+                }}
               >
-                <SelectItem key="default" value="default">
-                  Default (Trainee, EMT, Paramedic, Senior Paramedic, Supervisor, Chief)
-                </SelectItem>
-                <SelectItem key="custom" value="custom">
-                  Custom Ranks
-                </SelectItem>
-              </Select>
-              <Select
-                label="Fire Rank Structure"
-                placeholder="Select rank structure"
-                defaultSelectedKeys={["default"]}
-              >
-                <SelectItem key="default" value="default">
-                  Default (Probie, Firefighter, Engineer, Captain, Battalion Chief, Fire Chief)
-                </SelectItem>
-                <SelectItem key="custom" value="custom">
-                  Custom Ranks
-                </SelectItem>
-              </Select>
-            </div>
-          </CardBody>
-        </Card>
+                {categories.map((category) => (
+                  <Tab
+                    key={category}
+                    title={
+                      <div className="flex items-center gap-2">
+                        <span className="capitalize">{category}</span>
+                        <span className="text-xs bg-gray-700 px-2 py-0.5 rounded-full">
+                          {settings[category].length}
+                        </span>
+                      </div>
+                    }
+                  >
+                    <div className="py-6 space-y-6">
+                      {settings[category].map((setting) => (
+                        <div key={setting.id}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-white">{setting.key}</h3>
+                                <span className="text-xs bg-gray-700 px-2 py-0.5 rounded">
+                                  {setting.dataType}
+                                </span>
+                              </div>
+                              {setting.description && (
+                                <p className="text-sm text-gray-400">{setting.description}</p>
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              color="danger"
+                              isIconOnly
+                              onPress={() => handleDeleteSetting(setting.key)}
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
+                          <div className="max-w-2xl">
+                            {renderSettingInput(setting)}
+                          </div>
+                          <Divider className="mt-6" />
+                        </div>
+                      ))}
+                    </div>
+                  </Tab>
+                ))}
+              </Tabs>
+            </CardBody>
+          </Card>
+        )}
 
-        {/* Database & Backup */}
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody className="p-6">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Database className="w-5 h-5" />
-              Database & Backup
-            </h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-gray-800/50 rounded-lg">
-                  <p className="text-sm text-gray-400 mb-1">Database Size</p>
-                  <p className="text-2xl font-bold text-white">247 MB</p>
-                </div>
-                <div className="p-4 bg-gray-800/50 rounded-lg">
-                  <p className="text-sm text-gray-400 mb-1">Last Backup</p>
-                  <p className="text-2xl font-bold text-white">2h ago</p>
-                </div>
-                <div className="p-4 bg-gray-800/50 rounded-lg">
-                  <p className="text-sm text-gray-400 mb-1">Total Records</p>
-                  <p className="text-2xl font-bold text-white">12,847</p>
-                </div>
-              </div>
-              <Divider className="my-4" />
-              <div className="flex gap-2">
-                <Button
-                  color="primary"
-                  variant="flat"
-                  onPress={() => toast.info("Creating backup...")}
+        {/* Create Setting Modal */}
+        <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+          <ModalContent>
+            <ModalHeader>Create New Setting</ModalHeader>
+            <ModalBody>
+              <div className="space-y-4">
+                <Select
+                  label="Category"
+                  selectedKeys={[newSetting.category]}
+                  onChange={(e) => setNewSetting(prev => ({ ...prev, category: e.target.value }))}
+                  classNames={{
+                    trigger: "bg-gray-800 border-gray-700",
+                  }}
                 >
-                  Create Backup
-                </Button>
-                <Button
-                  color="default"
-                  variant="flat"
-                  onPress={() => toast.info("Optimizing database...")}
-                >
-                  Optimize Database
-                </Button>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
+                  <SelectItem key="general" value="general">General</SelectItem>
+                  <SelectItem key="auth" value="auth">Authentication</SelectItem>
+                  <SelectItem key="notifications" value="notifications">Notifications</SelectItem>
+                  <SelectItem key="cad" value="cad">CAD System</SelectItem>
+                  <SelectItem key="whitelist" value="whitelist">Whitelist</SelectItem>
+                </Select>
 
-        {/* Save Button */}
-        <div className="flex justify-end gap-2">
-          <Button
-            color="default"
-            variant="flat"
-            onPress={() => toast.info("Settings reset to defaults")}
-          >
-            Reset to Defaults
-          </Button>
-          <Button
-            color="primary"
-            startContent={<Save className="w-4 h-4" />}
-            onPress={handleSave}
-          >
-            Save Settings
-          </Button>
-        </div>
+                <Input
+                  label="Key"
+                  placeholder="e.g., site_name, max_upload_size"
+                  value={newSetting.key}
+                  onChange={(e) => setNewSetting(prev => ({ ...prev, key: e.target.value }))}
+                  description="Unique identifier for this setting (use snake_case)"
+                  classNames={{
+                    inputWrapper: "bg-gray-800 border-gray-700",
+                  }}
+                />
+
+                <Select
+                  label="Data Type"
+                  selectedKeys={[newSetting.dataType]}
+                  onChange={(e) => setNewSetting(prev => ({ ...prev, dataType: e.target.value }))}
+                  classNames={{
+                    trigger: "bg-gray-800 border-gray-700",
+                  }}
+                >
+                  <SelectItem key="string" value="string">String</SelectItem>
+                  <SelectItem key="number" value="number">Number</SelectItem>
+                  <SelectItem key="boolean" value="boolean">Boolean</SelectItem>
+                  <SelectItem key="json" value="json">JSON</SelectItem>
+                </Select>
+
+                {newSetting.dataType === "boolean" ? (
+                  <Switch
+                    isSelected={newSetting.value === "true"}
+                    onValueChange={(checked) => 
+                      setNewSetting(prev => ({ ...prev, value: String(checked) }))
+                    }
+                  >
+                    Initial Value
+                  </Switch>
+                ) : (
+                  <Input
+                    label="Initial Value"
+                    value={newSetting.value}
+                    onChange={(e) => setNewSetting(prev => ({ ...prev, value: e.target.value }))}
+                    classNames={{
+                      inputWrapper: "bg-gray-800 border-gray-700",
+                    }}
+                  />
+                )}
+
+                <Textarea
+                  label="Description"
+                  placeholder="What does this setting control?"
+                  value={newSetting.description}
+                  onChange={(e) => setNewSetting(prev => ({ ...prev, description: e.target.value }))}
+                  minRows={2}
+                  classNames={{
+                    inputWrapper: "bg-gray-800 border-gray-700",
+                  }}
+                />
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="flat" onPress={onClose}>
+                Cancel
+              </Button>
+              <Button color="primary" onPress={handleCreateSetting}>
+                Create Setting
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </div>
     </AdminLayout>
   );

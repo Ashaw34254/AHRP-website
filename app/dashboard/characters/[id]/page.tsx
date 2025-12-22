@@ -1,59 +1,19 @@
 "use client";
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Avatar, Chip, Button, Input, Textarea, Select, SelectItem, Tabs, Tab } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Avatar, Chip, Button, Input, Textarea, Select, SelectItem, Tabs, Tab, Spinner } from "@nextui-org/react";
 import { ArrowLeft, Edit, Save, Plus, Car, Trash2, Shield, User, IdCard, Briefcase, FileText, Crosshair } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import { toast } from "@/lib/toast";
 
-// Mock character data
-const mockCharacter = {
-  id: "1",
-  firstName: "John",
-  lastName: "Doe",
-  dateOfBirth: "1990-05-15",
-  gender: "MALE",
-  image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-  height: "6'2\"",
-  weight: "180lbs",
-  eyeColor: "BLUE",
-  hairColor: "BROWN",
-  build: "ATHLETIC",
-  bloodType: "O+",
-  licenseStatus: "VALID",
-  stateId: "SA-123456",
-  firearmPermit: true,
-  organDonor: true,
-  veteranStatus: false,
-  department: "POLICE",
-  rank: "Sergeant",
-  phoneNumber: "555-0123",
-  backstory: "A dedicated police officer with years of experience serving the community.",
-  isActive: true,
-  playTime: 1200,
-};
-
-const mockVehicles = [
-  { id: "1", make: "Dodge", model: "Charger", year: 2021, plate: "POLICE1", color: "Black", vin: "1C3CDZCB1JN123456" },
-  { id: "2", make: "Ford", model: "F-150", year: 2020, plate: "ABC-123", color: "Blue", vin: "1FTEW1EP5LFB12345" },
-];
-
-const mockWeapons = [
-  { id: "1", type: "Handgun", make: "Glock", model: "17", caliber: "9mm", serialNumber: "GLK123456", registered: true },
-  { id: "2", type: "Rifle", make: "Smith & Wesson", model: "M&P15", caliber: "5.56mm", serialNumber: "SW789012", registered: true },
-];
-
-const mockWeapons = [
-  { id: "1", type: "Pistol", make: "Glock", model: "17", caliber: "9mm", serialNumber: "ABC123456", registered: true },
-  { id: "2", type: "Rifle", make: "Smith & Wesson", model: "M&P15", caliber: "5.56mm", serialNumber: "XYZ789012", registered: true },
-];
-
 export default function CharacterDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const [isEditing, setIsEditing] = useState(false);
-  const [character, setCharacter] = useState(mockCharacter);
-  const [vehicles, setVehicles] = useState(mockVehicles);
-  const [weapons, setWeapons] = useState(mockWeapons);
+  const [loading, setLoading] = useState(true);
+  const [character, setCharacter] = useState<any>(null);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [weapons, setWeapons] = useState<any[]>([]);
   const [showAddVehicle, setShowAddVehicle] = useState(false);
   const [showAddWeapon, setShowAddWeapon] = useState(false);
   const [newVehicle, setNewVehicle] = useState({
@@ -73,12 +33,48 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
     registered: true,
   });
 
+  useEffect(() => {
+    loadCharacter();
+  }, [resolvedParams.id]);
+
+  const loadCharacter = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        setCharacter(data.character);
+      } else {
+        toast.error("Failed to load character");
+      }
+    } catch (error) {
+      console.error("Error loading character:", error);
+      toast.error("Failed to load character");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     try {
-      // API call would go here
-      toast.success("Character updated successfully!");
-      setIsEditing(false);
+      const res = await fetch(`/api/dashboard/characters/${resolvedParams.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(character),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Character updated successfully!");
+        setIsEditing(false);
+        loadCharacter();
+      } else {
+        toast.error(data.message || "Failed to update character");
+      }
     } catch (error) {
+      console.error("Error updating character:", error);
       toast.error("Failed to update character");
     }
   };
@@ -143,65 +139,84 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button as={Link} href="/dashboard" variant="flat" isIconOnly>
+            <Button as={Link} href="/dashboard/characters" variant="flat" isIconOnly>
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 text-transparent bg-clip-text">
-                {character.firstName} {character.lastName}
+                {loading ? "Loading..." : `${character?.firstName} ${character?.lastName}`}
               </h1>
               <p className="text-gray-400">Character Details</p>
             </div>
           </div>
-          <Button
-            color={isEditing ? "success" : "primary"}
-            startContent={isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-            onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
-          >
-            {isEditing ? "Save Changes" : "Edit Character"}
-          </Button>
+          {!loading && character && (
+            <Button
+              color={isEditing ? "success" : "primary"}
+              startContent={isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
+              onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
+            >
+              {isEditing ? "Save Changes" : "Edit Character"}
+            </Button>
+          )}
         </div>
 
-        {/* Character Overview */}
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody className="p-6">
-            <div className="flex items-start gap-6">
-              <Avatar src={character.image} className="w-32 h-32" isBordered />
-              <div className="flex-1 space-y-4">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold text-white">
-                    {character.firstName} {character.lastName}
-                  </h2>
-                  <Chip color={getDepartmentColor(character.department) as any} variant="flat">
-                    {character.department} - {character.rank}
-                  </Chip>
-                  {character.isActive && <Chip color="success" variant="dot">Active</Chip>}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Spinner size="lg" />
+          </div>
+        ) : !character ? (
+          <Card className="bg-gray-900/50 border border-gray-800">
+            <CardBody className="text-center py-12">
+              <p className="text-gray-400">Character not found</p>
+              <Button as={Link} href="/dashboard/characters" color="primary" className="mt-4">
+                Back to Characters
+              </Button>
+            </CardBody>
+          </Card>
+        ) : (
+          <>
+            {/* Character Overview */}
+            <Card className="bg-gray-900/50 border border-gray-800">
+              <CardBody className="p-6">
+                <div className="flex items-start gap-6">
+                  <Avatar src={character.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${character.firstName}`} className="w-32 h-32" isBordered />
+                  <div className="flex-1 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-2xl font-bold text-white">
+                        {character.firstName} {character.lastName}
+                      </h2>
+                      {character.department && (
+                        <Chip color={getDepartmentColor(character.department) as any} variant="flat">
+                          {character.department} {character.rank && `- ${character.rank}`}
+                        </Chip>
+                      )}
+                      <Chip color="success" variant="dot">Active</Chip>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-400">Date of Birth</p>
+                        <p className="text-white font-medium">{character.dateOfBirth}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Gender</p>
+                        <p className="text-white font-medium">{character.gender || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Phone</p>
+                        <p className="text-white font-medium">{character.phoneNumber || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Occupation</p>
+                        <p className="text-white font-medium">{character.occupation || "Civilian"}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-400">State ID</p>
-                    <p className="text-white font-medium">{character.stateId}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Blood Type</p>
-                    <p className="text-white font-medium">{character.bloodType}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">License</p>
-                    <p className="text-white font-medium">{character.licenseStatus}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Play Time</p>
-                    <p className="text-white font-medium">{Math.floor(character.playTime / 60)}h</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
+              </CardBody>
+            </Card>
 
-        {/* Tabbed Content */}
-        <Tabs aria-label="Character sections" color="primary" variant="underlined" classNames={{ tabList: "bg-gray-900/50 border border-gray-800 p-2 rounded-lg" }}>
+            {/* Tabbed Content */}
+            <Tabs aria-label="Character sections" color="primary" variant="underlined" classNames={{ tabList: "bg-gray-900/50 border border-gray-800 p-2 rounded-lg" }}>
           <Tab key="details" title={<div className="flex items-center gap-2"><User className="w-4 h-4" />Details</div>}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <Card className="bg-gray-900/50 border border-gray-800">
@@ -215,19 +230,19 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
                   {isEditing ? (
                     <>
                       <div className="grid grid-cols-2 gap-4">
-                        <Input label="First Name" value={character.firstName} onChange={(e) => setCharacter({ ...character, firstName: e.target.value })} />
-                        <Input label="Last Name" value={character.lastName} onChange={(e) => setCharacter({ ...character, lastName: e.target.value })} />
+                        <Input label="First Name" value={character.firstName || ""} onChange={(e) => setCharacter({ ...character, firstName: e.target.value })} />
+                        <Input label="Last Name" value={character.lastName || ""} onChange={(e) => setCharacter({ ...character, lastName: e.target.value })} />
                       </div>
-                      <Input label="Date of Birth" type="date" value={character.dateOfBirth} onChange={(e) => setCharacter({ ...character, dateOfBirth: e.target.value })} />
-                      <Input label="Phone Number" value={character.phoneNumber} onChange={(e) => setCharacter({ ...character, phoneNumber: e.target.value })} />
+                      <Input label="Date of Birth" type="date" value={character.dateOfBirth || ""} onChange={(e) => setCharacter({ ...character, dateOfBirth: e.target.value })} />
+                      <Input label="Phone Number" value={character.phoneNumber || ""} onChange={(e) => setCharacter({ ...character, phoneNumber: e.target.value })} />
                     </>
                   ) : (
                     <>
-                      <div className="flex justify-between"><span className="text-gray-400">Date of Birth:</span><span className="text-white">{character.dateOfBirth}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-400">Gender:</span><span className="text-white">{character.gender}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-400">Height:</span><span className="text-white">{character.height}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-400">Weight:</span><span className="text-white">{character.weight}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-400">Phone:</span><span className="text-white">{character.phoneNumber}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">Date of Birth:</span><span className="text-white">{character.dateOfBirth || "N/A"}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">Gender:</span><span className="text-white">{character.gender || "N/A"}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">Height:</span><span className="text-white">{character.height || "N/A"}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">Weight:</span><span className="text-white">{character.weight || "N/A"}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">Phone:</span><span className="text-white">{character.phoneNumber || "N/A"}</span></div>
                     </>
                   )}
                 </CardBody>
@@ -243,16 +258,14 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
                 <CardBody className="space-y-4">
                   {isEditing ? (
                     <>
-                      <Input label="Department" value={character.department} onChange={(e) => setCharacter({ ...character, department: e.target.value })} />
-                      <Input label="Rank" value={character.rank} onChange={(e) => setCharacter({ ...character, rank: e.target.value })} />
+                      <Input label="Department" value={character.department || ""} onChange={(e) => setCharacter({ ...character, department: e.target.value })} />
+                      <Input label="Rank" value={character.rank || ""} onChange={(e) => setCharacter({ ...character, rank: e.target.value })} />
                     </>
                   ) : (
                     <>
-                      <div className="flex justify-between"><span className="text-gray-400">Department:</span><span className="text-white">{character.department}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-400">Rank:</span><span className="text-white">{character.rank}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-400">Firearm Permit:</span><span className="text-white">{character.firearmPermit ? "Yes" : "No"}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-400">Organ Donor:</span><span className="text-white">{character.organDonor ? "Yes" : "No"}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-400">Veteran:</span><span className="text-white">{character.veteranStatus ? "Yes" : "No"}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">Department:</span><span className="text-white">{character.department || "Civilian"}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">Rank:</span><span className="text-white">{character.rank || "N/A"}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">Occupation:</span><span className="text-white">{character.occupation || "N/A"}</span></div>
                     </>
                   )}
                 </CardBody>
@@ -267,9 +280,9 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
                 </CardHeader>
                 <CardBody>
                   {isEditing ? (
-                    <Textarea value={character.backstory} onChange={(e) => setCharacter({ ...character, backstory: e.target.value })} minRows={6} />
+                    <Textarea value={character.backstory || ""} onChange={(e) => setCharacter({ ...character, backstory: e.target.value })} minRows={6} />
                   ) : (
-                    <p className="text-gray-300">{character.backstory}</p>
+                    <p className="text-gray-300">{character.backstory || "No backstory provided."}</p>
                   )}
                 </CardBody>
               </Card>
@@ -356,6 +369,8 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
             </div>
           </Tab>
         </Tabs>
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

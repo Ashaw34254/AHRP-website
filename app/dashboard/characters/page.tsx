@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { 
   Card, 
@@ -13,79 +14,167 @@ import {
   ModalFooter,
   Input,
   Textarea,
-  Select,
-  SelectItem,
   useDisclosure,
   Chip,
   Avatar,
   Tabs,
-  Tab
+  Tab,
+  Skeleton,
 } from "@nextui-org/react";
-import { Plus, User, Edit, Trash2, Users } from "lucide-react";
+import { Plus, User, Edit, Trash2, Users, Calendar } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { OfficerProfiles } from "@/components/OfficerProfiles";
 
 interface Character {
   id: string;
-  name: string;
-  age: number;
-  gender: string;
-  backstory: string;
-  department: string;
-  status: "active" | "inactive" | "pending";
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string | null;
+  backstory: string | null;
+  image: string | null;
+  department: string | null;
+  rank: string | null;
+  occupation: string | null;
   createdAt: string;
+  officer: {
+    id: string;
+    callsign: string;
+    rank: string;
+    department: string;
+    dutyStatus: string;
+  } | null;
 }
 
-const mockCharacters: Character[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    age: 32,
-    gender: "Male",
-    backstory: "A former military veteran turned police officer...",
-    department: "Police",
-    status: "active",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    age: 28,
-    gender: "Female",
-    backstory: "An experienced paramedic dedicated to saving lives...",
-    department: "EMS",
-    status: "active",
-    createdAt: "2024-02-20",
-  },
-];
-
 export default function CharactersPage() {
-  const [characters, setCharacters] = useState<Character[]>(mockCharacters);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedTab, setSelectedTab] = useState("all");
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    gender: "",
+    backstory: "",
+    image: "",
+  });
+
+  useEffect(() => {
+    loadCharacters();
+  }, []);
+
+  const loadCharacters = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/dashboard/characters");
+      const data = await res.json();
+      
+      if (data.success) {
+        setCharacters(data.characters);
+      } else {
+        toast.error("Failed to load characters");
+      }
+    } catch (error) {
+      console.error("Error loading characters:", error);
+      toast.error("Failed to load characters");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateCharacter = () => {
     setSelectedCharacter(null);
+    setFormData({
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
+      gender: "",
+      backstory: "",
+      image: "",
+    });
     onOpen();
   };
 
   const handleEditCharacter = (character: Character) => {
     setSelectedCharacter(character);
+    setFormData({
+      firstName: character.firstName,
+      lastName: character.lastName,
+      dateOfBirth: character.dateOfBirth.split('T')[0],
+      gender: character.gender || "",
+      backstory: character.backstory || "",
+      image: character.image || "",
+    });
     onOpen();
   };
 
-  const handleDeleteCharacter = (id: string) => {
-    setCharacters(characters.filter(c => c.id !== id));
-    toast.success("Character deleted successfully");
+  const handleDeleteCharacter = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this character?")) return;
+
+    try {
+      const res = await fetch(`/api/dashboard/characters?id=${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Character deleted successfully");
+        loadCharacters();
+      } else {
+        toast.error(data.message || "Failed to delete character");
+      }
+    } catch (error) {
+      console.error("Error deleting character:", error);
+      toast.error("Failed to delete character");
+    }
   };
 
-  const handleSave = () => {
-    if (selectedCharacter) {
-      toast.success("Character updated successfully");
-    } else {
-      toast.success("Character created successfully");
+  const handleSave = async () => {
+    if (!formData.firstName || !formData.lastName || !formData.dateOfBirth) {
+      toast.error("Please fill in all required fields");
+      return;
     }
-    onOpenChange();
+
+    try {
+      const url = "/api/dashboard/characters";
+      const method = selectedCharacter ? "PATCH" : "POST";
+      const body = selectedCharacter
+        ? { characterId: selectedCharacter.id, updates: formData }
+        : formData;
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success(selectedCharacter ? "Character updated" : "Character created");
+        onClose();
+        loadCharacters();
+      } else {
+        toast.error(data.message || "Failed to save character");
+      }
+    } catch (error) {
+      console.error("Error saving character:", error);
+      toast.error("Failed to save character");
+    }
+  };
+
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   return (
@@ -120,67 +209,127 @@ export default function CharactersPage() {
               <div className="flex items-center justify-between">
                 <p className="text-gray-400">Manage your roleplay characters</p>
                 <Button
-                  color="primary"
+                  as={Link}
+                  href="/dashboard/characters/new"
+                  color="success"
                   startContent={<Plus className="w-5 h-5" />}
-                  onPress={handleCreateCharacter}
                 >
                   Create Character
                 </Button>
               </div>
 
               {/* Characters Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {characters.map((character) => (
-                  <Card key={character.id} className="bg-gray-900/50 border border-gray-800">
-                    <CardBody className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <Avatar
-                          icon={<User />}
-                          className="w-16 h-16"
-                          color="primary"
-                        />
-                        <Chip
-                          color={character.status === "active" ? "success" : "warning"}
-                          variant="flat"
-                          size="sm"
-                        >
-                          {character.status}
-                        </Chip>
-                      </div>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="bg-gray-900/50 border border-gray-800">
+                      <CardBody className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <Skeleton className="w-16 h-16 rounded-full" />
+                          <Skeleton className="h-6 w-20 rounded-full" />
+                        </div>
+                        <Skeleton className="h-6 w-3/4 mb-2 rounded-lg" />
+                        <Skeleton className="h-4 w-full mb-1 rounded-lg" />
+                        <Skeleton className="h-4 w-2/3 mb-4 rounded-lg" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-8 w-20 rounded-lg" />
+                          <Skeleton className="h-8 w-20 rounded-lg" />
+                        </div>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+              ) : characters.length === 0 ? (
+                <Card className="bg-gray-900/50 border border-gray-800">
+                  <CardBody className="text-center py-12">
+                    <User className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-300 font-semibold mb-2">No characters yet</p>
+                    <p className="text-gray-400 text-sm mb-4">
+                      Create your first character to get started
+                    </p>
+                    <Button
+                      as={Link}
+                      href="/dashboard/characters/new"
+                      color="success"
+                      startContent={<Plus className="w-5 h-5" />}
+                    >
+                      Create Character
+                    </Button>
+                  </CardBody>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {characters.map((character) => (
+                    <Card key={character.id} className="bg-gray-900/50 border border-gray-800">
+                      <CardBody className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <Avatar
+                            src={character.image || undefined}
+                            name={`${character.firstName} ${character.lastName}`}
+                            className="w-16 h-16"
+                            isBordered
+                          />
+                          {character.officer && (
+                            <Chip
+                              color={
+                                character.officer.department === "POLICE" ? "primary" :
+                                character.officer.department === "FIRE" ? "danger" :
+                                character.officer.department === "EMS" ? "success" : "default"
+                              }
+                              variant="flat"
+                              size="sm"
+                            >
+                              {character.officer.department}
+                            </Chip>
+                          )}
+                        </div>
 
-                      <h3 className="text-xl font-bold text-white mb-2">
-                        {character.name}
-                      </h3>
-                      
-                      <div className="space-y-1 text-sm text-gray-400 mb-4">
-                        <p>Age: {character.age} • {character.gender}</p>
-                        <p>Department: {character.department}</p>
-                        <p className="line-clamp-2">{character.backstory}</p>
-                      </div>
+                        <h3 className="text-xl font-bold text-white mb-2">
+                          {character.firstName} {character.lastName}
+                        </h3>
+                        
+                        <div className="space-y-1 text-sm text-gray-400 mb-4">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-3 h-3" />
+                            <span>Age: {calculateAge(character.dateOfBirth)}</span>
+                            {character.gender && <span>• {character.gender}</span>}
+                          </div>
+                          {character.officer && (
+                            <p>
+                              {character.officer.rank} - {character.officer.callsign}
+                            </p>
+                          )}
+                          {character.backstory && (
+                            <p className="line-clamp-2 mt-2">{character.backstory}</p>
+                          )}
+                        </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="bordered"
-                          startContent={<Edit className="w-4 h-4" />}
-                          onPress={() => handleEditCharacter(character)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          color="danger"
-                          variant="light"
-                          startContent={<Trash2 className="w-4 h-4" />}
-                          onPress={() => handleDeleteCharacter(character.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
+                        <div className="flex gap-2">
+                          <Button
+                            as={Link}
+                            href={`/dashboard/characters/${character.id}`}
+                            size="sm"
+                            color="primary"
+                            variant="flat"
+                            startContent={<Edit className="w-4 h-4" />}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            size="sm"
+                            color="danger"
+                            variant="light"
+                            startContent={<Trash2 className="w-4 h-4" />}
+                            onPress={() => handleDeleteCharacter(character.id)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </Tab>
 
@@ -202,7 +351,7 @@ export default function CharactersPage() {
         {/* Create/Edit Modal */}
         <Modal 
           isOpen={isOpen} 
-          onOpenChange={onOpenChange}
+          onClose={onClose}
           size="2xl"
           classNames={{
             base: "bg-gray-900 border border-gray-800",
@@ -211,71 +360,74 @@ export default function CharactersPage() {
           }}
         >
           <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader className="text-white">
-                  {selectedCharacter ? "Edit Character" : "Create New Character"}
-                </ModalHeader>
-                <ModalBody className="py-6">
-                  <div className="space-y-4">
-                    <Input
-                      label="Character Name"
-                      placeholder="Enter character name"
-                      defaultValue={selectedCharacter?.name}
-                      variant="bordered"
-                    />
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        label="Age"
-                        type="number"
-                        placeholder="25"
-                        defaultValue={selectedCharacter?.age.toString()}
-                        variant="bordered"
-                      />
-                      <Select
-                        label="Gender"
-                        placeholder="Select gender"
-                        defaultSelectedKeys={selectedCharacter ? [selectedCharacter.gender] : []}
-                        variant="bordered"
-                      >
-                        <SelectItem key="Male" value="Male">Male</SelectItem>
-                        <SelectItem key="Female" value="Female">Female</SelectItem>
-                        <SelectItem key="Other" value="Other">Other</SelectItem>
-                      </Select>
-                    </div>
+            <ModalHeader className="text-white">
+              {selectedCharacter ? "Edit Character" : "Create New Character"}
+            </ModalHeader>
+            <ModalBody className="py-6">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="First Name"
+                    placeholder="John"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                    variant="bordered"
+                    isRequired
+                  />
+                  <Input
+                    label="Last Name"
+                    placeholder="Doe"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                    variant="bordered"
+                    isRequired
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Date of Birth"
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                    variant="bordered"
+                    isRequired
+                  />
+                  <Input
+                    label="Gender"
+                    placeholder="Male, Female, Other"
+                    value={formData.gender}
+                    onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value }))}
+                    variant="bordered"
+                  />
+                </div>
 
-                    <Select
-                      label="Department"
-                      placeholder="Select department"
-                      defaultSelectedKeys={selectedCharacter ? [selectedCharacter.department] : []}
-                      variant="bordered"
-                    >
-                      <SelectItem key="Police" value="Police">Police</SelectItem>
-                      <SelectItem key="EMS" value="EMS">Fire & EMS</SelectItem>
-                      <SelectItem key="Civilian" value="Civilian">Civilian</SelectItem>
-                      <SelectItem key="Criminal" value="Criminal">Criminal</SelectItem>
-                    </Select>
+                <Input
+                  label="Profile Image URL"
+                  placeholder="https://..."
+                  value={formData.image}
+                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                  variant="bordered"
+                />
 
-                    <Textarea
-                      label="Backstory"
-                      placeholder="Tell us about your character's background..."
-                      defaultValue={selectedCharacter?.backstory}
-                      minRows={4}
-                      variant="bordered"
-                    />
-                  </div>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Cancel
-                  </Button>
-                  <Button color="primary" onPress={handleSave}>
-                    {selectedCharacter ? "Update" : "Create"}
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
+                <Textarea
+                  label="Backstory"
+                  placeholder="Tell us about your character's background..."
+                  value={formData.backstory}
+                  onChange={(e) => setFormData(prev => ({ ...prev, backstory: e.target.value }))}
+                  minRows={4}
+                  variant="bordered"
+                />
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="danger" variant="light" onPress={onClose}>
+                Cancel
+              </Button>
+              <Button color="primary" onPress={handleSave}>
+                {selectedCharacter ? "Update" : "Create"}
+              </Button>
+            </ModalFooter>
           </ModalContent>
         </Modal>
       </div>

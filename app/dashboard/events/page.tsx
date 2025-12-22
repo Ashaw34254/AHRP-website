@@ -1,261 +1,281 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Button, Chip, Avatar } from "@nextui-org/react";
-import { Calendar as CalendarIcon, Clock, Users, MapPin, Plus } from "lucide-react";
-import { useState } from "react";
-import Link from "next/link";
+import { Card, CardBody, CardHeader, Button, Chip, Skeleton } from "@nextui-org/react";
+import { Calendar as CalendarIcon, Clock, Users, MapPin, CheckCircle, XCircle } from "lucide-react";
+import { toast } from "@/lib/toast";
 
-// Mock events data
-const mockEvents = [
-  {
-    id: "1",
-    title: "Police Department Training",
-    description: "Weekly training session for all officers",
-    type: "MEETING",
-    department: "POLICE",
-    startTime: "2025-12-23T18:00:00Z",
-    endTime: "2025-12-23T20:00:00Z",
-    location: "LSPD HQ",
-    maxAttendees: 20,
-    currentAttendees: 12,
-    isRecurring: true,
-    recurrence: "WEEKLY",
-  },
-  {
-    id: "2",
-    title: "Street Race Event",
-    description: "Community street race around the city",
-    type: "RACE",
-    department: null,
-    startTime: "2025-12-24T21:00:00Z",
-    endTime: "2025-12-24T23:00:00Z",
-    location: "Downtown LS",
-    maxAttendees: 50,
-    currentAttendees: 35,
-    isRecurring: false,
-  },
-  {
-    id: "3",
-    title: "Bank Heist Event",
-    description: "Organized bank robbery event",
-    type: "ROBBERY",
-    department: null,
-    startTime: "2025-12-25T22:00:00Z",
-    location: "Pacific Standard Bank",
-    maxAttendees: 10,
-    currentAttendees: 8,
-    isRecurring: false,
-  },
-  {
-    id: "4",
-    title: "Fire Department Drill",
-    description: "Practice fire rescue scenarios",
-    type: "MEETING",
-    department: "FIRE",
-    startTime: "2025-12-26T19:00:00Z",
-    endTime: "2025-12-26T21:00:00Z",
-    location: "Fire Station 7",
-    isRecurring: true,
-    recurrence: "WEEKLY",
-  },
-];
+interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  type: string;
+  department: string | null;
+  startTime: string;
+  endTime: string | null;
+  location: string | null;
+  maxAttendees: number | null;
+  rsvps: { status: string; createdAt: string }[];
+  _count: { rsvps: number };
+}
 
 const eventTypeColors: Record<string, { color: any; icon: string }> = {
-  MEETING: { color: "primary", icon: "👥" },
-  RACE: { color: "warning", icon: "🏁" },
-  ROBBERY: { color: "danger", icon: "💰" },
+  TRAINING: { color: "primary", icon: "📚" },
   PATROL: { color: "success", icon: "🚓" },
-  SERVER_EVENT: { color: "secondary", icon: "🎉" },
-  OTHER: { color: "default", icon: "📅" },
+  MEETING: { color: "warning", icon: "👥" },
+  COMMUNITY: { color: "secondary", icon: "🎉" },
+  SPECIAL: { color: "danger", icon: "⭐" },
 };
 
 export default function EventsPage() {
-  const [filter, setFilter] = useState<string | null>(null);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>("upcoming");
 
-  const filteredEvents = filter
-    ? mockEvents.filter((e) => e.type === filter || e.department === filter)
-    : mockEvents;
+  useEffect(() => {
+    loadEvents();
+  }, [filter]);
+
+  const loadEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/dashboard/events?filter=${filter}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        setEvents(data.events);
+      } else {
+        toast.error("Failed to load events");
+      }
+    } catch (error) {
+      console.error("Error loading events:", error);
+      toast.error("Failed to load events");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRSVP = async (eventId: string, status: string) => {
+    try {
+      const res = await fetch("/api/dashboard/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, status }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success(status === "ATTENDING" ? "RSVP confirmed!" : "RSVP declined");
+        loadEvents();
+      } else {
+        toast.error(data.message || "Failed to RSVP");
+      }
+    } catch (error) {
+      console.error("Error RSVPing:", error);
+      toast.error("Failed to RSVP");
+    }
+  };
 
   const getEventTypeChip = (type: string) => {
-    const config = eventTypeColors[type] || eventTypeColors.OTHER;
+    const config = eventTypeColors[type] || eventTypeColors.SPECIAL;
     return (
-      <Chip color={config.color} variant="flat" size="sm">
-        {config.icon} {type.replace(/_/g, " ")}
+      <Chip size="sm" variant="flat" color={config.color}>
+        {config.icon} {type}
       </Chip>
     );
   };
 
-  const getDepartmentChip = (dept: string | null) => {
-    if (!dept) return null;
-    const colors: Record<string, any> = {
-      POLICE: "primary",
-      FIRE: "danger",
-      EMS: "success",
+  const formatDateTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return {
+      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     };
-    return <Chip color={colors[dept]} variant="flat" size="sm">{dept}</Chip>;
   };
 
-  const formatTimeUntil = (date: string) => {
-    const now = new Date();
-    const eventDate = new Date(date);
-    const diff = eventDate.getTime() - now.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const isEventFull = (event: Event) => {
+    return event.maxAttendees ? event._count.rsvps >= event.maxAttendees : false;
+  };
 
-    if (days > 0) return `in ${days}d ${hours}h`;
-    if (hours > 0) return `in ${hours}h`;
-    return "Soon";
+  const getUserRSVP = (event: Event) => {
+    return event.rsvps.length > 0 ? event.rsvps[0].status : null;
   };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 text-transparent bg-clip-text">
-              Events & Calendar
-            </h1>
-            <p className="text-gray-400 mt-1">Server events, races, meetings, and more</p>
-          </div>
-          <Button 
-            as={Link}
-            href="/dashboard/events/new"
-            color="primary"
-            startContent={<Plus className="w-4 h-4" />}
-          >
-            Create Event
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Events</h1>
+          <p className="text-gray-400">Browse and RSVP to community events</p>
         </div>
 
         {/* Filter Buttons */}
         <div className="flex gap-2 flex-wrap">
           <Button
-            size="sm"
-            variant={filter === null ? "solid" : "flat"}
+            variant={filter === "upcoming" ? "solid" : "bordered"}
+            color="primary"
+            onPress={() => setFilter("upcoming")}
+          >
+            Upcoming
+          </Button>
+          <Button
+            variant={filter === "past" ? "solid" : "bordered"}
             color="default"
-            onClick={() => setFilter(null)}
+            onPress={() => setFilter("past")}
           >
-            All Events
+            Past Events
           </Button>
           <Button
-            size="sm"
-            variant={filter === "RACE" ? "solid" : "flat"}
-            color="warning"
-            onClick={() => setFilter("RACE")}
+            variant={filter === "my-rsvps" ? "solid" : "bordered"}
+            color="secondary"
+            onPress={() => setFilter("my-rsvps")}
           >
-            🏁 Races
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "ROBBERY" ? "solid" : "flat"}
-            color="danger"
-            onClick={() => setFilter("ROBBERY")}
-          >
-            💰 Heists
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "MEETING" ? "solid" : "flat"}
-            color="primary"
-            onClick={() => setFilter("MEETING")}
-          >
-            👥 Meetings
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "POLICE" ? "solid" : "flat"}
-            color="primary"
-            onClick={() => setFilter("POLICE")}
-          >
-            Police
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "FIRE" ? "solid" : "flat"}
-            color="danger"
-            onClick={() => setFilter("FIRE")}
-          >
-            Fire
+            My RSVPs
           </Button>
         </div>
 
         {/* Events List */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {filteredEvents.map((event) => (
-            <Card 
-              key={event.id} 
-              className="bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-colors cursor-pointer"
-              isPressable
-            >
-              <CardBody className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      {getEventTypeChip(event.type)}
-                      {event.department && getDepartmentChip(event.department)}
-                      {event.isRecurring && (
-                        <Chip size="sm" variant="dot" color="secondary">
-                          {event.recurrence}
-                        </Chip>
-                      )}
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="bg-gray-900/50 border border-gray-800">
+                <CardBody className="p-6">
+                  <div className="flex items-start gap-4">
+                    <Skeleton className="w-20 h-20 rounded-lg shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-6 w-1/3 rounded-lg" />
+                      <Skeleton className="h-4 w-full rounded-lg" />
+                      <Skeleton className="h-4 w-2/3 rounded-lg" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-1">{event.title}</h3>
-                    <p className="text-gray-400 text-sm">{event.description}</p>
+                    <Skeleton className="h-10 w-24 rounded-lg" />
                   </div>
-                </div>
-
-                <div className="space-y-2 text-sm text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    <span>
-                      {new Date(event.startTime).toLocaleString()} 
-                      {event.endTime && ` - ${new Date(event.endTime).toLocaleTimeString()}`}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span className="text-indigo-400 font-semibold">
-                      {formatTimeUntil(event.startTime)}
-                    </span>
-                  </div>
-                  {event.location && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>{event.location}</span>
-                    </div>
-                  )}
-                  {event.maxAttendees && (
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>
-                        {event.currentAttendees || 0} / {event.maxAttendees} attending
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 mt-4">
-                  <Button color="primary" size="sm" className="flex-1">
-                    RSVP
-                  </Button>
-                  <Button variant="flat" size="sm">
-                    Details
-                  </Button>
-                </div>
-              </CardBody>
-            </Card>
-          ))}
-        </div>
-
-        {filteredEvents.length === 0 && (
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
           <Card className="bg-gray-900/50 border border-gray-800">
             <CardBody className="text-center py-12">
-              <CalendarIcon className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-              <h3 className="text-xl font-bold text-white mb-2">No Events Found</h3>
-              <p className="text-gray-400">No events match your filter</p>
+              <CalendarIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-300 font-semibold mb-2">No events found</p>
+              <p className="text-gray-400 text-sm">
+                {filter === "upcoming" && "No upcoming events at this time"}
+                {filter === "past" && "No past events to display"}
+                {filter === "my-rsvps" && "You haven't RSVP'd to any events yet"}
+              </p>
             </CardBody>
           </Card>
+        ) : (
+          <div className="space-y-4">
+            {events.map((event) => {
+              const { date, time } = formatDateTime(event.startTime);
+              const userRSVP = getUserRSVP(event);
+              const isFull = isEventFull(event);
+
+              return (
+                <Card key={event.id} className="bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-colors">
+                  <CardBody className="p-6">
+                    <div className="flex items-start gap-6">
+                      {/* Date Box */}
+                      <div className="bg-primary/20 border border-primary/30 rounded-lg p-4 text-center shrink-0 w-20">
+                        <div className="text-2xl font-bold text-primary">
+                          {new Date(event.startTime).getDate()}
+                        </div>
+                        <div className="text-xs text-gray-400 uppercase">
+                          {new Date(event.startTime).toLocaleDateString('en-US', { month: 'short' })}
+                        </div>
+                      </div>
+
+                      {/* Event Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
+                            <div className="flex items-center gap-2 flex-wrap mb-3">
+                              {getEventTypeChip(event.type)}
+                              {event.department && (
+                                <Chip size="sm" variant="flat" color="default">
+                                  {event.department}
+                                </Chip>
+                              )}
+                              {isFull && (
+                                <Chip size="sm" variant="flat" color="danger">
+                                  FULL
+                                </Chip>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {event.description && (
+                          <p className="text-gray-400 text-sm mb-3">{event.description}</p>
+                        )}
+
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            <span>{time}</span>
+                          </div>
+                          {event.location && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              <span>{event.location}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            <span>
+                              {event._count.rsvps}
+                              {event.maxAttendees ? ` / ${event.maxAttendees}` : ""} attending
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* RSVP Buttons */}
+                      {filter !== "past" && (
+                        <div className="flex flex-col gap-2 shrink-0">
+                          {userRSVP === "ATTENDING" ? (
+                            <Chip color="success" variant="flat" startContent={<CheckCircle size={16} />}>
+                              Attending
+                            </Chip>
+                          ) : userRSVP === "DECLINED" ? (
+                            <Chip color="danger" variant="flat" startContent={<XCircle size={16} />}>
+                              Declined
+                            </Chip>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                color="success"
+                                variant="flat"
+                                startContent={<CheckCircle size={16} />}
+                                onPress={() => handleRSVP(event.id, "ATTENDING")}
+                                isDisabled={isFull}
+                              >
+                                Attend
+                              </Button>
+                              <Button
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                startContent={<XCircle size={16} />}
+                                onPress={() => handleRSVP(event.id, "DECLINED")}
+                              >
+                                Decline
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </CardBody>
+                </Card>
+              );
+            })}
+          </div>
         )}
       </div>
     </DashboardLayout>

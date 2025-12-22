@@ -37,24 +37,23 @@ import {
   Calendar,
   User
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/lib/toast";
 
 interface Application {
-  id: number;
-  applicantName: string;
-  applicantEmail: string;
-  department: string;
-  position: string;
-  status: "pending" | "approved" | "rejected" | "reviewing";
-  submittedDate: string;
+  id: string;
+  userId: string;
+  applicationType: string;
+  status: string;
+  formData: Record<string, any>;
+  createdAt: string;
   reviewedBy?: string;
-  reviewDate?: string;
-  notes?: string;
-  experience: string;
-  reason: string;
-  availability: string;
-  discordId?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  user?: {
+    name: string;
+    email: string;
+  };
 }
 
 export default function ApplicationsPage() {
@@ -63,126 +62,71 @@ export default function ApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [reviewNote, setReviewNote] = useState("");
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [applications, setApplications] = useState<Application[]>([
-    {
-      id: 1,
-      applicantName: "John Smith",
-      applicantEmail: "john@example.com",
-      department: "Police",
-      position: "Officer",
-      status: "pending",
-      submittedDate: "2024-12-10",
-      experience: "5 years LEO experience",
-      reason: "Want to serve the community",
-      availability: "Weekdays 6pm-11pm EST",
-      discordId: "john#1234"
-    },
-    {
-      id: 2,
-      applicantName: "Sarah Johnson",
-      applicantEmail: "sarah@example.com",
-      department: "EMS",
-      position: "Paramedic",
-      status: "reviewing",
-      submittedDate: "2024-12-08",
-      reviewedBy: "Admin",
-      experience: "3 years medical RP",
-      reason: "Passionate about medical roleplay",
-      availability: "Flexible schedule",
-      discordId: "sarah#5678"
-    },
-    {
-      id: 3,
-      applicantName: "Mike Wilson",
-      applicantEmail: "mike@example.com",
-      department: "Fire",
-      position: "Firefighter",
-      status: "approved",
-      submittedDate: "2024-12-05",
-      reviewedBy: "Admin",
-      reviewDate: "2024-12-07",
-      notes: "Excellent application, approved",
-      experience: "New to RP but eager to learn",
-      reason: "Love firefighting theme",
-      availability: "Weekends",
-      discordId: "mike#9012"
-    },
-    {
-      id: 4,
-      applicantName: "Emily Davis",
-      applicantEmail: "emily@example.com",
-      department: "Police",
-      position: "Detective",
-      status: "rejected",
-      submittedDate: "2024-12-03",
-      reviewedBy: "Admin",
-      reviewDate: "2024-12-04",
-      notes: "Insufficient experience for detective role",
-      experience: "No prior RP experience",
-      reason: "Interested in investigation work",
-      availability: "Limited",
-      discordId: "emily#3456"
-    },
-    {
-      id: 5,
-      applicantName: "Robert Brown",
-      applicantEmail: "robert@example.com",
-      department: "EMS",
-      position: "EMT",
-      status: "pending",
-      submittedDate: "2024-12-12",
-      experience: "2 years EMS RP",
-      reason: "Want to help players",
-      availability: "Daily 8pm-12am EST",
-      discordId: "robert#7890"
-    },
-    {
-      id: 6,
-      applicantName: "Lisa Anderson",
-      applicantEmail: "lisa@example.com",
-      department: "Fire",
-      position: "Fire Chief",
-      status: "reviewing",
-      submittedDate: "2024-12-11",
-      reviewedBy: "Senior Admin",
-      experience: "10+ years fire department RP",
-      reason: "Leadership and mentorship experience",
-      availability: "Very flexible",
-      discordId: "lisa#2345"
-    },
-  ]);
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  const fetchApplications = async () => {
+    try {
+      const response = await fetch("/api/applications");
+      const data = await response.json();
+      if (data.success) {
+        setApplications(data.applications);
+      } else {
+        toast.error("Failed to load applications");
+      }
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+      toast.error("Error loading applications");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const stats = {
     total: applications.length,
-    pending: applications.filter(a => a.status === "pending").length,
-    reviewing: applications.filter(a => a.status === "reviewing").length,
-    approved: applications.filter(a => a.status === "approved").length,
-    rejected: applications.filter(a => a.status === "rejected").length,
+    pending: applications.filter(a => a.status === "PENDING").length,
+    reviewing: applications.filter(a => a.status === "UNDER_REVIEW").length,
+    approved: applications.filter(a => a.status === "APPROVED").length,
+    rejected: applications.filter(a => a.status === "REJECTED").length,
   };
 
   const filteredApplications = applications.filter(app => {
-    const matchesSearch = app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         app.applicantEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         app.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         app.position.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = app.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         app.user?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         app.applicationType.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesTab = selectedTab === "all" ? true :
-                      selectedTab === "pending" ? app.status === "pending" :
-                      selectedTab === "reviewing" ? app.status === "reviewing" :
-                      selectedTab === "approved" ? app.status === "approved" :
-                      selectedTab === "rejected" ? app.status === "rejected" : true;
+                      selectedTab === "PENDING" ? app.status === "PENDING" :
+                      selectedTab === "UNDER_REVIEW" ? app.status === "UNDER_REVIEW" :
+                      selectedTab === "APPROVED" ? app.status === "APPROVED" :
+                      selectedTab === "REJECTED" ? app.status === "REJECTED" : true;
 
     return matchesSearch && matchesTab;
   });
 
-  const handleViewApplication = (app: Application) => {
-    setSelectedApplication(app);
-    setReviewNote(app.notes || "");
-    onOpen();
+  const handleViewApplication = async (app: Application) => {
+    try {
+      const response = await fetch(`/api/applications/${app.id}`);
+      const data = await response.json();
+      if (data.success) {
+        setSelectedApplication(data.application);
+        setReviewNote(data.application.reviewNotes || "");
+        onOpen();
+      } else {
+        toast.error("Failed to load application details");
+      }
+    } catch (error) {
+      console.error("Error fetching application:", error);
+      toast.error("Error loading details");
+    }
   };
 
-  const handleReview = (status: "approved" | "rejected") => {
+  const handleReview = async (status: "APPROVED" | "REJECTED") => {
     if (!selectedApplication) return;
     
     if (!reviewNote.trim()) {
@@ -190,59 +134,79 @@ export default function ApplicationsPage() {
       return;
     }
 
-    setApplications(prev => prev.map(app => 
-      app.id === selectedApplication.id 
-        ? { 
-            ...app, 
-            status, 
-            reviewedBy: "Admin",
-            reviewDate: new Date().toISOString().split('T')[0],
-            notes: reviewNote
-          }
-        : app
-    ));
+    setSubmitting(true);
+    try {
+      const response = await fetch(`/api/applications/${selectedApplication.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status,
+          reviewNotes: reviewNote,
+        }),
+      });
 
-    toast.success(`Application ${status === "approved" ? "approved" : "rejected"}`);
-    onClose();
+      const data = await response.json();
+      if (data.success) {
+        toast.success(`Application ${status === "APPROVED" ? "approved" : "rejected"}`);
+        onClose();
+        fetchApplications();
+      } else {
+        toast.error(data.message || "Failed to update application");
+      }
+    } catch (error) {
+      console.error("Error updating application:", error);
+      toast.error("Error updating application");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleStartReview = () => {
+  const handleStartReview = async () => {
     if (!selectedApplication) return;
     
-    setApplications(prev => prev.map(app => 
-      app.id === selectedApplication.id 
-        ? { ...app, status: "reviewing", reviewedBy: "Admin" }
-        : app
-    ));
+    setSubmitting(true);
+    try {
+      const response = await fetch(`/api/applications/${selectedApplication.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "UNDER_REVIEW",
+          reviewNotes: reviewNote || "Application is being reviewed",
+        }),
+      });
 
-    toast.info("Application marked as reviewing");
+      const data = await response.json();
+      if (data.success) {
+        toast.info("Application marked as reviewing");
+        setSelectedApplication({ ...selectedApplication, status: "UNDER_REVIEW" });
+        fetchApplications();
+      } else {
+        toast.error("Failed to update status");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Error updating status");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case "pending": return "warning";
-      case "reviewing": return "primary";
-      case "approved": return "success";
-      case "rejected": return "danger";
-      default: return "default";
-    }
-  };
-
-  const getDepartmentColor = (dept: string) => {
-    switch(dept) {
-      case "Police": return "primary";
-      case "EMS": return "success";
-      case "Fire": return "danger";
+      case "PENDING": return "warning";
+      case "UNDER_REVIEW": return "primary";
+      case "APPROVED": return "success";
+      case "REJECTED": return "danger";
       default: return "default";
     }
   };
 
   const exportApplications = () => {
     const csv = [
-      ["ID", "Applicant", "Email", "Department", "Position", "Status", "Submitted", "Reviewed By", "Review Date"],
+      ["ID", "Applicant", "Email", "Type", "Status", "Submitted", "Reviewed At"],
       ...filteredApplications.map(a => [
-        a.id, a.applicantName, a.applicantEmail, a.department, a.position, 
-        a.status, a.submittedDate, a.reviewedBy || "N/A", a.reviewDate || "N/A"
+        a.id, a.user?.name || "Unknown", a.user?.email || "", a.applicationType, 
+        a.status, new Date(a.createdAt).toLocaleDateString(), a.reviewedAt ? new Date(a.reviewedAt).toLocaleDateString() : "N/A"
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -265,7 +229,7 @@ export default function ApplicationsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Application Management</h1>
-            <p className="text-gray-400">Review and process department applications</p>
+            <p className="text-gray-400">Review and process all applications</p>
           </div>
           <Button
             color="primary"
@@ -349,10 +313,10 @@ export default function ApplicationsPage() {
                   variant="underlined"
                 >
                   <Tab key="all" title={`All (${stats.total})`} />
-                  <Tab key="pending" title={`Pending (${stats.pending})`} />
-                  <Tab key="reviewing" title={`Reviewing (${stats.reviewing})`} />
-                  <Tab key="approved" title={`Approved (${stats.approved})`} />
-                  <Tab key="rejected" title={`Rejected (${stats.rejected})`} />
+                  <Tab key="PENDING" title={`Pending (${stats.pending})`} />
+                  <Tab key="UNDER_REVIEW" title={`Reviewing (${stats.reviewing})`} />
+                  <Tab key="APPROVED" title={`Approved (${stats.approved})`} />
+                  <Tab key="REJECTED" title={`Rejected (${stats.rejected})`} />
                 </Tabs>
 
                 <div className="flex gap-2 w-full md:w-auto">
@@ -382,25 +346,24 @@ export default function ApplicationsPage() {
               >
                 <TableHeader>
                   <TableColumn>APPLICANT</TableColumn>
-                  <TableColumn>DEPARTMENT</TableColumn>
-                  <TableColumn>POSITION</TableColumn>
+                  <TableColumn>TYPE</TableColumn>
                   <TableColumn>STATUS</TableColumn>
                   <TableColumn>SUBMITTED</TableColumn>
                   <TableColumn>REVIEWED BY</TableColumn>
                   <TableColumn>ACTIONS</TableColumn>
                 </TableHeader>
-                <TableBody emptyContent="No applications found">
+                <TableBody emptyContent="No applications found" isLoading={loading}>
                   {filteredApplications.map((app) => (
                     <TableRow key={app.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar
-                            name={app.applicantName}
+                            name={app.user?.name || "Unknown"}
                             size="sm"
                           />
                           <div>
-                            <p className="text-white font-medium">{app.applicantName}</p>
-                            <p className="text-xs text-gray-400">{app.applicantEmail}</p>
+                            <p className="text-white font-medium">{app.user?.name || "Unknown"}</p>
+                            <p className="text-xs text-gray-400">{app.user?.email}</p>
                           </div>
                         </div>
                       </TableCell>
@@ -408,13 +371,9 @@ export default function ApplicationsPage() {
                         <Chip
                           size="sm"
                           variant="flat"
-                          color={getDepartmentColor(app.department)}
                         >
-                          {app.department}
+                          {app.applicationType}
                         </Chip>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-white text-sm">{app.position}</span>
                       </TableCell>
                       <TableCell>
                         <Chip
@@ -422,19 +381,19 @@ export default function ApplicationsPage() {
                           variant="flat"
                           color={getStatusColor(app.status)}
                           startContent={
-                            app.status === "pending" ? <Clock className="w-3 h-3" /> :
-                            app.status === "reviewing" ? <Eye className="w-3 h-3" /> :
-                            app.status === "approved" ? <CheckCircle className="w-3 h-3" /> :
+                            app.status === "PENDING" ? <Clock className="w-3 h-3" /> :
+                            app.status === "UNDER_REVIEW" ? <Eye className="w-3 h-3" /> :
+                            app.status === "APPROVED" ? <CheckCircle className="w-3 h-3" /> :
                             <XCircle className="w-3 h-3" />
                           }
                         >
-                          {app.status.toUpperCase()}
+                          {app.status.replace("_", " ")}
                         </Chip>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 text-sm text-gray-400">
                           <Calendar className="w-3 h-3" />
-                          {app.submittedDate}
+                          {new Date(app.createdAt).toLocaleDateString()}
                         </div>
                       </TableCell>
                       <TableCell>

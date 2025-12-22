@@ -174,7 +174,7 @@ export default function NewCharacterPage() {
         personalityTraits: JSON.stringify(formData.personalityTraits),
       };
 
-      const response = await fetch("/api/characters", {
+      const response = await fetch("/api/dashboard/characters", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submitData),
@@ -182,7 +182,7 @@ export default function NewCharacterPage() {
 
       if (response.ok) {
         toast.success("Character created successfully!");
-        router.push("/dashboard");
+        router.push("/dashboard/characters");
       } else {
         const error = await response.json();
         toast.error(error.error || "Failed to create character");

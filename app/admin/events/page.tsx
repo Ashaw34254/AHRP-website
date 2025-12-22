@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { 
   Card, 
@@ -16,61 +16,29 @@ import {
   Select,
   SelectItem,
   useDisclosure,
-  Chip
+  Chip,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@nextui-org/react";
-import { Calendar as CalendarIcon, Plus, Edit, Trash2, MapPin, Users } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Edit, Trash2, MapPin, Users, RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface Event {
   id: string;
   title: string;
   description: string;
-  date: string;
-  time: string;
+  startDate: string;
+  endDate?: string;
   location: string;
-  type: "training" | "patrol" | "community" | "special";
+  type: string;
   maxParticipants?: number;
   participants: number;
-  host: string;
+  createdAt: string;
 }
-
-const mockEvents: Event[] = [
-  {
-    id: "1",
-    title: "Police Academy Training",
-    description: "Basic training for new recruits covering traffic stops, arrests, and radio procedures.",
-    date: "2024-03-20",
-    time: "18:00",
-    location: "Police Academy",
-    type: "training",
-    maxParticipants: 20,
-    participants: 15,
-    host: "Chief Williams",
-  },
-  {
-    id: "2",
-    title: "Community BBQ Event",
-    description: "Join us for a community gathering at the park. Food, games, and fun for everyone!",
-    date: "2024-03-22",
-    time: "15:00",
-    location: "Central Park",
-    type: "community",
-    participants: 47,
-    host: "Mayor Johnson",
-  },
-  {
-    id: "3",
-    title: "Joint Emergency Response Drill",
-    description: "Combined PD/EMS/Fire training drill for major incident response.",
-    date: "2024-03-25",
-    time: "19:00",
-    location: "Downtown Area",
-    type: "training",
-    maxParticipants: 30,
-    participants: 22,
-    host: "Emergency Services",
-  },
-];
 
 const eventTypes = [
   { key: "training", label: "Training", color: "primary" },
@@ -80,31 +48,51 @@ const eventTypes = [
 ];
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    date: "",
-    time: "",
+    startDate: "",
     location: "",
-    type: "training" as Event["type"],
+    type: "community",
     maxParticipants: "",
-    host: "",
   });
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/events");
+      const data = await res.json();
+      
+      if (data.success) {
+        setEvents(data.events);
+      } else {
+        toast.error("Failed to load events");
+      }
+    } catch (error) {
+      console.error("Error loading events:", error);
+      toast.error("Failed to load events");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreate = () => {
     setSelectedEvent(null);
     setFormData({
       title: "",
       description: "",
-      date: "",
-      time: "",
+      startDate: "",
       location: "",
-      type: "training",
+      type: "community",
       maxParticipants: "",
-      host: "",
     });
     onOpen();
   };
@@ -114,277 +102,334 @@ export default function EventsPage() {
     setFormData({
       title: event.title,
       description: event.description,
-      date: event.date,
-      time: event.time,
+      startDate: new Date(event.startDate).toISOString().slice(0, 16),
       location: event.location,
       type: event.type,
       maxParticipants: event.maxParticipants?.toString() || "",
-      host: event.host,
     });
     onOpen();
   };
 
-  const handleDelete = (id: string) => {
-    setEvents(events.filter(e => e.id !== id));
-    toast.success("Event deleted successfully");
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this event?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/events?eventId=${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Event deleted successfully");
+        loadEvents();
+      } else {
+        toast.error(data.message || "Failed to delete event");
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+    }
   };
 
-  const handleSave = () => {
-    if (selectedEvent) {
-      setEvents(events.map(e => 
-        e.id === selectedEvent.id 
-          ? { 
-              ...e, 
-              ...formData,
-              maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
-            }
-          : e
-      ));
-      toast.success("Event updated successfully");
-    } else {
-      const newEvent: Event = {
-        id: Date.now().toString(),
-        ...formData,
-        maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
-        participants: 0,
-      };
-      setEvents([...events, newEvent]);
-      toast.success("Event created successfully");
+  const handleSave = async () => {
+    if (!formData.title || !formData.startDate || !formData.location) {
+      toast.error("Please fill in all required fields");
+      return;
     }
-    onOpenChange();
+
+    try {
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        startDate: new Date(formData.startDate).toISOString(),
+        location: formData.location,
+        type: formData.type,
+        maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : null,
+      };
+
+      if (selectedEvent) {
+        // Update
+        const res = await fetch("/api/admin/events", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            eventId: selectedEvent.id,
+            updates: payload,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          toast.success("Event updated successfully");
+          onClose();
+          loadEvents();
+        } else {
+          toast.error(data.message || "Failed to update event");
+        }
+      } else {
+        // Create
+        const res = await fetch("/api/admin/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          toast.success("Event created successfully");
+          onClose();
+          loadEvents();
+        } else {
+          toast.error(data.message || "Failed to create event");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving event:", error);
+      toast.error("Failed to save event");
+    }
   };
 
   const getTypeColor = (type: string) => {
-    return eventTypes.find(t => t.key === type)?.color || "default";
+    const eventType = eventTypes.find(t => t.key === type);
+    return eventType?.color || "default";
   };
 
   return (
     <AdminLayout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CalendarIcon className="w-8 h-8 text-red-400" />
-            <div>
-              <h1 className="text-3xl font-bold text-white">Event Calendar</h1>
-              <p className="text-gray-400">Manage community events and training sessions</p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
+              Event Management
+            </h1>
+            <p className="text-gray-400 mt-2">
+              Schedule and manage community events
+            </p>
           </div>
-          <Button
-            color="primary"
-            startContent={<Plus className="w-5 h-5" />}
-            onPress={handleCreate}
-          >
-            Create Event
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              startContent={<RefreshCw size={18} />}
+              variant="flat"
+              onPress={loadEvents}
+              isLoading={loading}
+            >
+              Refresh
+            </Button>
+            <Button
+              startContent={<Plus size={18} />}
+              color="primary"
+              onPress={handleCreate}
+            >
+              Create Event
+            </Button>
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-blue-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-blue-400 mb-2">{events.length}</div>
-              <p className="text-gray-400">Total Events</p>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-purple-400 mb-2">
-                {events.filter(e => e.type === "training").length}
-              </div>
-              <p className="text-gray-400">Training Sessions</p>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-green-400 mb-2">
-                {events.filter(e => e.type === "community").length}
-              </div>
-              <p className="text-gray-400">Community Events</p>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-yellow-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-yellow-400 mb-2">
-                {events.reduce((sum, e) => sum + e.participants, 0)}
-              </div>
-              <p className="text-gray-400">Total Participants</p>
-            </CardBody>
-          </Card>
-        </div>
-
-        {/* Events Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map((event) => (
-            <Card key={event.id} className="bg-gray-900/50 border border-gray-800 hover:border-indigo-500 transition-colors">
-              <CardBody className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Chip color={getTypeColor(event.type) as any} variant="flat" size="sm">
-                      {eventTypes.find(t => t.key === event.type)?.label}
-                    </Chip>
-                    {event.maxParticipants && (
-                      <Chip 
-                        color={event.participants >= event.maxParticipants ? "danger" : "success"} 
-                        variant="flat" 
+        {/* Events Table */}
+        <Card className="bg-gray-900/50 border border-gray-800">
+          <CardBody>
+            <Table
+              aria-label="Events table"
+              classNames={{
+                base: "bg-transparent",
+                wrapper: "bg-transparent shadow-none",
+              }}
+            >
+              <TableHeader>
+                <TableColumn>TITLE</TableColumn>
+                <TableColumn>TYPE</TableColumn>
+                <TableColumn>DATE</TableColumn>
+                <TableColumn>LOCATION</TableColumn>
+                <TableColumn>PARTICIPANTS</TableColumn>
+                <TableColumn>ACTIONS</TableColumn>
+              </TableHeader>
+              <TableBody
+                emptyContent={loading ? "Loading events..." : "No events found"}
+                isLoading={loading}
+              >
+                {events.map((event) => (
+                  <TableRow key={event.id}>
+                    <TableCell>
+                      <div>
+                        <p className="text-gray-300 font-semibold">{event.title}</p>
+                        {event.description && (
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                            {event.description}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
                         size="sm"
+                        variant="flat"
+                        color={getTypeColor(event.type) as any}
                       >
-                        {event.participants}/{event.maxParticipants}
+                        {event.type}
                       </Chip>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="flat"
-                      color="primary"
-                      isIconOnly
-                      onPress={() => handleEdit(event)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="flat"
-                      color="danger"
-                      isIconOnly
-                      onPress={() => handleDelete(event.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <CalendarIcon size={14} />
+                        <span className="text-sm">
+                          {new Date(event.startDate).toLocaleString()}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <MapPin size={14} />
+                        <span className="text-sm">{event.location}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <Users size={14} />
+                        <span className="text-sm">
+                          {event.participants}
+                          {event.maxParticipants && ` / ${event.maxParticipants}`}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          color="primary"
+                          isIconOnly
+                          onPress={() => handleEdit(event)}
+                        >
+                          <Edit size={16} />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          color="danger"
+                          isIconOnly
+                          onPress={() => handleDelete(event.id)}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardBody>
+        </Card>
 
-                <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
-                <p className="text-gray-400 text-sm mb-4 line-clamp-2">{event.description}</p>
-
-                <div className="space-y-2 text-sm text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span>{new Date(event.date).toLocaleDateString()} at {event.time}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    <span>{event.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    <span>{event.participants} participants • Hosted by {event.host}</span>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          ))}
-        </div>
-
-        {/* Create/Edit Modal */}
+        {/* Create/Edit Event Modal */}
         <Modal 
           isOpen={isOpen} 
           onOpenChange={onOpenChange}
           size="2xl"
           scrollBehavior="inside"
-          classNames={{
-            base: "bg-gray-900 border border-gray-800",
-            header: "border-b border-gray-800",
-            footer: "border-t border-gray-800",
-          }}
         >
           <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader className="text-white">
-                  {selectedEvent ? "Edit Event" : "Create New Event"}
-                </ModalHeader>
-                <ModalBody className="py-6">
-                  <div className="space-y-4">
-                    <Input
-                      label="Event Title"
-                      placeholder="Enter event title"
-                      value={formData.title}
-                      onValueChange={(value) => setFormData({ ...formData, title: value })}
-                      variant="bordered"
-                    />
-                    
-                    <Textarea
-                      label="Description"
-                      placeholder="Describe the event"
-                      value={formData.description}
-                      onValueChange={(value) => setFormData({ ...formData, description: value })}
-                      minRows={3}
-                      variant="bordered"
-                    />
+            <ModalHeader>
+              {selectedEvent ? "Edit Event" : "Create Event"}
+            </ModalHeader>
+            <ModalBody>
+              <div className="space-y-4">
+                <Input
+                  label="Event Title"
+                  placeholder="e.g., Police Academy Training"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  isRequired
+                  classNames={{
+                    inputWrapper: "bg-gray-800 border-gray-700",
+                  }}
+                />
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        label="Date"
-                        type="date"
-                        value={formData.date}
-                        onValueChange={(value) => setFormData({ ...formData, date: value })}
-                        variant="bordered"
-                      />
-                      <Input
-                        label="Time"
-                        type="time"
-                        value={formData.time}
-                        onValueChange={(value) => setFormData({ ...formData, time: value })}
-                        variant="bordered"
-                      />
-                    </div>
+                <Textarea
+                  label="Description"
+                  placeholder="Event details and information..."
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  minRows={3}
+                  classNames={{
+                    inputWrapper: "bg-gray-800 border-gray-700",
+                  }}
+                />
 
-                    <Input
-                      label="Location"
-                      placeholder="Event location"
-                      value={formData.location}
-                      onValueChange={(value) => setFormData({ ...formData, location: value })}
-                      variant="bordered"
-                    />
+                <Input
+                  label="Date & Time"
+                  type="datetime-local"
+                  value={formData.startDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, startDate: e.target.value })
+                  }
+                  isRequired
+                  classNames={{
+                    inputWrapper: "bg-gray-800 border-gray-700",
+                  }}
+                />
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <Select
-                        label="Event Type"
-                        placeholder="Select type"
-                        selectedKeys={[formData.type]}
-                        onChange={(e) => setFormData({ ...formData, type: e.target.value as Event["type"] })}
-                        variant="bordered"
-                      >
-                        {eventTypes.map((type) => (
-                          <SelectItem key={type.key} value={type.key}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </Select>
+                <Input
+                  label="Location"
+                  placeholder="e.g., Central Park, Police Academy"
+                  value={formData.location}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
+                  isRequired
+                  classNames={{
+                    inputWrapper: "bg-gray-800 border-gray-700",
+                  }}
+                />
 
-                      <Input
-                        label="Max Participants (Optional)"
-                        type="number"
-                        placeholder="No limit"
-                        value={formData.maxParticipants}
-                        onValueChange={(value) => setFormData({ ...formData, maxParticipants: value })}
-                        variant="bordered"
-                      />
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Select
+                    label="Event Type"
+                    selectedKeys={[formData.type]}
+                    onChange={(e) =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
+                    classNames={{
+                      trigger: "bg-gray-800 border-gray-700",
+                    }}
+                  >
+                    {eventTypes.map((type) => (
+                      <SelectItem key={type.key} value={type.key}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
 
-                    <Input
-                      label="Host"
-                      placeholder="Event host name"
-                      value={formData.host}
-                      onValueChange={(value) => setFormData({ ...formData, host: value })}
-                      variant="bordered"
-                    />
-                  </div>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Cancel
-                  </Button>
-                  <Button color="primary" onPress={handleSave}>
-                    {selectedEvent ? "Update" : "Create"}
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
+                  <Input
+                    label="Max Participants"
+                    type="number"
+                    placeholder="Optional"
+                    value={formData.maxParticipants}
+                    onChange={(e) =>
+                      setFormData({ ...formData, maxParticipants: e.target.value })
+                    }
+                    classNames={{
+                      inputWrapper: "bg-gray-800 border-gray-700",
+                    }}
+                  />
+                </div>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="flat" onPress={onClose}>
+                Cancel
+              </Button>
+              <Button color="primary" onPress={handleSave}>
+                {selectedEvent ? "Update Event" : "Create Event"}
+              </Button>
+            </ModalFooter>
           </ModalContent>
         </Modal>
       </div>

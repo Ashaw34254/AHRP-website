@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { 
   Card, 
   CardBody,
-  Button,
+  CardHeader,
   Table,
   TableHeader,
   TableColumn,
@@ -13,263 +13,284 @@ import {
   TableRow,
   TableCell,
   Chip,
+  Avatar,
+  Button,
+  Input,
+  Select,
+  SelectItem,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Input,
-  Textarea,
-  Checkbox,
-  useDisclosure
+  useDisclosure,
 } from "@nextui-org/react";
-import { Shield, Plus, Edit, Trash2, Users } from "lucide-react";
+import { Shield, Users, Search, RefreshCw, Edit } from "lucide-react";
 import { toast } from "@/lib/toast";
 
-interface Role {
+interface User {
   id: string;
   name: string;
-  description: string;
-  color: string;
-  permissions: string[];
-  userCount: number;
+  email: string;
+  image?: string;
+  role: string;
+  characterCount: number;
+  createdAt: string;
 }
 
-const mockRoles: Role[] = [
-  {
-    id: "1",
-    name: "Administrator",
-    description: "Full system access and control",
-    color: "danger",
-    permissions: ["all"],
-    userCount: 5,
-  },
-  {
-    id: "2",
-    name: "Moderator",
-    description: "Manage users and applications",
-    color: "warning",
-    permissions: ["manage_users", "manage_applications", "view_logs"],
-    userCount: 12,
-  },
-  {
-    id: "3",
-    name: "Police Chief",
-    description: "Manage police department",
-    color: "primary",
-    permissions: ["manage_police", "view_reports"],
-    userCount: 3,
-  },
-  {
-    id: "4",
-    name: "EMS Chief",
-    description: "Manage EMS department",
-    color: "success",
-    permissions: ["manage_ems", "view_reports"],
-    userCount: 2,
-  },
-  {
-    id: "5",
-    name: "Member",
-    description: "Standard community member",
-    color: "default",
-    permissions: ["basic_access"],
-    userCount: 1225,
-  },
-];
-
-const availablePermissions = [
-  "all",
-  "manage_users",
-  "manage_applications",
-  "manage_roles",
-  "manage_police",
-  "manage_ems",
-  "manage_fire",
-  "view_logs",
-  "view_reports",
-  "ban_users",
-  "kick_users",
-  "basic_access",
-];
-
 export default function RolesPage() {
-  const [roles, setRoles] = useState<Role[]>(mockRoles);
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    color: "default",
-    permissions: [] as string[],
-  });
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRole, setSelectedRole] = useState("all");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [newRole, setNewRole] = useState("");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [stats, setStats] = useState({ total: 0, admins: 0, users: 0 });
 
-  const handleCreate = () => {
-    setSelectedRole(null);
-    setFormData({
-      name: "",
-      description: "",
-      color: "default",
-      permissions: [],
-    });
-    onOpen();
-  };
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
-  const handleEdit = (role: Role) => {
-    setSelectedRole(role);
-    setFormData({
-      name: role.name,
-      description: role.description,
-      color: role.color,
-      permissions: role.permissions,
-    });
-    onOpen();
-  };
+  useEffect(() => {
+    calculateStats();
+  }, [users]);
 
-  const handleDelete = (id: string) => {
-    setRoles(roles.filter(r => r.id !== id));
-    toast.success("Role deleted successfully");
-  };
-
-  const handleSave = () => {
-    if (selectedRole) {
-      setRoles(roles.map(r => 
-        r.id === selectedRole.id 
-          ? { ...r, ...formData }
-          : r
-      ));
-      toast.success("Role updated successfully");
-    } else {
-      const newRole: Role = {
-        id: Date.now().toString(),
-        ...formData,
-        userCount: 0,
-      };
-      setRoles([...roles, newRole]);
-      toast.success("Role created successfully");
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/users?page=1&search=");
+      const data = await res.json();
+      
+      if (data.success) {
+        setUsers(data.users);
+      } else {
+        toast.error("Failed to load users");
+      }
+    } catch (error) {
+      console.error("Error loading users:", error);
+      toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
     }
-    onOpenChange();
   };
 
-  const togglePermission = (permission: string) => {
-    setFormData(prev => ({
-      ...prev,
-      permissions: prev.permissions.includes(permission)
-        ? prev.permissions.filter(p => p !== permission)
-        : [...prev.permissions, permission],
-    }));
+  const calculateStats = () => {
+    setStats({
+      total: users.length,
+      admins: users.filter(u => u.role === "admin").length,
+      users: users.filter(u => u.role !== "admin").length,
+    });
   };
+
+  const handleEditRole = (user: User) => {
+    setSelectedUser(user);
+    setNewRole(user.role || "user");
+    onOpen();
+  };
+
+  const handleUpdateRole = async () => {
+    if (!selectedUser) return;
+
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          updates: { role: newRole },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success(`Role updated to ${newRole}`);
+        onClose();
+        loadUsers();
+      } else {
+        toast.error(data.message || "Failed to update role");
+      }
+    } catch (error) {
+      console.error("Error updating role:", error);
+      toast.error("Failed to update role");
+    }
+  };
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         user.email?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = selectedRole === "all" || user.role === selectedRole;
+    return matchesSearch && matchesRole;
+  });
 
   return (
     <AdminLayout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-red-400" />
-            <div>
-              <h1 className="text-3xl font-bold text-white">Role Management</h1>
-              <p className="text-gray-400">Manage user roles and permissions</p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
+              Role Management
+            </h1>
+            <p className="text-gray-400 mt-2">
+              Manage user roles and permissions
+            </p>
           </div>
           <Button
-            color="primary"
-            startContent={<Plus className="w-5 h-5" />}
-            onPress={handleCreate}
+            startContent={<RefreshCw size={18} />}
+            variant="flat"
+            onPress={loadUsers}
+            isLoading={loading}
           >
-            Create Role
+            Refresh
           </Button>
         </div>
 
-        {/* Stats */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-gradient-to-br from-red-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-red-400 mb-2">{roles.length}</div>
-              <p className="text-gray-400">Total Roles</p>
+          <Card className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-500/20 rounded-lg">
+                  <Users className="w-8 h-8 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Total Users</p>
+                  <p className="text-3xl font-bold text-white">{stats.total}</p>
+                </div>
+              </div>
             </CardBody>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-blue-400 mb-2">
-                {roles.reduce((sum, r) => sum + r.userCount, 0)}
+          <Card className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-red-500/20 rounded-lg">
+                  <Shield className="w-8 h-8 text-red-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Administrators</p>
+                  <p className="text-3xl font-bold text-white">{stats.admins}</p>
+                </div>
               </div>
-              <p className="text-gray-400">Total Users</p>
             </CardBody>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-purple-400 mb-2">
-                {availablePermissions.length}
+          <Card className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-green-500/20 rounded-lg">
+                  <Users className="w-8 h-8 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Regular Users</p>
+                  <p className="text-3xl font-bold text-white">{stats.users}</p>
+                </div>
               </div>
-              <p className="text-gray-400">Permissions</p>
             </CardBody>
           </Card>
         </div>
 
-        {/* Roles Table */}
+        {/* Filters */}
         <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody className="p-6">
-            <Table 
-              aria-label="Roles table"
+          <CardBody>
+            <div className="flex flex-col md:flex-row gap-4">
+              <Input
+                placeholder="Search by name or email..."
+                startContent={<Search size={18} />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1"
+                classNames={{
+                  inputWrapper: "bg-gray-800 border-gray-700",
+                }}
+              />
+              <Select
+                label="Filter by Role"
+                selectedKeys={[selectedRole]}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="w-full md:w-64"
+                classNames={{
+                  trigger: "bg-gray-800 border-gray-700",
+                }}
+              >
+                <SelectItem key="all" value="all">All Roles</SelectItem>
+                <SelectItem key="admin" value="admin">Administrators</SelectItem>
+                <SelectItem key="user" value="user">Regular Users</SelectItem>
+              </Select>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Users Table */}
+        <Card className="bg-gray-900/50 border border-gray-800">
+          <CardHeader className="border-b border-gray-800">
+            <h2 className="text-xl font-semibold">Users by Role</h2>
+          </CardHeader>
+          <CardBody>
+            <Table
+              aria-label="Users table"
               classNames={{
-                wrapper: "bg-transparent",
-                th: "bg-gray-800 text-gray-300",
-                td: "text-gray-400",
+                base: "bg-transparent",
+                wrapper: "bg-transparent shadow-none",
               }}
             >
               <TableHeader>
-                <TableColumn>ROLE</TableColumn>
-                <TableColumn>DESCRIPTION</TableColumn>
-                <TableColumn>PERMISSIONS</TableColumn>
-                <TableColumn>USERS</TableColumn>
+                <TableColumn>USER</TableColumn>
+                <TableColumn>EMAIL</TableColumn>
+                <TableColumn>CURRENT ROLE</TableColumn>
+                <TableColumn>CHARACTERS</TableColumn>
+                <TableColumn>JOINED</TableColumn>
                 <TableColumn>ACTIONS</TableColumn>
               </TableHeader>
-              <TableBody>
-                {roles.map((role) => (
-                  <TableRow key={role.id}>
+              <TableBody
+                emptyContent={loading ? "Loading users..." : "No users found"}
+                isLoading={loading}
+              >
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Chip color={role.color as any} variant="flat" size="sm">
-                          {role.name}
-                        </Chip>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{role.description}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{role.permissions.length} permissions</span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        <span>{role.userCount}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
+                        <Avatar
+                          name={user.name || "User"}
+                          src={user.image || undefined}
                           size="sm"
-                          variant="flat"
-                          color="primary"
-                          isIconOnly
-                          onPress={() => handleEdit(role)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          color="danger"
-                          isIconOnly
-                          onPress={() => handleDelete(role.id)}
-                          isDisabled={role.name === "Administrator" || role.name === "Member"}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        />
+                        <span className="text-gray-300">{user.name || "Unknown"}</span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-gray-400 text-sm">{user.email}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="sm"
+                        variant="flat"
+                        color={user.role === "admin" ? "danger" : "default"}
+                        startContent={user.role === "admin" ? <Shield size={14} /> : undefined}
+                      >
+                        {user.role || "user"}
+                      </Chip>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-gray-300">{user.characterCount}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-gray-400 text-sm">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        color="primary"
+                        startContent={<Edit size={14} />}
+                        onPress={() => handleEditRole(user)}
+                      >
+                        Change Role
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -278,68 +299,85 @@ export default function RolesPage() {
           </CardBody>
         </Card>
 
-        {/* Create/Edit Modal */}
-        <Modal 
-          isOpen={isOpen} 
-          onOpenChange={onOpenChange}
-          size="2xl"
-          scrollBehavior="inside"
-          classNames={{
-            base: "bg-gray-900 border border-gray-800",
-            header: "border-b border-gray-800",
-            footer: "border-t border-gray-800",
-          }}
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader className="text-white">
-                  {selectedRole ? "Edit Role" : "Create New Role"}
-                </ModalHeader>
-                <ModalBody className="py-6">
-                  <div className="space-y-4">
-                    <Input
-                      label="Role Name"
-                      placeholder="Enter role name"
-                      value={formData.name}
-                      onValueChange={(value) => setFormData({ ...formData, name: value })}
-                      variant="bordered"
-                    />
-                    
-                    <Textarea
-                      label="Description"
-                      placeholder="Describe the role's purpose"
-                      value={formData.description}
-                      onValueChange={(value) => setFormData({ ...formData, description: value })}
-                      variant="bordered"
-                    />
+        {/* Role Description Card */}
+        <Card className="bg-gray-900/50 border border-gray-800">
+          <CardHeader className="border-b border-gray-800">
+            <h2 className="text-xl font-semibold">Role Descriptions</h2>
+          </CardHeader>
+          <CardBody className="space-y-4">
+            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="w-5 h-5 text-red-400" />
+                <h3 className="font-semibold text-white">Administrator</h3>
+              </div>
+              <p className="text-sm text-gray-400">
+                Full system access. Can manage users, applications, events, settings, and all admin functions.
+              </p>
+            </div>
 
+            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-5 h-5 text-blue-400" />
+                <h3 className="font-semibold text-white">User</h3>
+              </div>
+              <p className="text-sm text-gray-400">
+                Standard community member. Can submit applications, create characters, and participate in events.
+              </p>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Edit Role Modal */}
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalContent>
+            <ModalHeader>Change User Role</ModalHeader>
+            <ModalBody>
+              {selectedUser && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/50 rounded-lg">
+                    <Avatar
+                      name={selectedUser.name || "User"}
+                      src={selectedUser.image || undefined}
+                      size="lg"
+                    />
                     <div>
-                      <label className="text-sm text-gray-400 mb-2 block">Permissions</label>
-                      <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-3 bg-gray-800/50 rounded-lg">
-                        {availablePermissions.map((permission) => (
-                          <Checkbox
-                            key={permission}
-                            isSelected={formData.permissions.includes(permission)}
-                            onValueChange={() => togglePermission(permission)}
-                          >
-                            <span className="text-sm text-gray-300">{permission}</span>
-                          </Checkbox>
-                        ))}
-                      </div>
+                      <p className="font-semibold text-white">{selectedUser.name}</p>
+                      <p className="text-sm text-gray-400">{selectedUser.email}</p>
                     </div>
                   </div>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Cancel
-                  </Button>
-                  <Button color="primary" onPress={handleSave}>
-                    {selectedRole ? "Update" : "Create"}
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
+
+                  <Select
+                    label="New Role"
+                    selectedKeys={[newRole]}
+                    onChange={(e) => setNewRole(e.target.value)}
+                    classNames={{
+                      trigger: "bg-gray-800 border-gray-700",
+                    }}
+                  >
+                    <SelectItem key="user" value="user">
+                      User - Standard member access
+                    </SelectItem>
+                    <SelectItem key="admin" value="admin">
+                      Administrator - Full system access
+                    </SelectItem>
+                  </Select>
+
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                    <p className="text-xs text-gray-300">
+                      ⚠️ Changing a user's role will immediately affect their access permissions.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="flat" onPress={onClose}>
+                Cancel
+              </Button>
+              <Button color="primary" onPress={handleUpdateRole}>
+                Update Role
+              </Button>
+            </ModalFooter>
           </ModalContent>
         </Modal>
       </div>

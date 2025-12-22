@@ -1,17 +1,190 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { CheckCircle, Target, Users, Heart, Shield, Sparkles, BookOpen, Trophy } from "lucide-react";
+import { Card, CardBody } from "@nextui-org/react";
+
+const highlights = [
+  "Professional staff and management team",
+  "Story-driven immersive roleplay",
+  "Mature and respectful community",
+  "Long-term character development focus",
+  "Multiple career paths and opportunities",
+  "Regular server events and activities",
+];
+
+const coreValues = [
+  {
+    icon: Target,
+    title: "Our Mission",
+    description: "To create the most realistic and immersive FiveM roleplay experience where every player's story matters and contributes to our living, breathing community.",
+    gradient: "from-purple-500 to-indigo-500",
+  },
+  {
+    icon: Heart,
+    title: "Community First",
+    description: "We prioritize our community's wellbeing, fostering an inclusive environment where respect, fairness, and collaboration are at the heart of everything we do.",
+    gradient: "from-pink-500 to-red-500",
+  },
+  {
+    icon: Shield,
+    title: "Professional Standards",
+    description: "Maintaining the highest standards of professionalism through rigorous training programs, accountability systems, and transparent leadership.",
+    gradient: "from-blue-500 to-cyan-500",
+  },
+  {
+    icon: Sparkles,
+    title: "Innovation",
+    description: "Constantly evolving with custom-built systems, cutting-edge technology, and community feedback to deliver unique gameplay experiences.",
+    gradient: "from-yellow-500 to-orange-500",
+  },
+];
+
+const statistics = [
+  { icon: Users, value: "500+", label: "Active Members" },
+  { icon: BookOpen, value: "3+", label: "Years Running" },
+  { icon: Trophy, value: "50+", label: "Staff Team" },
+  { icon: Shield, value: "99.9%", label: "Uptime" },
+];
+
 export function AboutSection() {
   return (
-    <section id="about" className="py-20 px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-          About Aurora Horizon RP
-        </h2>
-        <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
-          Aurora Horizon RP is a premium FiveM community dedicated to realistic, 
-          story-driven roleplay. We pride ourselves on professional management, fair staff, 
-          and a commitment to long-term character development. Whether you&apos;re interested in 
-          law enforcement, emergency services, civilian life, or criminal enterprises, 
-          Aurora Horizon RP provides a mature and immersive environment for your roleplay journey.
-        </p>
+    <section id="about" className="py-24 px-4 bg-gradient-to-b from-black via-gray-900/50 to-black relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.1),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(167,139,250,0.1),transparent_50%)]" />
+      
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <motion.div
+            className="inline-block mb-4 px-4 py-2 bg-purple-600/20 border border-purple-500/50 rounded-full"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <span className="text-purple-300 text-sm font-semibold">Our Story</span>
+          </motion.div>
+          
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white">
+            About <span className="bg-gradient-to-r from-indigo-400 to-purple-400 text-transparent bg-clip-text">Aurora Horizon RP</span>
+          </h2>
+          
+          <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-4xl mx-auto mb-6">
+            Aurora Horizon RP is a premium FiveM community dedicated to realistic, 
+            story-driven roleplay. We pride ourselves on professional management, fair staff, 
+            and a commitment to long-term character development.
+          </p>
+          
+          <p className="text-base md:text-lg text-gray-400 leading-relaxed max-w-3xl mx-auto">
+            Whether you&apos;re interested in law enforcement, emergency services, civilian life, 
+            or criminal enterprises, Aurora Horizon RP provides a mature and immersive environment 
+            for your roleplay journey. Our custom-built CAD system, extensive department structures, 
+            and dedicated community create an unparalleled roleplay experience.
+          </p>
+        </motion.div>
+
+        {/* Core Values Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+        >
+          {coreValues.map((value, index) => {
+            const Icon = value.icon;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+              >
+                <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/40 border border-gray-800 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 h-full">
+                  <CardBody className="p-6">
+                    <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${value.gradient} mb-4`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-3">
+                      {value.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      {value.description}
+                    </p>
+                  </CardBody>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {/* Statistics Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="bg-gradient-to-r from-purple-900/30 via-indigo-900/30 to-purple-900/30 border border-purple-500/30 rounded-2xl p-8 mb-16"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {statistics.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 * index, duration: 0.5 }}
+                  className="text-center"
+                >
+                  <Icon className="w-8 h-8 text-purple-400 mx-auto mb-3" />
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-1">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    {stat.label}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* What Makes Us Special */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+        >
+          <h3 className="text-3xl font-bold text-center text-white mb-8">
+            What Makes Us <span className="bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">Special</span>
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+            {highlights.map((highlight, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.05 * index, duration: 0.5 }}
+                className="flex items-center gap-3 bg-gray-900/50 border border-gray-800 rounded-xl p-4 hover:border-purple-500/50 hover:bg-gray-900/70 transition-all"
+              >
+                <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                <span className="text-gray-300 text-sm font-medium">{highlight}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );

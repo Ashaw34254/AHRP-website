@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 import type { Session } from "next-auth";
@@ -18,8 +18,10 @@ import {
   DropdownMenu,
   DropdownItem,
   Avatar,
+  Badge,
 } from "@nextui-org/react";
-import { ChevronDown, LogOut, LayoutDashboard, Shield } from "lucide-react";
+import { ChevronDown, LogOut, LayoutDashboard, Shield, Sparkles, Users } from "lucide-react";
+import { motion } from "framer-motion";
 
 // Extend session type to include role
 interface ExtendedSession extends Session {
@@ -34,6 +36,15 @@ interface ExtendedSession extends Session {
 export function Header() {
   const { data: session } = useSession() as { data: ExtendedSession | null };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const menuItems = [
     { name: "Home", href: "/" },
@@ -49,7 +60,12 @@ export function Header() {
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
       maxWidth="xl"
-      className="bg-black/80 backdrop-blur-md border-b border-gray-800"
+      className={`transition-all duration-300 ${
+        scrolled
+          ? "bg-black/95 backdrop-blur-xl border-b border-purple-500/30 shadow-lg shadow-purple-500/10"
+          : "bg-black/60 backdrop-blur-md border-b border-gray-800"
+      }`}
+      height="4.5rem"
     >
       {/* Logo/Brand */}
       <NavbarContent>
@@ -58,35 +74,59 @@ export function Header() {
           className="sm:hidden text-white"
         />
         <NavbarBrand>
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-              AHRP
-            </span>
+          <Link href="/" className="flex items-center gap-3">
+            <motion.div
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 400 }}
+            >
+              <Sparkles className="w-5 h-5 text-white" />
+            </motion.div>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-transparent bg-clip-text">
+                Aurora Horizon
+              </span>
+              <span className="text-xs text-gray-400 font-medium hidden sm:block">Roleplay Community</span>
+            </div>
           </Link>
         </NavbarBrand>
       </NavbarContent>
 
       {/* Desktop Navigation */}
-      <NavbarContent className="hidden sm:flex gap-6" justify="center">
+      <NavbarContent className="hidden lg:flex gap-8" justify="center">
         <NavbarItem>
-          <Link href="/#about" className="text-gray-300 hover:text-white transition-colors">
+          <Link 
+            href="/#about" 
+            className="text-gray-300 hover:text-white transition-all duration-200 font-medium hover:scale-105 inline-block"
+          >
             About
           </Link>
         </NavbarItem>
         <NavbarItem>
-          <Link href="/#departments" className="text-gray-300 hover:text-white transition-colors">
+          <Link 
+            href="/#departments" 
+            className="text-gray-300 hover:text-white transition-all duration-200 font-medium hover:scale-105 inline-block"
+          >
             Departments
           </Link>
         </NavbarItem>
         <NavbarItem>
-          <Link href="/#features" className="text-gray-300 hover:text-white transition-colors">
+          <Link 
+            href="/#features" 
+            className="text-gray-300 hover:text-white transition-all duration-200 font-medium hover:scale-105 inline-block"
+          >
             Features
           </Link>
         </NavbarItem>
         <NavbarItem>
-          <Link href="/#join" className="text-gray-300 hover:text-white transition-colors">
-            Join
-          </Link>
+          <Badge content="New" color="secondary" size="sm" className="hidden xl:block">
+            <Link 
+              href="/#join" 
+              className="text-gray-300 hover:text-white transition-all duration-200 font-medium hover:scale-105 inline-block"
+            >
+              Join
+            </Link>
+          </Badge>
         </NavbarItem>
       </NavbarContent>
 
@@ -148,21 +188,24 @@ export function Header() {
             </DropdownMenu>
           </Dropdown>
         ) : (
-          <div className="flex items-center gap-2">
-            <NavbarItem className="hidden md:flex">
+          <div className="flex items-center gap-3">
+            <NavbarItem>
               <Button
+                as="a"
+                href="https://discord.gg/ahrp"
+                target="_blank"
                 variant="light"
-                onClick={() => signIn("discord")}
-                className="text-white"
+                className="text-gray-300 hover:text-white font-medium hidden md:flex"
+                startContent={<Users className="w-4 h-4" />}
               >
-                Sign In
+                Discord
               </Button>
             </NavbarItem>
             <NavbarItem>
               <Button
-                color="primary"
-                variant="shadow"
                 onClick={() => signIn("discord")}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70 transition-all"
+                endContent={<Sparkles className="w-4 h-4" />}
               >
                 Get Started
               </Button>

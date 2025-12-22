@@ -113,37 +113,90 @@ model Character {
 
 model Application {
   id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String?  // Optional - for logged-in users
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  department    String   // POLICE, FIRE, EMS
-  position      String?  // Specific role applying for
+  // Application Type
+  applicationType String // whitelist, police, ems, fire
   
-  status        String   @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, DENIED
+  // Dynamic Form Data - JSON object with all form field values
+  formData      String   // JSON string of all submitted field values
   
-  // Application Content
-  characterName String
-  experience    String?  // Previous RP experience
-  motivation    String?  // Why join department
-  availability  String?  // When can you play
-  references    String?  // References or recommendations
-  documents     String?  // JSON array of document URLs
+  // Status & Review
+  status        String   @default("DRAFT") // DRAFT, PENDING, UNDER_REVIEW, APPROVED, REJECTED
+  isDraft       Boolean  @default(true)    // Quick flag for drafts
   
-  // Interview
-  interviewDate DateTime?
-  interviewNotes String?
-  
-  // Review
+  // Review Information
   reviewedBy    String?  // Admin user ID
   reviewedAt    DateTime?
   reviewNotes   String?
+  feedback      String?  // Feedback for applicant
+  
+  // Metadata
+  submittedDate DateTime?
+  lastSavedAt   DateTime @default(now())  // Auto-save timestamp
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([status])
+  @@index([applicationType])
+  @@index([isDraft])
+  @@index([userId, isDraft])
+}
+
+// ============================================
+// APPLICATION FORM CONFIGURATION
+// ============================================
+
+model ApplicationFormConfig {
+  id            String   @id @default(cuid())
+  name          String   // whitelist, police, ems, fire
+  title         String   // Display title
+  description   String?  // Form description
+  isActive      Boolean  @default(true)
+  
+  fields        ApplicationFormField[]
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
-  @@index([userId])
-  @@index([status])
-  @@index([department])
+  @@unique([name])
+}
+
+model ApplicationFormField {
+  id            String   @id @default(cuid())
+  formConfigId  String
+  formConfig    ApplicationFormConfig @relation(fields: [formConfigId], references: [id], onDelete: Cascade)
+  
+  // Field Configuration
+  fieldName     String   // Unique identifier (e.g., "discordUsername")
+  label         String   // Display label
+  fieldType     String   // text, textarea, select, radio, checkbox, number, email
+  placeholder   String?  // Placeholder text
+  helpText      String?  // Help text below field
+  
+  // Validation
+  required      Boolean  @default(false)
+  minLength     Int?
+  maxLength     Int?
+  pattern       String?  // Regex pattern for validation
+  
+  // Options for select/radio/checkbox
+  options       String?  // JSON array of options
+  
+  // Layout
+  order         Int      @default(0)
+  width         String   @default("full") // full, half
+  section       String?  // Group fields into sections
+  
+  // Conditional Logic
+  conditionalLogic String? // JSON: {show: true/false, conditions: [{field: "fieldName", operator: "equals", value: "x"}], operator: "AND"/"OR"}
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([formConfigId])
+  @@index([order])
 }
 
 // ============================================
@@ -564,6 +617,22 @@ model Citizen {
   // Status
   isWanted    Boolean   @default(false)
   isMissing   Boolean   @default(false)
+  flags       String?   // JSON array of flags: ["armed", "violent", "gang", "caution", "mental", "suicidal"]
+  notes       String?   // JSON array of officer notes with timestamps
+  
+  // Additional Information
+  aliases     String?   // JSON array of known aliases
+  tattoos     String?   // Text description of tattoos/scars/marks
+  image       String?   // Photo URL
+  
+  // Emergency & Medical
+  emergencyContact String?  // JSON object: {name, relationship, phone}
+  medicalInfo     String?   // JSON array of medical alerts: [{type: "allergy/medication/condition", detail: "..."}]
+  
+  // Gang Information
+  gangAffiliation String?  // Gang name
+  gangStatus      String?  // "verified", "suspected", "former"
+  gangNotes       String?  // Additional gang intelligence
   
   // Licenses
   driversLicense Boolean @default(false)
@@ -1517,4 +1586,23 @@ model FiveMEvent {
   createdAt   DateTime @default(now())
   
   @@index([eventType, createdAt])
+}
+
+// ============================================
+// ADMIN SETTINGS
+// ============================================
+
+model Setting {
+  id          String   @id @default(cuid())
+  
+  category    String   // general, auth, notifications, cad, whitelist
+  key         String   @unique
+  value       String   // JSON value
+  description String?
+  dataType    String   @default("string") // string, number, boolean, json
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([category])
 }

@@ -1,59 +1,54 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, Avatar, Chip, Button, Badge } from "@nextui-org/react";
-import { Calendar, MapPin, Shield, Star, Award, Crown, Users, Clock, Plus, Edit } from "lucide-react";
+import { Card, CardBody, Avatar, Chip, Button, Badge, Skeleton } from "@nextui-org/react";
+import { Calendar, MapPin, Clock, Plus, Edit } from "lucide-react";
 import Link from "next/link";
+import { toast } from "@/lib/toast";
 
-// Mock character data - will be fetched from API in production
-const mockCharacters = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-    department: "POLICE",
-    rank: "Sergeant",
-    isActive: true,
-    playTime: 1200, // minutes
-  },
-  {
-    id: "2",
-    firstName: "Jane",
-    lastName: "Smith",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane",
-    department: "FIRE",
-    rank: "Firefighter",
-    isActive: false,
-    playTime: 800,
-  },
-  {
-    id: "3",
-    firstName: "Mike",
-    lastName: "Johnson",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-    department: "CIVILIAN",
-    occupation: "Mechanic",
-    isActive: false,
-    playTime: 450,
-  },
-];
-
-// Badge definitions
-const availableBadges = {
-  veteran: { icon: Crown, label: "Veteran", color: "text-yellow-400", description: "6+ months member" },
-  leader: { icon: Star, label: "Leader", color: "text-purple-400", description: "Department leadership" },
-  active: { icon: Award, label: "Active", color: "text-green-400", description: "100+ hours" },
-  helpful: { icon: Users, label: "Helpful", color: "text-blue-400", description: "Community helper" },
-};
+interface DashboardData {
+  characters: any[];
+  applications: any[];
+  events: any[];
+  stats: {
+    totalCharacters: number;
+    activeCharacters: number;
+    pendingApplications: number;
+    upcomingEvents: number;
+  };
+}
 
 export default function DashboardPage() {
   const { data: session } = useSession();
   const user = session?.user;
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock user badges - will come from database
-  const userBadges = ["veteran", "active", "helpful"];
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/dashboard/overview");
+      const result = await res.json();
+      
+      if (result.success) {
+        setData(result);
+      } else {
+        toast.error("Failed to load dashboard");
+      }
+    } catch (error) {
+      console.error("Error loading dashboard:", error);
+      toast.error("Failed to load dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const bannerImage = (user as any)?.bannerImage || "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=300&fit=crop";
 
   const getDepartmentColor = (dept: string) => {
@@ -102,24 +97,6 @@ export default function DashboardPage() {
                     {user?.name || "Anonymous Player"}
                   </h2>
                   <Chip color="success" variant="flat">Active</Chip>
-                  
-                  {/* Profile Badges */}
-                  <div className="flex gap-2">
-                    {userBadges.map((badgeKey) => {
-                      const badge = availableBadges[badgeKey as keyof typeof availableBadges];
-                      const BadgeIcon = badge.icon;
-                      return (
-                        <Badge key={badgeKey} content="" color="warning" size="sm" placement="bottom-right">
-                          <div 
-                            className={`p-2 rounded-lg bg-gray-800/50 border border-gray-700 ${badge.color} cursor-help`}
-                            title={`${badge.label}: ${badge.description}`}
-                          >
-                            <BadgeIcon className="w-5 h-5" />
-                          </div>
-                        </Badge>
-                      );
-                    })}
-                  </div>
                 </div>
                 
                 <p className="text-gray-400 mb-2">{user?.email}</p>
@@ -132,7 +109,9 @@ export default function DashboardPage() {
                 <div className="flex flex-wrap gap-4 text-sm text-gray-400">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    <span suppressHydrationWarning>Joined {new Date().toLocaleDateString()}</span>
+                    <span suppressHydrationWarning>
+                      Joined {(user as any)?.createdAt ? new Date((user as any).createdAt).toLocaleDateString() : 'Recently'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
@@ -152,126 +131,197 @@ export default function DashboardPage() {
           </CardBody>
         </Card>
 
+        {/* Stats Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="bg-gray-900/50 border border-gray-800">
+                <CardBody className="text-center p-6">
+                  <Skeleton className="h-10 w-16 mx-auto mb-2 rounded-lg" />
+                  <Skeleton className="h-4 w-32 mx-auto rounded-lg" />
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="bg-gradient-to-br from-indigo-900/30 to-gray-900/50 border border-gray-800">
+              <CardBody className="text-center p-6">
+                <div className="text-4xl font-bold text-indigo-400 mb-2">
+                  {data?.stats.totalCharacters || 0}
+                </div>
+                <p className="text-gray-400">Characters</p>
+              </CardBody>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-900/30 to-gray-900/50 border border-gray-800">
+              <CardBody className="text-center p-6">
+                <div className="text-4xl font-bold text-green-400 mb-2">
+                  {data?.stats.activeCharacters || 0}
+                </div>
+                <p className="text-gray-400">Active</p>
+              </CardBody>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-amber-900/30 to-gray-900/50 border border-gray-800">
+              <CardBody className="text-center p-6">
+                <div className="text-4xl font-bold text-amber-400 mb-2">
+                  {data?.stats.pendingApplications || 0}
+                </div>
+                <p className="text-gray-400">Pending Apps</p>
+              </CardBody>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-900/30 to-gray-900/50 border border-gray-800">
+              <CardBody className="text-center p-6">
+                <div className="text-4xl font-bold text-purple-400 mb-2">
+                  {data?.stats.upcomingEvents || 0}
+                </div>
+                <p className="text-gray-400">Upcoming Events</p>
+              </CardBody>
+            </Card>
+          </div>
+        )}
+
         {/* Character Quick Cards */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-white">My Characters</h3>
-            <Button
-              as={Link}
-              href="/dashboard/characters/new"
-              color="primary"
-              startContent={<Plus className="w-4 h-4" />}
-            >
-              New Character
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                as={Link}
+                href="/dashboard/characters/new"
+                color="success"
+                startContent={<Plus className="w-4 h-4" />}
+              >
+                Create Character
+              </Button>
+              <Button
+                as={Link}
+                href="/dashboard/characters"
+                color="primary"
+                variant="flat"
+              >
+                View All
+              </Button>
+            </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockCharacters.map((character) => (
-              <Link key={character.id} href={`/dashboard/characters/${character.id}`}>
-                <Card 
-                  className={`border-2 ${getDepartmentColor(character.department)} hover:scale-105 transition-transform cursor-pointer`}
-                  isPressable
-                >
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="bg-gray-900/50 border border-gray-800">
                   <CardBody className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="relative">
-                      <Avatar
-                        src={character.image}
-                        name={`${character.firstName} ${character.lastName}`}
-                        className="w-16 h-16"
-                        isBordered
-                      />
-                      {character.isActive && (
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-gray-900 rounded-full"></div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-lg font-bold text-white truncate">
-                        {character.firstName} {character.lastName}
-                      </h4>
-                      <p className="text-sm text-gray-400 mb-2">
-                        {character.rank || character.occupation || "Civilian"}
-                      </p>
-                      
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{Math.floor(character.playTime / 60)}h</span>
-                        </div>
-                        <Chip size="sm" variant="flat" color={
-                          character.department === "POLICE" ? "primary" :
-                          character.department === "FIRE" ? "danger" :
-                          character.department === "EMS" ? "success" : "default"
-                        }>
-                          {character.department}
-                        </Chip>
+                    <div className="flex items-start gap-4">
+                      <Skeleton className="w-16 h-16 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-32 rounded-lg" />
+                        <Skeleton className="h-4 w-24 rounded-lg" />
+                        <Skeleton className="h-4 w-full rounded-lg" />
                       </div>
                     </div>
-                  </div>
-                </CardBody>
-              </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-gradient-to-br from-indigo-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-indigo-400 mb-2">3</div>
-              <p className="text-gray-400">Active Characters</p>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-green-400 mb-2">2</div>
-              <p className="text-gray-400">Applications Approved</p>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-900/30 to-gray-900/50 border border-gray-800">
-            <CardBody className="text-center p-6">
-              <div className="text-4xl font-bold text-purple-400 mb-2">47</div>
-              <p className="text-gray-400">Hours Played</p>
-            </CardBody>
-          </Card>
-        </div>
-
-        {/* Recent Activity */}
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody className="p-6">
-            <h3 className="text-xl font-bold text-white mb-4">Recent Activity</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-white">Character &quot;John Doe&quot; approved</p>
-                  <p className="text-sm text-gray-400">2 hours ago</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-white">Application submitted</p>
-                  <p className="text-sm text-gray-400">1 day ago</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-white">Profile updated</p>
-                  <p className="text-sm text-gray-400">3 days ago</p>
-                </div>
-              </div>
+                  </CardBody>
+                </Card>
+              ))}
             </div>
-          </CardBody>
-        </Card>
+          ) : data?.characters && data.characters.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {data.characters.slice(0, 3).map((character) => (
+                <Link key={character.id} href={`/dashboard/characters/${character.id}`}>
+                  <Card 
+                    className={`border-2 ${getDepartmentColor(character.officer?.department || "CIVILIAN")} hover:scale-105 transition-transform cursor-pointer`}
+                    isPressable
+                  >
+                    <CardBody className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className="relative">
+                          <Avatar
+                            src={character.image || undefined}
+                            name={`${character.firstName} ${character.lastName}`}
+                            className="w-16 h-16"
+                            isBordered
+                          />
+                          {character.officer?.dutyStatus === "AVAILABLE" && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-gray-900 rounded-full"></div>
+                          )}
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-lg font-bold text-white truncate">
+                            {character.firstName} {character.lastName}
+                          </h4>
+                          <p className="text-sm text-gray-400 mb-2">
+                            {character.officer?.rank || character.occupation || "Civilian"}
+                          </p>
+                          
+                          <div className="flex items-center gap-3 text-xs">
+                            <Chip size="sm" variant="flat" color={
+                              character.officer?.department === "POLICE" ? "primary" :
+                              character.officer?.department === "FIRE" ? "danger" :
+                              character.officer?.department === "EMS" ? "success" : "default"
+                            }>
+                              {character.officer?.department || character.department || "CIVILIAN"}
+                            </Chip>
+                          </div>
+                        </div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <Card className="bg-gray-900/50 border border-gray-800">
+              <CardBody className="text-center py-12">
+                <p className="text-gray-400 mb-4">No characters yet</p>
+                <Button
+                  as={Link}
+                  href="/dashboard/characters"
+                  color="primary"
+                  startContent={<Plus className="w-4 h-4" />}
+                >
+                  Create Your First Character
+                </Button>
+              </CardBody>
+            </Card>
+          )}
+        </div>
+
+        {/* Recent Applications */}
+        {data?.applications && data.applications.length > 0 && (
+          <Card className="bg-gray-900/50 border border-gray-800">
+            <CardBody className="p-6">
+              <h3 className="text-xl font-bold text-white mb-4">Recent Applications</h3>
+              <div className="space-y-3">
+                {data.applications.map((app) => (
+                  <Link key={app.id} href={`/dashboard/applications/${app.id}`}>
+                    <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer">
+                      <div className={`w-2 h-2 rounded-full ${
+                        app.status === 'approved' ? 'bg-green-400' :
+                        app.status === 'rejected' ? 'bg-red-400' :
+                        app.status === 'in_review' ? 'bg-blue-400' :
+                        'bg-amber-400'
+                      }`}></div>
+                      <div className="flex-1">
+                        <p className="text-white">{app.formConfig?.title || 'Application'}</p>
+                        <p className="text-sm text-gray-400">
+                          {new Date(app.submittedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Chip size="sm" variant="flat" color={
+                        app.status === 'approved' ? 'success' :
+                        app.status === 'rejected' ? 'danger' :
+                        app.status === 'in_review' ? 'primary' : 'warning'
+                      }>
+                        {app.status}
+                      </Chip>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
