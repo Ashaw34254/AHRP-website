@@ -13,6 +13,8 @@ import {
   Textarea,
   Divider,
   Avatar,
+  Card,
+  CardBody,
 } from "@nextui-org/react";
 import {
   MapPin,
@@ -24,6 +26,9 @@ import {
   X,
   CheckCircle,
   AlertTriangle,
+  Flame,
+  Heart,
+  Radiation,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "@/lib/toast";
@@ -40,9 +45,17 @@ interface Call {
   description: string;
   caller: string | null;
   callerPhone: string | null;
+  department: string | null;
   createdAt: string;
   dispatchedAt: string | null;
   closedAt: string | null;
+  // FIRE-specific fields
+  fireSize?: string | null;
+  hazmat?: boolean;
+  // EMS-specific fields
+  patientAge?: number | null;
+  patientGender?: string | null;
+  consciousness?: string | null;
   units: Array<{
     id: string;
     callsign: string;
@@ -352,6 +365,84 @@ export function CADCallDetails({ callId, isOpen, onClose, onUpdate }: CADCallDet
               <h4 className="text-sm font-semibold text-gray-400 mb-2">Description</h4>
               <p className="text-white">{call.description}</p>
             </div>
+
+            {/* Department-Specific Fields */}
+            {call.department === "FIRE" && (call.fireSize || call.hazmat) && (
+              <Card className="bg-red-900/20 border border-red-700/30">
+                <CardBody className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Flame className="w-5 h-5 text-red-500" />
+                    <h4 className="text-sm font-semibold text-red-400">Fire Department Details</h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {call.fireSize && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Fire Size</p>
+                        <Chip size="sm" color="danger" variant="flat">
+                          {call.fireSize}
+                        </Chip>
+                      </div>
+                    )}
+                    {call.hazmat && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">HAZMAT Status</p>
+                        <Chip 
+                          size="sm" 
+                          color="danger" 
+                          variant="solid"
+                          startContent={<Radiation className="w-3 h-3" />}
+                        >
+                          HAZMAT Response Required
+                        </Chip>
+                      </div>
+                    )}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
+            {call.department === "EMS" && (call.patientAge || call.patientGender || call.consciousness) && (
+              <Card className="bg-green-900/20 border border-green-700/30">
+                <CardBody className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Heart className="w-5 h-5 text-green-500" />
+                    <h4 className="text-sm font-semibold text-green-400">Patient Information</h4>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    {call.patientAge && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Age</p>
+                        <p className="text-white font-semibold">{call.patientAge} years</p>
+                      </div>
+                    )}
+                    {call.patientGender && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Gender</p>
+                        <Chip size="sm" color="success" variant="flat">
+                          {call.patientGender}
+                        </Chip>
+                      </div>
+                    )}
+                    {call.consciousness && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Consciousness</p>
+                        <Chip 
+                          size="sm" 
+                          color={
+                            call.consciousness === "UNRESPONSIVE" ? "danger" :
+                            call.consciousness === "PAIN" ? "warning" :
+                            "success"
+                          }
+                          variant="flat"
+                        >
+                          {call.consciousness.replace(/_/g, " ")}
+                        </Chip>
+                      </div>
+                    )}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
 
             <Divider className="bg-gray-800" />
 

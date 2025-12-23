@@ -32,6 +32,7 @@ model User {
   // CAD Relations
   officers      Officer[]
   createdCalls  Call[]    @relation("CallCreator")
+  callTemplates CallTemplate[] @relation("TemplateCreator")
   characters    Character[]
   
   // Community Features
@@ -620,6 +621,16 @@ model Officer {
   isActive    Boolean    @default(true)
   dutyStatus  String     @default("OUT_OF_SERVICE") // AVAILABLE, BUSY, ENROUTE, ON_SCENE, OUT_OF_SERVICE, PANIC
   
+  // Tactical Team Fields
+  isTactical  Boolean    @default(false)
+  tacticalTeam String?   // CIRT, SOG
+  tacticalRole String?   // TEAM_LEADER, BREACHER, SNIPER, NEGOTIATOR, MEDIC, K9_HANDLER, EXPLOSIVES, ENTRY_TEAM
+  qualifications String? // JSON array of certifications
+  lastTraining DateTime?
+  responseTime Int?      // Expected response time in minutes
+  equipment    String?   // JSON array of assigned equipment
+  phone        String?
+  
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -628,22 +639,30 @@ model Officer {
   unit        Unit?      @relation(fields: [unitId], references: [id])
   callNotes   CallNote[]
   plateScans  PlateScan[]
+  tacticalCallouts TacticalCallout[] @relation("TacticalCalloutOfficer")
 }
 
 model Unit {
   id          String     @id @default(cuid())
   callsign    String     @unique
   department  String     // POLICE, FIRE, EMS
+  unitType    String?    // PATROL, TRAFFIC, K9, SWAT, ENGINE, LADDER, HAZMAT, AMBULANCE, MEDIC, etc.
   status      String     @default("OUT_OF_SERVICE") // AVAILABLE, BUSY, ENROUTE, ON_SCENE, OUT_OF_SERVICE, PANIC
+  statusCode  String?    // Department-specific status codes (10-8, RESPONDING, PATIENT_CONTACT, etc.)
   
   // Current assignment
   callId      String?
   call        Call?      @relation(fields: [callId], references: [id])
   
-  // Location
+  // Location & Zone
   location    String?
   latitude    Float?
   longitude   Float?
+  zone        String?    // Geographic zone assignment (NORTH, SOUTH, EAST, WEST, CENTRAL)
+  
+  // Response tracking
+  responseTime Int?      // Minutes to respond to scene
+  lastStatusChange DateTime? // When status last changed
   
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -651,6 +670,7 @@ model Unit {
   // Relations
   officers    Officer[]
   plateScans  PlateScan[]
+  equipment   Equipment[] @relation("EquipmentUnit")
 }
 
 // ============================================
@@ -662,19 +682,44 @@ model Call {
   callNumber  String       @unique // Auto-generated CAD number (e.g., 2025-001234)
   
   type        String       // TRAFFIC_STOP, SUSPICIOUS_ACTIVITY, THEFT, ROBBERY, ASSAULT, etc.
-  priority    String       @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  priority    String       @default("MEDIUM") // Department-specific priorities
   status      String       @default("PENDING") // PENDING, DISPATCHED, ACTIVE, CLOSED, CANCELLED
+  department  String?      // POLICE, FIRE, EMS - which department owns this call
   
-  // Location
+  // Location & Zone
   location    String
   latitude    Float?
   longitude   Float?
   postal      String?
+  zone        String?      // Geographic zone (NORTH, SOUTH, EAST, WEST, CENTRAL)
   
   // Details
   description String
   caller      String?
   callerPhone String?
+  
+  // FIRE Department Specific Fields
+  fireSize    String?      // SMALL, MEDIUM, LARGE, MAJOR
+  hazmat      Boolean      @default(false) // HAZMAT involvement flag
+  alarmLevel  String?      // FIRST_ALARM, SECOND_ALARM, THIRD_ALARM
+  
+  // EMS Department Specific Fields
+  patientAge  Int?
+  patientGender String?    // MALE, FEMALE, OTHER, UNKNOWN
+  consciousness String?    // ALERT, VERBAL, PAIN, UNRESPONSIVE
+  
+  // Response Time Tracking
+  responseTimeTarget Int? // Target response time in minutes
+  actualResponseTime Int? // Actual response time in minutes
+  
+  // Cross-Department Coordination
+  requiresMutualAid Boolean @default(false)
+  notifiedDepartments String? // JSON array of departments notified
+  
+  // Escalation
+  escalated   Boolean      @default(false)
+  escalatedFrom String?    // Original call ID if escalated
+  escalatedTo String?      // Priority level escalated to
   
   // Timestamps
   createdAt   DateTime     @default(now())
@@ -689,9 +734,12 @@ model Call {
   units       Unit[]
   notes       CallNote[]
   attachments CallAttachment[]
+  tacticalCallouts TacticalCallout[]
   
   @@index([status, priority])
   @@index([createdAt])
+  @@index([department])
+  @@index([zone])
 }
 
 model CallNote {
@@ -706,6 +754,35 @@ model CallNote {
   createdAt DateTime @default(now())
 }
 
+// Tactical Team Callout System
+model TacticalCallout {
+  id            String   @id @default(cuid())
+  calloutTime   DateTime @default(now())
+  incidentType  String   // HOSTAGE, BARRICADED_SUSPECT, ACTIVE_SHOOTER, HIGH_RISK_WARRANT, etc.
+  location      String
+  priority      String   @default("URGENT") // ROUTINE, URGENT, CRITICAL
+  status        String   @default("PENDING") // PENDING, RESPONDING, ON_SCENE, RESOLVED
+  team          String   // CIRT, SOG, BOTH
+  
+  requestedBy   String
+  approvedBy    String?
+  briefing      String?  // Tactical briefing notes
+  stagingArea   String?  // Designated staging location
+  
+  // Relations
+  officers      Officer[] @relation("TacticalCalloutOfficer")
+  
+  // Associated CAD call (if any)
+  callId        String?
+  call          Call?    @relation(fields: [callId], references: [id])
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([status])
+  @@index([team])
+}
+
 model CallAttachment {
   id        String   @id @default(cuid())
   callId    String
@@ -716,6 +793,58 @@ model CallAttachment {
   type      String   // image, video, document
   createdAt DateTime @default(now())
 }
+
+model CallTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  callType    String   // Pre-filled call type
+  priority    String   // Default priority
+  department  String   // POLICE, FIRE, EMS
+  
+  // Pre-filled content
+  descriptionTemplate String // Template text with placeholders
+  
+  // Usage tracking
+  usageCount  Int      @default(0)
+  isPublic    Boolean  @default(false) // Available to all users in department
+  
+  createdById String
+  createdBy   User     @relation("TemplateCreator", fields: [createdById], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([department])
+}
+
+model Equipment {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // K9_UNIT, HELICOPTER, FOAM_UNIT, DEFIBRILLATOR, etc.
+  department  String   // POLICE, FIRE, EMS
+  status      String   @default("AVAILABLE") // AVAILABLE, IN_USE, MAINTENANCE, OUT_OF_SERVICE
+  
+  // Assignment
+  assignedToUnitId String?
+  assignedToUnit   Unit?    @relation("EquipmentUnit", fields: [assignedToUnitId], references: [id])
+  
+  // Location
+  location    String?
+  
+  // Tracking
+  lastInspection DateTime?
+  nextInspection DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([department])
+  @@index([status])
+}
+
+// Add Equipment relation to Unit model (Note: This requires updating Unit model)
+// Unit model needs: equipment Equipment[] @relation("EquipmentUnit")
 
 // ============================================
 // CIVIL RECORDS
@@ -1591,37 +1720,6 @@ model K9Deployment {
   @@index([k9UnitId])
 }
 
-model TacticalCallout {
-  id          String   @id @default(cuid())
-  
-  calloutNumber String  @unique
-  callId        String?
-  
-  type        String   // SWAT, CRISIS_NEGOTIATION, BOMB_SQUAD
-  reason      String
-  location    String
-  
-  priority    String   @default("HIGH") // HIGH, CRITICAL
-  status      String   @default("PENDING") // PENDING, ENROUTE, ON_SCENE, RESOLVED, CANCELLED
-  
-  requestedBy String
-  commander   String?
-  
-  unitsDeployed String? // JSON array
-  
-  activatedAt DateTime @default(now())
-  arrivedAt   DateTime?
-  resolvedAt  DateTime?
-  
-  outcome     String?
-  notes       String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@index([status])
-}
-
 // ============================================
 // MDT MESSAGING & ALERTS
 // ============================================
@@ -1723,22 +1821,6 @@ model RecordsRequest {
 // QUICK ACTIONS & TEMPLATES
 // ============================================
 
-model CallTemplate {
-  id          String   @id @default(cuid())
-  
-  name        String
-  type        String   // Pre-filled call type
-  priority    String
-  
-  descriptionTemplate String
-  
-  department  String?  // null for universal
-  isActive    Boolean  @default(true)
-  
-  createdBy   String
-  createdAt   DateTime @default(now())
-}
-
 model QuickAction {
   id          String   @id @default(cuid())
   
@@ -1813,4 +1895,49 @@ model Setting {
   updatedAt   DateTime @updatedAt
   
   @@index([category])
+}
+
+model DepartmentSettings {
+  id          String   @id @default(cuid())
+  
+  department  String   @unique // POLICE, FIRE, EMS
+  
+  // Basic Settings
+  enabled     Boolean  @default(true)
+  maxUnits    Int      @default(20)
+  requireCertification Boolean @default(true)
+  autoApprove Boolean  @default(false)
+  allowRecruitment Boolean @default(true)
+  minPlaytime Int      @default(10)
+  discordRole String?
+  
+  // Content
+  description String?
+  homepageContent String? // Rich text HTML
+  motto       String?
+  
+  // Theme (JSON)
+  theme       String   // JSON object with theme settings
+  
+  // Structure (JSON arrays)
+  ranks       String   @default("[]") // JSON array of rank objects
+  members     String   @default("[]") // JSON array of member objects
+  
+  // Dashboard Content (JSON arrays)
+  announcements String  @default("[]") // JSON array of announcement objects
+  events        String  @default("[]") // JSON array of event objects
+  news          String  @default("[]") // JSON array of news objects
+  quickStats    String  @default("[]") // JSON array of quick stat objects
+  
+  // Department Pages (JSON arrays)
+  leadership    String  @default("[]") // JSON array of leadership profiles
+  roster        String  @default("[]") // JSON array of roster entries
+  sops          String  @default("[]") // JSON array of SOP documents
+  stations      String  @default("[]") // JSON array of station locations
+  training      String  @default("[]") // JSON array of training programs
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([department])
 }

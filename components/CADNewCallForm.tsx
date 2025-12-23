@@ -1,42 +1,90 @@
 "use client";
 
 import { Card, CardBody, CardHeader, Button, Input, Textarea, Select, SelectItem } from "@nextui-org/react";
-import { Plus, MapPin, Phone, AlertTriangle } from "lucide-react";
+import { Plus, MapPin, Phone, AlertTriangle, Flame, Heart } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/lib/toast";
 import { useSession } from "next-auth/react";
-import { VIC_CALL_TYPES, getCallTypeDisplay } from "@/lib/victoria-police-config";
+import { VIC_CALL_TYPES } from "@/lib/victoria-police-config";
+import { 
+  DEPARTMENT_PRIORITIES, 
+  getUnitTypesByDepartment, 
+  getSuggestedUnits, 
+  shouldNotifyDepartments,
+  getZoneByPostcode,
+  type Department
+} from "@/lib/department-config";
 
 const CALL_TYPES = VIC_CALL_TYPES;
 
-const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-
 interface CADNewCallFormProps {
   onCallCreated?: () => void;
+  department?: Department;
 }
 
-export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
+export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewCallFormProps) {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   
+  // Get department-specific priorities
+  const departmentPriorities = DEPARTMENT_PRIORITIES[department];
+  const defaultPriority = departmentPriorities[1]?.value || "MEDIUM"; // Use second priority as default
+  
   const [formData, setFormData] = useState({
     type: "",
-    priority: "MEDIUM",
+    priority: defaultPriority,
     location: "",
     postal: "",
     description: "",
     caller: "",
     callerPhone: "",
+    // Department-specific fields
+    fireSize: "", // FIRE only
+    hazmat: false, // FIRE only
+    patientAge: "", // EMS only
+    patientGender: "", // EMS only
+    consciousness: "", // EMS only
   });
 
-  const allCallTypes = [
-    ...CALL_TYPES.POLICE,
-    ...CALL_TYPES.FIRE,
-    ...CALL_TYPES.EMS,
-    "MUTUAL_AID",
-    "OTHER"
-  ].filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
+  // Get call types based on department
+  const departmentCallTypes = CALL_TYPES[department] || [];
+
+  // Department-specific configuration
+  const getDepartmentConfig = () => {
+    switch (department) {
+      case "POLICE":
+        return {
+          icon: AlertTriangle,
+          color: "primary",
+          title: "Create Police Call",
+          buttonText: "New Police Call",
+        };
+      case "FIRE":
+        return {
+          icon: Flame,
+          color: "danger",
+          title: "Create Fire Call",
+          buttonText: "New Fire Call",
+        };
+      case "EMS":
+        return {
+          icon: Heart,
+          color: "success",
+          title: "Create EMS Call",
+          buttonText: "New EMS Call",
+        };
+      default:
+        return {
+          icon: AlertTriangle,
+          color: "primary",
+          title: "Create New Call",
+          buttonText: "New Call",
+        };
+    }
+  };
+
+  const config = getDepartmentConfig();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,11 +102,39 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
     setLoading(true);
 
     try {
+      // Get suggested units and response time target
+      const suggestedUnits = getSuggestedUnits(formData.type);
+      const responseTarget = departmentPriorities.find(p => p.value === formData.priority)?.responseTime || 15;
+      const zone = formData.postal ? getZoneByPostcode(formData.postal) : null;
+      const notifyDepts = shouldNotifyDepartments(formData.type);
+      
       const response = await fetch("/api/cad/calls", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
+          type: formData.type,
+          priority: formData.priority,
+          location: formData.location,
+          postal: formData.postal,
+          description: formData.description,
+          caller: formData.caller,
+          callerPhone: formData.callerPhone,
+          department: department,
+          zone: zone?.id,
+          responseTimeTarget: responseTarget,
+          requiresMutualAid: notifyDepts.length > 0,
+          notifiedDepartments: notifyDepts.length > 0 ? JSON.stringify(notifyDepts) : null,
+          // FIRE-specific fields
+          ...(department === "FIRE" && {
+            fireSize: formData.fireSize || null,
+            hazmat: formData.hazmat,
+          }),
+          // EMS-specific fields
+          ...(department === "EMS" && {
+            patientAge: formData.patientAge ? parseInt(formData.patientAge) : null,
+            patientGender: formData.patientGender || null,
+            consciousness: formData.consciousness || null,
+          }),
           createdById: session.user.id,
         }),
       });
@@ -71,15 +147,34 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
       
       toast.success(`Call ${data.call.callNumber} created successfully`);
       
+      // Notify if mutual aid is required
+      if (notifyDepts.length > 0) {
+        toast.info(`Mutual aid request sent to: ${notifyDepts.join(", ")}`, {
+          duration: 5000,
+        });
+      }
+      
+      // Suggest units
+      if (suggestedUnits.length > 0) {
+        toast.info(`Suggested units: ${suggestedUnits.join(", ")}`, {
+          duration: 4000,
+        });
+      }
+      
       // Reset form
       setFormData({
         type: "",
-        priority: "MEDIUM",
+        priority: defaultPriority,
         location: "",
         postal: "",
         description: "",
         caller: "",
         callerPhone: "",
+        fireSize: "",
+        hazmat: false,
+        patientAge: "",
+        patientGender: "",
+        consciousness: "",
       });
       
       setIsOpen(false);
@@ -96,13 +191,14 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
   };
 
   if (!isOpen) {
+    const Icon = config.icon;
     return (
       <Button
-        color="primary"
-        startContent={<Plus className="w-4 h-4" />}
+        color={config.color as any}
+        startContent={<Icon className="w-4 h-4" />}
         onClick={() => setIsOpen(true)}
       >
-        New Call
+        {config.buttonText}
       </Button>
     );
   }
@@ -110,7 +206,7 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
   return (
     <Card className="bg-gray-900/50 border border-gray-800">
       <CardHeader className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-white">Create New Call</h3>
+        <h3 className="text-lg font-semibold text-white">{config.title}</h3>
         <Button
           size="sm"
           variant="light"
@@ -129,7 +225,7 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               isRequired
             >
-              {allCallTypes.map((type) => (
+              {departmentCallTypes.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type.replace(/_/g, " ")}
                 </SelectItem>
@@ -142,10 +238,11 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
               value={formData.priority}
               onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
               isRequired
+              description={`Target response: ${departmentPriorities.find(p => p.value === formData.priority)?.responseTime || 15} min`}
             >
-              {PRIORITIES.map((priority) => (
-                <SelectItem key={priority} value={priority}>
-                  {priority}
+              {departmentPriorities.map((priority) => (
+                <SelectItem key={priority.value} value={priority.value}>
+                  {priority.label}
                 </SelectItem>
               ))}
             </Select>
@@ -178,6 +275,77 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
             minRows={3}
             isRequired
           />
+
+          {/* FIRE Department Specific Fields */}
+          {department === "FIRE" && (
+            <div className="grid grid-cols-2 gap-4 p-4 bg-red-900/10 border border-red-700/30 rounded-lg">
+              <Select
+                label="Fire Size"
+                placeholder="Select size"
+                value={formData.fireSize}
+                onChange={(e) => setFormData({ ...formData, fireSize: e.target.value })}
+              >
+                <SelectItem key="SMALL" value="SMALL">Small (Single Room)</SelectItem>
+                <SelectItem key="MEDIUM" value="MEDIUM">Medium (Multiple Rooms)</SelectItem>
+                <SelectItem key="LARGE" value="LARGE">Large (Entire Structure)</SelectItem>
+                <SelectItem key="MAJOR" value="MAJOR">Major (Multiple Structures)</SelectItem>
+              </Select>
+              <Select
+                label="HAZMAT Involved"
+                placeholder="Select"
+                value={formData.hazmat ? "true" : "false"}
+                onChange={(e) => setFormData({ ...formData, hazmat: e.target.value === "true" })}
+              >
+                <SelectItem key="false" value="false">No</SelectItem>
+                <SelectItem key="true" value="true">Yes - HAZMAT Response Required</SelectItem>
+              </Select>
+            </div>
+          )}
+
+          {/* EMS Department Specific Fields */}
+          {department === "EMS" && (
+            <div className="grid grid-cols-3 gap-4 p-4 bg-green-900/10 border border-green-700/30 rounded-lg">
+              <Input
+                label="Patient Age"
+                placeholder="Age"
+                type="number"
+                value={formData.patientAge}
+                onChange={(e) => setFormData({ ...formData, patientAge: e.target.value })}
+              />
+              <Select
+                label="Patient Gender"
+                placeholder="Select"
+                value={formData.patientGender}
+                onChange={(e) => setFormData({ ...formData, patientGender: e.target.value })}
+              >
+                <SelectItem key="MALE" value="MALE">Male</SelectItem>
+                <SelectItem key="FEMALE" value="FEMALE">Female</SelectItem>
+                <SelectItem key="OTHER" value="OTHER">Other</SelectItem>
+                <SelectItem key="UNKNOWN" value="UNKNOWN">Unknown</SelectItem>
+              </Select>
+              <Select
+                label="Consciousness Level"
+                placeholder="Select"
+                value={formData.consciousness}
+                onChange={(e) => setFormData({ ...formData, consciousness: e.target.value })}
+              >
+                <SelectItem key="ALERT" value="ALERT">Alert & Responsive</SelectItem>
+                <SelectItem key="VERBAL" value="VERBAL">Responds to Verbal</SelectItem>
+                <SelectItem key="PAIN" value="PAIN">Responds to Pain</SelectItem>
+                <SelectItem key="UNRESPONSIVE" value="UNRESPONSIVE">Unresponsive</SelectItem>
+              </Select>
+            </div>
+          )}
+
+          {/* POLICE Department Specific Fields */}
+          {department === "POLICE" && (
+            <div className="p-4 bg-blue-900/10 border border-blue-700/30 rounded-lg">
+              <p className="text-sm text-gray-400">
+                <AlertTriangle className="w-4 h-4 inline mr-2" />
+                Standard police response protocols apply. Use description field for suspect descriptions, vehicle details, or weapon information.
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <Input

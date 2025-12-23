@@ -29,6 +29,101 @@ export interface DepartmentSettings {
   description: string;
   homepageContent: string;
   motto: string;
+  announcements?: Announcement[];
+  events?: DepartmentEvent[];
+  news?: NewsArticle[];
+  quickStats?: QuickStat[];
+  leadership?: LeadershipProfile[];
+  roster?: RosterEntry[];
+  sops?: SOPDocument[];
+  stations?: Station[];
+  training?: TrainingProgram[];
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  message: string;
+  type: "Policy" | "Event" | "Notice" | "Training" | "Alert";
+  urgent: boolean;
+  date: string;
+}
+
+export interface DepartmentEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  attendees?: number;
+}
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  description: string;
+  content?: string;
+  date: string;
+  author?: string;
+  image?: string;
+}
+
+export interface QuickStat {
+  id: string;
+  label: string;
+  value: string;
+  icon: string;
+  color: string;
+}
+
+export interface LeadershipProfile {
+  id: string;
+  name: string;
+  rank: string;
+  role: string;
+  bio: string;
+  image?: string;
+  contact?: string;
+}
+
+export interface RosterEntry {
+  id: string;
+  name: string;
+  badgeNumber: string;
+  rank: string;
+  division: string;
+  status: "active" | "loa" | "suspended";
+  joinDate: string;
+}
+
+export interface SOPDocument {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  version: string;
+  lastUpdated: string;
+}
+
+export interface Station {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  staff: number;
+  status: "Active" | "Inactive";
+  image?: string;
+}
+
+export interface TrainingProgram {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  instructor: string;
+  requirements: string[];
+  certificationLevel?: string;
 }
 
 const defaultSettings: Record<string, DepartmentSettings> = {
@@ -116,9 +211,23 @@ const defaultSettings: Record<string, DepartmentSettings> = {
 };
 
 export function getDepartmentSettings(department: "POLICE" | "FIRE" | "EMS"): DepartmentSettings {
-  // TODO: Fetch from API/localStorage when admin settings are saved
-  // For now, return defaults
+  // Return defaults - pages should fetch from API using useDepartmentSettings hook
   return defaultSettings[department];
+}
+
+// Client-side hook for fetching department settings
+export async function fetchDepartmentSettings(): Promise<Record<string, DepartmentSettings>> {
+  try {
+    const response = await fetch("/api/admin/departments");
+    if (!response.ok) {
+      console.error("Failed to fetch department settings");
+      return defaultSettings;
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching department settings:", error);
+    return defaultSettings;
+  }
 }
 
 export function getDepartmentColor(department: "POLICE" | "FIRE" | "EMS"): string {

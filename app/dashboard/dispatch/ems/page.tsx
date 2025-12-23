@@ -28,7 +28,7 @@ export default function EMSDispatchPage() {
             </h1>
             <p className="text-gray-400 mt-1">Medical Emergency Response</p>
           </div>
-          <CADNewCallForm onCallCreated={() => setRefreshKey(prev => prev + 1)} />
+          <CADNewCallForm department="EMS" onCallCreated={() => setRefreshKey(prev => prev + 1)} />
         </div>
 
         <Tabs 

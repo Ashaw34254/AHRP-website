@@ -2,13 +2,14 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardBody, CardHeader, Tabs, Tab } from "@nextui-org/react";
-import { Shield, Radio, Phone, Search, History, Siren } from "lucide-react";
+import { Shield, Radio, Phone, Search, History, Siren, Target } from "lucide-react";
 import { CADDispatchConsole } from "@/components/CADDispatchConsole";
 import { CADActiveCalls } from "@/components/CADActiveCalls";
 import { CADUnitStatus } from "@/components/CADUnitStatus";
 import { CADNewCallForm } from "@/components/CADNewCallForm";
 import { CADCivilSearch } from "@/components/CADCivilSearch";
 import { CADCallHistory } from "@/components/CADCallHistory";
+import TacticalTeamManagement from "@/components/TacticalTeamManagement";
 import { useState } from "react";
 
 export default function PoliceCADPage() {
@@ -32,7 +33,7 @@ export default function PoliceCADPage() {
             </h1>
             <p className="text-gray-400 mt-1">Computer-Aided Dispatch</p>
           </div>
-          <CADNewCallForm onCallCreated={handleCallCreated} />
+          <CADNewCallForm department="POLICE" onCallCreated={handleCallCreated} />
         </div>
 
         {/* Tabs */}
@@ -115,6 +116,20 @@ export default function PoliceCADPage() {
           >
             <div className="py-6">
               <CADCallHistory department="POLICE" />
+            </div>
+          </Tab>
+
+          <Tab
+            key="tactical"
+            title={
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                <span>Tactical Teams</span>
+              </div>
+            }
+          >
+            <div className="py-6">
+              <TacticalTeamManagement />
             </div>
           </Tab>
         </Tabs>

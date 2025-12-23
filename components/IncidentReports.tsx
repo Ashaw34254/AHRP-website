@@ -412,17 +412,15 @@ export function IncidentReports({ department }: IncidentReportsProps = { departm
               filteredReports.map((report) => (
                 <Card
                   key={report.id}
-                  className={`bg-gradient-to-br from-gray-800/80 to-gray-900/80 border-2 hover:shadow-lg transition-all cursor-pointer ${
+                  className={`bg-gradient-to-br from-gray-800/80 to-gray-900/80 border-2 hover:shadow-lg transition-all ${
                     report.priority === "CRITICAL"
                       ? "border-red-700/50 hover:border-red-600/70 animate-pulse"
                       : report.priority === "HIGH"
                       ? "border-yellow-700/50 hover:border-yellow-600/70"
                       : "border-gray-700 hover:border-gray-600"
                   }`}
-                  isPressable
-                  onPress={() => viewReportDetails(report)}
                 >
-                  <CardBody className="p-5">
+                  <CardBody className="p-5 cursor-pointer" onClick={() => viewReportDetails(report)}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
@@ -485,15 +483,16 @@ export function IncidentReports({ department }: IncidentReportsProps = { departm
                         </div>
                       </div>
 
-                      <Button
-                        size="sm"
-                        color="primary"
-                        variant="flat"
-                        startContent={<Eye className="w-4 h-4" />}
-                        onPress={() => viewReportDetails(report)}
+                      <button
+                        className="z-10 px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/30 hover:border-blue-500/50 transition-all flex items-center gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          viewReportDetails(report);
+                        }}
                       >
+                        <Eye className="w-4 h-4" />
                         View
-                      </Button>
+                      </button>
                     </div>
                   </CardBody>
                 </Card>

@@ -25,7 +25,7 @@ export default function FireCADPage() {
             </h1>
             <p className="text-gray-400 mt-1">Computer-Aided Dispatch</p>
           </div>
-          <CADNewCallForm onCallCreated={() => setRefreshKey(prev => prev + 1)} />
+          <CADNewCallForm department="FIRE" onCallCreated={() => setRefreshKey(prev => prev + 1)} />
         </div>
 
         <Tabs 

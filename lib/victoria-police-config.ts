@@ -29,6 +29,13 @@ export const VIC_CALL_TYPES = {
     "SHOTS_FIRED",
     "VEHICLE_PURSUIT",
     "WARRANT_EXECUTION",
+    "HIGH_RISK_WARRANT", // Tactical
+    "HOSTAGE_SITUATION", // Tactical
+    "BARRICADED_SUSPECT", // Tactical
+    "ACTIVE_SHOOTER", // Tactical
+    "TERRORIST_THREAT", // Tactical
+    "VIP_PROTECTION", // Tactical
+    "CIVIL_DISTURBANCE", // Tactical
     "WELFARE_CHECK",
     "MISSING_PERSON",
     "PUBLIC_ORDER",

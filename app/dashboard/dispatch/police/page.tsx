@@ -2,7 +2,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, Tab } from "@nextui-org/react";
-import { Shield, Radio, Phone, Search, History, Siren, AlertTriangle, FileText, MessageSquare, Bell, Gavel } from "lucide-react";
+import { Shield, Radio, Phone, Search, History, Siren, AlertTriangle, FileText, MessageSquare, Bell, Gavel, Target } from "lucide-react";
 import { CADDispatchConsole } from "@/components/CADDispatchConsole";
 import { CADActiveCalls } from "@/components/CADActiveCalls";
 import { CADUnitStatus } from "@/components/CADUnitStatus";
@@ -14,6 +14,7 @@ import { WarrantManagement } from "@/components/WarrantManagement";
 import { IncidentReports } from "@/components/IncidentReports";
 import { PanicAlertMonitor } from "@/components/PanicAlertMonitor";
 import { DispatcherChatModal } from "@/components/DispatcherChatModal";
+import TacticalTeamManagement from "@/components/TacticalTeamManagement";
 import { useState } from "react";
 
 export default function PoliceDispatchPage() {
@@ -31,7 +32,7 @@ export default function PoliceDispatchPage() {
             </h1>
             <p className="text-gray-400 mt-1">Emergency Call & Unit Management</p>
           </div>
-          <CADNewCallForm onCallCreated={() => setRefreshKey(prev => prev + 1)} />
+          <CADNewCallForm department="POLICE" onCallCreated={() => setRefreshKey(prev => prev + 1)} />
         </div>
 
         <Tabs 
@@ -169,6 +170,20 @@ export default function PoliceDispatchPage() {
           >
             <div className="py-6">
               <PanicAlertMonitor department="POLICE" />
+            </div>
+          </Tab>
+
+          <Tab
+            key="tactical"
+            title={
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                <span>Tactical Teams</span>
+              </div>
+            }
+          >
+            <div className="py-6">
+              <TacticalTeamManagement />
             </div>
           </Tab>
         </Tabs>

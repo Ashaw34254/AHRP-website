@@ -28,7 +28,7 @@ export default function FireDispatchPage() {
             </h1>
             <p className="text-gray-400 mt-1">Emergency Response Coordination</p>
           </div>
-          <CADNewCallForm onCallCreated={() => setRefreshKey(prev => prev + 1)} />
+          <CADNewCallForm department="FIRE" onCallCreated={() => setRefreshKey(prev => prev + 1)} />
         </div>
 
         <Tabs 

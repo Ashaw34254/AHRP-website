@@ -36,8 +36,16 @@ import {
   Trash2,
   Edit,
   Star,
+  FileText,
+  Clock,
+  MapPin,
+  Building2,
+  GraduationCap,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "@/lib/toast";
 
 interface DepartmentTheme {
@@ -75,6 +83,92 @@ interface DepartmentMember {
   certifications: string[];
 }
 
+interface Announcement {
+  id: string;
+  title: string;
+  message: string;
+  type: "Policy" | "Event" | "Notice" | "Training" | "Alert";
+  urgent: boolean;
+  date: string;
+}
+
+interface DepartmentEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  attendees?: number;
+}
+
+interface NewsArticle {
+  id: string;
+  title: string;
+  description: string;
+  content?: string;
+  date: string;
+  author?: string;
+  image?: string;
+}
+
+interface QuickStat {
+  id: string;
+  label: string;
+  value: string;
+  icon: string; // Icon name
+  color: string;
+}
+
+interface LeadershipProfile {
+  id: string;
+  name: string;
+  rank: string;
+  role: string;
+  bio: string;
+  image?: string;
+  contact?: string;
+}
+
+interface RosterEntry {
+  id: string;
+  name: string;
+  badgeNumber: string;
+  rank: string;
+  division: string;
+  status: "active" | "loa" | "suspended";
+  joinDate: string;
+}
+
+interface SOPDocument {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  version: string;
+  lastUpdated: string;
+}
+
+interface Station {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  staff: number;
+  status: "Active" | "Inactive";
+  image?: string;
+}
+
+interface TrainingProgram {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  instructor: string;
+  requirements: string[];
+  certificationLevel?: string;
+}
+
 interface DepartmentSettings {
   enabled: boolean;
   maxUnits: number;
@@ -89,13 +183,23 @@ interface DepartmentSettings {
   description: string;
   homepageContent: string;
   motto: string;
+  announcements: Announcement[];
+  events: DepartmentEvent[];
+  news: NewsArticle[];
+  quickStats: QuickStat[];
+  leadership: LeadershipProfile[];
+  roster: RosterEntry[];
+  sops: SOPDocument[];
+  stations: Station[];
+  training: TrainingProgram[];
 }
 
 export default function DepartmentsPage() {
   const [selectedDept, setSelectedDept] = useState<"POLICE" | "FIRE" | "EMS">("POLICE");
   const [hasChanges, setHasChanges] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [departments, setDepartments] = useState<Record<string, DepartmentSettings>>({
+  const defaultDepartments: Record<string, DepartmentSettings> = {
     POLICE: {
       enabled: true,
       maxUnits: 20,
@@ -137,6 +241,41 @@ export default function DepartmentsPage() {
         { id: "2", name: "Sarah Johnson", badgeNumber: "1235", rank: "Officer", status: "active", joinDate: "2024-03-20", certifications: ["Traffic"] },
         { id: "3", name: "Mike Wilson", badgeNumber: "1236", rank: "Lieutenant", status: "loa", joinDate: "2023-11-10", certifications: ["FTO", "SWAT", "Supervisor"] },
       ],
+      announcements: [
+        { id: "1", title: "New Traffic Policy Update", message: "Review new traffic enforcement procedures", type: "Policy", urgent: false, date: "Dec 14, 2025" },
+        { id: "2", title: "Promotion Ceremony - Friday 6PM", message: "Join us to congratulate promoted officers", type: "Event", urgent: false, date: "Dec 13, 2025" },
+      ],
+      events: [
+        { id: "1", title: "Active Shooter Training", description: "Mandatory training for all patrol officers", date: "Dec 28, 2025", time: "08:00 - 16:00", location: "Training Facility" },
+        { id: "2", title: "Department Awards Ceremony", description: "Annual recognition event", date: "Jan 5, 2026", time: "18:00 - 21:00", location: "City Hall" },
+      ],
+      news: [
+        { id: "1", title: "Officer Martinez Receives Medal of Valor", description: "Recognized for heroic actions during armed robbery response", date: "Dec 20, 2025" },
+        { id: "2", title: "New Crime Prevention Initiative Launched", description: "Community partnership program reduces crime by 15%", date: "Dec 18, 2025" },
+      ],
+      quickStats: [
+        { id: "1", label: "Active Officers", value: "64", icon: "Users", color: "blue" },
+        { id: "2", label: "Units on Duty", value: "12", icon: "Radio", color: "green" },
+        { id: "3", label: "Active Calls", value: "8", icon: "Phone", color: "yellow" },
+        { id: "4", label: "Response Time", value: "4.2min", icon: "Clock", color: "purple" },
+      ],
+      leadership: [
+        { id: "1", name: "Chief James Anderson", rank: "Chief of Police", role: "Department Head", bio: "Leading the department with 25 years of experience in law enforcement." },
+        { id: "2", name: "Deputy Chief Sarah Williams", rank: "Deputy Chief", role: "Operations Commander", bio: "Oversees daily operations and special units." },
+      ],
+      roster: [],
+      sops: [
+        { id: "1", title: "Traffic Stop Procedures", category: "Patrol", content: "Standard procedures for conducting traffic stops safely and effectively.", version: "2.1", lastUpdated: "Dec 2025" },
+        { id: "2", title: "Use of Force Policy", category: "General", content: "Guidelines for appropriate use of force in various situations.", version: "3.0", lastUpdated: "Nov 2025" },
+      ],
+      stations: [
+        { id: "1", name: "Mission Row Station", address: "1200 Mission Row, Downtown", phone: "(555) 0100", staff: 45, status: "Active" },
+        { id: "2", name: "Vespucci Police Station", address: "440 Vespucci Blvd", phone: "(555) 0101", staff: 28, status: "Active" },
+      ],
+      training: [
+        { id: "1", title: "Basic Police Academy", description: "Foundational training for new recruits", duration: "6 months", instructor: "Sgt. Johnson", requirements: ["High school diploma", "Clean record"] },
+        { id: "2", title: "Field Training Officer Program", description: "Advanced training for FTO certification", duration: "3 months", instructor: "Lt. Davis", requirements: ["2 years experience", "Senior Officer rank"], certificationLevel: "FTO" },
+      ],
     },
     FIRE: {
       enabled: true,
@@ -177,6 +316,34 @@ export default function DepartmentsPage() {
         { id: "1", name: "Emily Davis", badgeNumber: "F101", rank: "Captain", status: "active", joinDate: "2023-08-10", certifications: ["Paramedic", "Hazmat"] },
         { id: "2", name: "Robert Brown", badgeNumber: "F102", rank: "Firefighter", status: "active", joinDate: "2024-05-15", certifications: ["EMT"] },
       ],
+      announcements: [
+        { id: "1", title: "Equipment Inspection Due", message: "All apparatus require monthly inspection", type: "Notice", urgent: false, date: "Dec 15, 2025" },
+      ],
+      events: [
+        { id: "1", title: "Fire Safety Awareness Week", description: "Community outreach program", date: "Jan 10, 2026", time: "All Week", location: "Various Locations" },
+      ],
+      news: [
+        { id: "1", title: "Station 2 Renovation Complete", description: "Modernized facilities now operational", date: "Dec 22, 2025" },
+      ],
+      quickStats: [
+        { id: "1", label: "Active Firefighters", value: "42", icon: "Users", color: "red" },
+        { id: "2", label: "Units Available", value: "8", icon: "Flame", color: "orange" },
+        { id: "3", label: "Active Calls", value: "3", icon: "Phone", color: "yellow" },
+        { id: "4", label: "Response Time", value: "5.8min", icon: "Clock", color: "red" },
+      ],
+      leadership: [
+        { id: "1", name: "Fire Chief Michael Roberts", rank: "Fire Chief", role: "Department Head", bio: "Leading fire operations with 30 years of firefighting experience." },
+      ],
+      roster: [],
+      sops: [
+        { id: "1", title: "Structure Fire Response", category: "Operations", content: "Standard procedures for responding to structure fires.", version: "1.5", lastUpdated: "Dec 2025" },
+      ],
+      stations: [
+        { id: "1", name: "Fire Station 1", address: "100 Fire Department Ave", phone: "(555) 0200", staff: 25, status: "Active" },
+      ],
+      training: [
+        { id: "1", title: "Firefighter I Academy", description: "Basic firefighter training and certification", duration: "4 months", instructor: "Capt. Thompson", requirements: ["Physical fitness test", "EMT-B"] },
+      ],
     },
     EMS: {
       enabled: true,
@@ -215,8 +382,159 @@ export default function DepartmentsPage() {
       members: [
         { id: "1", name: "Lisa Martinez", badgeNumber: "E201", rank: "Paramedic", status: "active", joinDate: "2024-02-01", certifications: ["Paramedic", "ACLS"] },
       ],
+      announcements: [
+        { id: "1", title: "New ALS Protocols", message: "Updated advanced life support procedures effective immediately", type: "Policy", urgent: true, date: "Dec 20, 2025" },
+      ],
+      events: [
+        { id: "1", title: "CPR Recertification", description: "Annual CPR and AED training", date: "Dec 30, 2025", time: "09:00 - 17:00", location: "EMS Training Center" },
+      ],
+      news: [
+        { id: "1", title: "EMS Response Times Improved", description: "Average response time reduced to 4.5 minutes", date: "Dec 19, 2025" },
+      ],
+      quickStats: [
+        { id: "1", label: "Active Medics", value: "28", icon: "Users", color: "green" },
+        { id: "2", label: "Ambulances Ready", value: "6", icon: "Heart", color: "emerald" },
+        { id: "3", label: "Active Calls", value: "5", icon: "Phone", color: "yellow" },
+        { id: "4", label: "Response Time", value: "4.5min", icon: "Clock", color: "green" },
+      ],
+      leadership: [
+        { id: "1", name: "EMS Director Lisa Chen", rank: "EMS Chief", role: "Department Head", bio: "20 years in emergency medicine and paramedicine." },
+      ],
+      roster: [],
+      sops: [
+        { id: "1", title: "Advanced Life Support Protocols", category: "Medical", content: "ALS procedures and medication administration guidelines.", version: "4.2", lastUpdated: "Dec 2025" },
+      ],
+      stations: [
+        { id: "1", name: "EMS Base 1", address: "200 Medical Plaza", phone: "(555) 0300", staff: 18, status: "Active" },
+      ],
+      training: [
+        { id: "1", title: "Paramedic Program", description: "Advanced paramedic certification course", duration: "12 months", instructor: "Dr. Martinez", requirements: ["EMT-B certification", "College prerequisites"], certificationLevel: "Paramedic" },
+      ],
     },
-  });
+  };
+
+  const [departments, setDepartments] = useState<Record<string, DepartmentSettings>>(defaultDepartments);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const tabsScrollRef = useRef<HTMLDivElement>(null);
+
+  // Check scroll position
+  const checkScroll = () => {
+    const wrapper = tabsScrollRef.current;
+    if (wrapper) {
+      // Try multiple selectors to find the scrollable element
+      const element = 
+        wrapper.querySelector('[role="tablist"]') as HTMLElement ||
+        wrapper.querySelector('.tabs-scroll') as HTMLElement ||
+        wrapper.querySelector('[class*="tabList"]') as HTMLElement;
+      
+      if (element) {
+        const hasScroll = element.scrollWidth > element.clientWidth;
+        setCanScrollLeft(element.scrollLeft > 5);
+        setCanScrollRight(hasScroll && element.scrollLeft < element.scrollWidth - element.clientWidth - 5);
+        
+        // Debug log
+        console.log('Scroll check:', {
+          scrollWidth: element.scrollWidth,
+          clientWidth: element.clientWidth,
+          scrollLeft: element.scrollLeft,
+          hasScroll,
+          canScrollLeft: element.scrollLeft > 5,
+          canScrollRight: hasScroll && element.scrollLeft < element.scrollWidth - element.clientWidth - 5
+        });
+      }
+    }
+  };
+
+  // Scroll tabs
+  const scrollTabs = (direction: 'left' | 'right') => {
+    const wrapper = tabsScrollRef.current;
+    if (wrapper) {
+      const element = 
+        wrapper.querySelector('[role="tablist"]') as HTMLElement ||
+        wrapper.querySelector('.tabs-scroll') as HTMLElement ||
+        wrapper.querySelector('[class*="tabList"]') as HTMLElement;
+      
+      if (element) {
+        const scrollAmount = 300;
+        element.scrollBy({
+          left: direction === 'left' ? -scrollAmount : scrollAmount,
+          behavior: 'smooth'
+        });
+        setTimeout(checkScroll, 100);
+      }
+    }
+  };
+
+  // Load department settings from database on mount
+  useEffect(() => {
+    const loadDepartmentSettings = async () => {
+      try {
+        const response = await fetch("/api/admin/departments");
+        if (response.ok) {
+          const data = await response.json();
+          setDepartments(data);
+        }
+      } catch (error) {
+        console.error("Error loading department settings:", error);
+        toast.error("Failed to load department settings");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDepartmentSettings();
+  }, []);
+
+  // Check scroll on mount and resize
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkScroll();
+      // Force another check after a longer delay
+      setTimeout(checkScroll, 1000);
+    }, 300);
+    
+    const handleResize = () => checkScroll();
+    window.addEventListener('resize', handleResize);
+    
+    // Set up mutation observer to detect when tabs are rendered
+    const wrapper = tabsScrollRef.current;
+    if (wrapper) {
+      const observer = new MutationObserver(() => {
+        checkScroll();
+      });
+      observer.observe(wrapper, { childList: true, subtree: true });
+      
+      const element = 
+        wrapper.querySelector('[role="tablist"]') as HTMLElement ||
+        wrapper.querySelector('.tabs-scroll') as HTMLElement ||
+        wrapper.querySelector('[class*="tabList"]') as HTMLElement;
+      
+      if (element) {
+        element.addEventListener('scroll', checkScroll);
+        // Initial check on the element
+        setTimeout(checkScroll, 100);
+      }
+      
+      return () => {
+        clearTimeout(timer);
+        observer.disconnect();
+        window.removeEventListener('resize', handleResize);
+        const el = 
+          wrapper.querySelector('[role="tablist"]') as HTMLElement ||
+          wrapper.querySelector('.tabs-scroll') as HTMLElement ||
+          wrapper.querySelector('[class*="tabList"]') as HTMLElement;
+        if (el) {
+          el.removeEventListener('scroll', checkScroll);
+        }
+      };
+    }
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const currentSettings = departments[selectedDept];
   const currentTheme = currentSettings.theme;
@@ -248,10 +566,21 @@ export default function DepartmentsPage() {
 
   const handleSave = async () => {
     try {
-      // TODO: Save to database via API
-      toast.success("Department settings saved successfully!");
-      setHasChanges(false);
+      const response = await fetch("/api/admin/departments", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(departments),
+      });
+      
+      if (response.ok) {
+        toast.success("Department settings saved successfully!");
+        setHasChanges(false);
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to save settings");
+      }
     } catch (error) {
+      console.error("Error saving department settings:", error);
       toast.error("Failed to save settings");
     }
   };
@@ -311,6 +640,21 @@ export default function DepartmentsPage() {
   };
 
   const DeptIcon = getDeptIcon(selectedDept);
+
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="p-6 flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-4">
+            <div className="animate-spin">
+              <SettingsIcon className="w-12 h-12 text-blue-500" />
+            </div>
+            <p className="text-gray-400 text-lg">Loading department settings...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -425,8 +769,70 @@ export default function DepartmentsPage() {
 
         {/* Settings Tabs */}
         <Card className="bg-gray-900/50 border border-gray-800">
-          <CardBody>
-            <Tabs aria-label="Department settings" size="lg">
+          <CardBody className="p-0">
+            <div className="relative">
+              {/* Left scroll button */}
+              <Button
+                isIconOnly
+                size="sm"
+                variant="flat"
+                className={`absolute left-2 top-[32px] -translate-y-1/2 z-50 bg-gray-800/95 hover:bg-gray-700 backdrop-blur-sm shadow-lg transition-opacity ${
+                  canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+                onPress={() => scrollTabs('left')}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+
+              {/* Right scroll button */}
+              <Button
+                isIconOnly
+                size="sm"
+                variant="flat"
+                className={`absolute right-2 top-[32px] -translate-y-1/2 z-50 bg-gray-800/95 hover:bg-gray-700 backdrop-blur-sm shadow-lg transition-opacity ${
+                  canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+                onPress={() => scrollTabs('right')}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+
+              {/* Debug info - remove after testing */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-50 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                L: {canScrollLeft ? '✓' : '✗'} | R: {canScrollRight ? '✓' : '✗'}
+              </div>
+
+            <style jsx global>{`
+              .tabs-scroll::-webkit-scrollbar {
+                height: 6px;
+              }
+              .tabs-scroll::-webkit-scrollbar-track {
+                background: rgba(31, 41, 55, 0.5);
+                border-radius: 3px;
+              }
+              .tabs-scroll::-webkit-scrollbar-thumb {
+                background: linear-gradient(to right, #6366f1, #a855f7);
+                border-radius: 3px;
+              }
+              .tabs-scroll::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(to right, #4f46e5, #9333ea);
+              }
+            `}</style>
+            <div 
+              ref={tabsScrollRef}
+            >
+            <Tabs 
+              aria-label="Department settings" 
+              size="lg"
+              variant="underlined"
+              classNames={{
+                base: "w-full",
+                tabList: "tabs-scroll gap-6 w-full relative rounded-none p-4 border-b border-gray-800 bg-gray-900/30 overflow-x-auto scroll-smooth",
+                cursor: "w-full bg-gradient-to-r from-indigo-500 to-purple-500",
+                tab: "max-w-fit px-4 h-12 flex-shrink-0",
+                tabContent: "group-data-[selected=true]:text-white text-gray-400 font-medium whitespace-nowrap"
+              }}
+            >
               {/* General Settings */}
               <Tab
                 key="general"
@@ -437,7 +843,7 @@ export default function DepartmentsPage() {
                   </div>
                 }
               >
-                <div className="space-y-6 pt-4">
+                <div className="space-y-6 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-semibold text-white">
@@ -533,7 +939,7 @@ export default function DepartmentsPage() {
                   </div>
                 }
               >
-                <div className="space-y-6 pt-4">
+                <div className="space-y-6 p-6">
                   {/* Department Identity */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-white mb-4">
@@ -777,7 +1183,7 @@ export default function DepartmentsPage() {
                   </div>
                 }
               >
-                <div className="space-y-6 pt-4">
+                <div className="space-y-6 p-6">
                   <div className="text-center">
                     <h3 className="text-lg font-semibold text-white mb-2">
                       Theme Preview
@@ -928,7 +1334,7 @@ export default function DepartmentsPage() {
                   </div>
                 }
               >
-                <div className="space-y-6 pt-4">
+                <div className="space-y-6 p-6">
                   <div className="text-center">
                     <h3 className="text-lg font-semibold text-white mb-2">
                       Department Homepage Content
@@ -1100,7 +1506,7 @@ export default function DepartmentsPage() {
                   </div>
                 }
               >
-                <div className="space-y-6 pt-4">
+                <div className="space-y-6 p-6">
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="text-lg font-semibold text-white">
@@ -1277,7 +1683,7 @@ export default function DepartmentsPage() {
                   </div>
                 }
               >
-                <div className="space-y-6 pt-4">
+                <div className="space-y-6 p-6">
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="text-lg font-semibold text-white">
@@ -1427,7 +1833,7 @@ export default function DepartmentsPage() {
                   </div>
                 }
               >
-                <div className="space-y-6 pt-4">
+                <div className="space-y-6 p-6">
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-4">
                       Recruitment Settings
@@ -1532,10 +1938,1104 @@ export default function DepartmentsPage() {
                   </div>
                 </div>
               </Tab>
+
+              {/* Announcements Tab */}
+              <Tab
+                key="announcements"
+                title={
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Announcements</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white">Department Announcements</h3>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newAnnouncement: Announcement = {
+                          id: Date.now().toString(),
+                          title: "New Announcement",
+                          message: "Enter announcement details",
+                          type: "Notice",
+                          urgent: false,
+                          date: new Date().toLocaleDateString()
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            announcements: [...prev[selectedDept].announcements, newAnnouncement]
+                          }
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add Announcement
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {currentSettings.announcements.map((announcement, index) => (
+                      <Card key={announcement.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 grid grid-cols-2 gap-4">
+                                <Input
+                                  label="Title"
+                                  value={announcement.title}
+                                  onChange={(e) => {
+                                    const updated = [...currentSettings.announcements];
+                                    updated[index].title = e.target.value;
+                                    handleSettingsChange("announcements", updated);
+                                  }}
+                                />
+                                <Select
+                                  label="Type"
+                                  selectedKeys={[announcement.type]}
+                                  onChange={(e) => {
+                                    const updated = [...currentSettings.announcements];
+                                    updated[index].type = e.target.value as any;
+                                    handleSettingsChange("announcements", updated);
+                                  }}
+                                >
+                                  <SelectItem key="Policy" value="Policy">Policy</SelectItem>
+                                  <SelectItem key="Event" value="Event">Event</SelectItem>
+                                  <SelectItem key="Notice" value="Notice">Notice</SelectItem>
+                                  <SelectItem key="Training" value="Training">Training</SelectItem>
+                                  <SelectItem key="Alert" value="Alert">Alert</SelectItem>
+                                </Select>
+                              </div>
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = currentSettings.announcements.filter((_, i) => i !== index);
+                                  handleSettingsChange("announcements", updated);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Textarea
+                              label="Message"
+                              value={announcement.message}
+                              onChange={(e) => {
+                                const updated = [...currentSettings.announcements];
+                                updated[index].message = e.target.value;
+                                handleSettingsChange("announcements", updated);
+                              }}
+                              minRows={2}
+                            />
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <Switch
+                                  size="sm"
+                                  isSelected={announcement.urgent}
+                                  onValueChange={(value) => {
+                                    const updated = [...currentSettings.announcements];
+                                    updated[index].urgent = value;
+                                    handleSettingsChange("announcements", updated);
+                                  }}
+                                >
+                                  <span className="text-sm">Urgent</span>
+                                </Switch>
+                              </div>
+                              <span className="text-sm text-gray-400">{announcement.date}</span>
+                            </div>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
+
+              {/* Events Tab */}
+              <Tab
+                key="events"
+                title={
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>Events</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white">Department Events</h3>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newEvent: DepartmentEvent = {
+                          id: Date.now().toString(),
+                          title: "New Event",
+                          description: "Event description",
+                          date: new Date().toLocaleDateString(),
+                          time: "00:00",
+                          location: "TBD"
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            events: [...prev[selectedDept].events, newEvent]
+                          }
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add Event
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {currentSettings.events.map((event, index) => (
+                      <Card key={event.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <Input
+                                label="Event Title"
+                                value={event.title}
+                                onChange={(e) => {
+                                  const updated = [...currentSettings.events];
+                                  updated[index].title = e.target.value;
+                                  handleSettingsChange("events", updated);
+                                }}
+                                className="flex-1"
+                              />
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = currentSettings.events.filter((_, i) => i !== index);
+                                  handleSettingsChange("events", updated);
+                                }}
+                                className="ml-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Textarea
+                              label="Description"
+                              value={event.description}
+                              onChange={(e) => {
+                                const updated = [...currentSettings.events];
+                                updated[index].description = e.target.value;
+                                handleSettingsChange("events", updated);
+                              }}
+                              minRows={2}
+                            />
+                            <div className="grid grid-cols-3 gap-4">
+                              <Input
+                                label="Date"
+                                value={event.date}
+                                onChange={(e) => {
+                                  const updated = [...currentSettings.events];
+                                  updated[index].date = e.target.value;
+                                  handleSettingsChange("events", updated);
+                                }}
+                              />
+                              <Input
+                                label="Time"
+                                value={event.time}
+                                onChange={(e) => {
+                                  const updated = [...currentSettings.events];
+                                  updated[index].time = e.target.value;
+                                  handleSettingsChange("events", updated);
+                                }}
+                              />
+                              <Input
+                                label="Location"
+                                value={event.location}
+                                onChange={(e) => {
+                                  const updated = [...currentSettings.events];
+                                  updated[index].location = e.target.value;
+                                  handleSettingsChange("events", updated);
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
+
+              {/* News Tab */}
+              <Tab
+                key="news"
+                title={
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    <span>News</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white">Department News</h3>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newArticle: NewsArticle = {
+                          id: Date.now().toString(),
+                          title: "New Article",
+                          description: "Article description",
+                          date: new Date().toLocaleDateString()
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            news: [...prev[selectedDept].news, newArticle]
+                          }
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add News Article
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {currentSettings.news.map((article, index) => (
+                      <Card key={article.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <Input
+                                label="Article Title"
+                                value={article.title}
+                                onChange={(e) => {
+                                  const updated = [...currentSettings.news];
+                                  updated[index].title = e.target.value;
+                                  handleSettingsChange("news", updated);
+                                }}
+                                className="flex-1"
+                              />
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = currentSettings.news.filter((_, i) => i !== index);
+                                  handleSettingsChange("news", updated);
+                                }}
+                                className="ml-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Textarea
+                              label="Description"
+                              value={article.description}
+                              onChange={(e) => {
+                                const updated = [...currentSettings.news];
+                                updated[index].description = e.target.value;
+                                handleSettingsChange("news", updated);
+                              }}
+                              minRows={2}
+                            />
+                            <Input
+                              label="Publish Date"
+                              value={article.date}
+                              onChange={(e) => {
+                                const updated = [...currentSettings.news];
+                                updated[index].date = e.target.value;
+                                handleSettingsChange("news", updated);
+                              }}
+                            />
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
+
+              {/* Quick Stats Tab */}
+              <Tab
+                key="quickstats"
+                title={
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Quick Stats</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Dashboard Quick Stats</h3>
+                      <p className="text-sm text-gray-400">Statistics shown on the department homepage</p>
+                    </div>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newStat: QuickStat = {
+                          id: Date.now().toString(),
+                          label: "New Stat",
+                          value: "0",
+                          icon: "Users",
+                          color: "blue"
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            quickStats: [...prev[selectedDept].quickStats, newStat]
+                          }
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add Stat
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {currentSettings.quickStats.map((stat, index) => (
+                      <Card key={stat.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="text-sm font-semibold text-white">Stat #{index + 1}</h4>
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = currentSettings.quickStats.filter((_, i) => i !== index);
+                                  handleSettingsChange("quickStats", updated);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Input
+                              label="Label"
+                              value={stat.label}
+                              onChange={(e) => {
+                                const updated = [...currentSettings.quickStats];
+                                updated[index].label = e.target.value;
+                                handleSettingsChange("quickStats", updated);
+                              }}
+                              size="sm"
+                            />
+                            <Input
+                              label="Value"
+                              value={stat.value}
+                              onChange={(e) => {
+                                const updated = [...currentSettings.quickStats];
+                                updated[index].value = e.target.value;
+                                handleSettingsChange("quickStats", updated);
+                              }}
+                              size="sm"
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input
+                                label="Icon Name"
+                                value={stat.icon}
+                                onChange={(e) => {
+                                  const updated = [...currentSettings.quickStats];
+                                  updated[index].icon = e.target.value;
+                                  handleSettingsChange("quickStats", updated);
+                                }}
+                                size="sm"
+                              />
+                              <Select
+                                label="Color"
+                                selectedKeys={[stat.color]}
+                                onChange={(e) => {
+                                  const updated = [...currentSettings.quickStats];
+                                  updated[index].color = e.target.value;
+                                  handleSettingsChange("quickStats", updated);
+                                }}
+                                size="sm"
+                              >
+                                <SelectItem key="blue" value="blue">Blue</SelectItem>
+                                <SelectItem key="green" value="green">Green</SelectItem>
+                                <SelectItem key="red" value="red">Red</SelectItem>
+                                <SelectItem key="yellow" value="yellow">Yellow</SelectItem>
+                                <SelectItem key="purple" value="purple">Purple</SelectItem>
+                                <SelectItem key="orange" value="orange">Orange</SelectItem>
+                              </Select>
+                            </div>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
+
+              {/* Leadership Tab */}
+              <Tab
+                key="leadership"
+                title={
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4" />
+                    <span>Leadership</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white">Leadership Team</h3>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newLeader: LeadershipProfile = {
+                          id: Date.now().toString(),
+                          name: "New Leader",
+                          rank: "Rank",
+                          role: "Role",
+                          bio: "Biography",
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            leadership: [...prev[selectedDept].leadership, newLeader]
+                          }
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add Leader
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(currentSettings.leadership || []).map((leader, index) => (
+                      <Card key={leader.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <h4 className="text-sm font-semibold text-white">Profile #{index + 1}</h4>
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = (currentSettings.leadership || []).filter((_, i) => i !== index);
+                                  handleSettingsChange("leadership", updated);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <Input
+                                label="Name"
+                                value={leader.name}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.leadership || [])];
+                                  updated[index].name = e.target.value;
+                                  handleSettingsChange("leadership", updated);
+                                }}
+                                size="sm"
+                              />
+                              <Input
+                                label="Rank"
+                                value={leader.rank}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.leadership || [])];
+                                  updated[index].rank = e.target.value;
+                                  handleSettingsChange("leadership", updated);
+                                }}
+                                size="sm"
+                              />
+                            </div>
+                            <Input
+                              label="Role"
+                              value={leader.role}
+                              onChange={(e) => {
+                                const updated = [...(currentSettings.leadership || [])];
+                                updated[index].role = e.target.value;
+                                handleSettingsChange("leadership", updated);
+                              }}
+                              size="sm"
+                            />
+                            <Textarea
+                              label="Biography"
+                              value={leader.bio}
+                              onChange={(e) => {
+                                const updated = [...(currentSettings.leadership || [])];
+                                updated[index].bio = e.target.value;
+                                handleSettingsChange("leadership", updated);
+                              }}
+                              minRows={3}
+                              size="sm"
+                            />
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
+
+              {/* Roster Tab */}
+              <Tab
+                key="roster"
+                title={
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    <span>Roster</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Department Roster</h3>
+                      <p className="text-sm text-gray-400">Manage department personnel roster</p>
+                    </div>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newRosterEntry: RosterEntry = {
+                          id: Date.now().toString(),
+                          name: "New Member",
+                          badgeNumber: "000",
+                          rank: "Officer",
+                          division: "Patrol",
+                          status: "active",
+                          joinDate: new Date().toLocaleDateString(),
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            roster: [...(prev[selectedDept].roster || []), newRosterEntry],
+                          },
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add Roster Entry
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(currentSettings.roster || []).map((entry, index) => (
+                      <Card key={entry.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                                  {entry.badgeNumber}
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-semibold text-white">{entry.name}</h4>
+                                  <p className="text-xs text-gray-400">{entry.rank} - {entry.division}</p>
+                                </div>
+                              </div>
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = (currentSettings.roster || []).filter((_, i) => i !== index);
+                                  handleSettingsChange("roster", updated);
+                                }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <Input
+                                label="Name"
+                                value={entry.name}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.roster || [])];
+                                  updated[index].name = e.target.value;
+                                  handleSettingsChange("roster", updated);
+                                }}
+                                size="sm"
+                              />
+                              <Input
+                                label="Badge Number"
+                                value={entry.badgeNumber}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.roster || [])];
+                                  updated[index].badgeNumber = e.target.value;
+                                  handleSettingsChange("roster", updated);
+                                }}
+                                size="sm"
+                              />
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                              <Input
+                                label="Rank"
+                                value={entry.rank}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.roster || [])];
+                                  updated[index].rank = e.target.value;
+                                  handleSettingsChange("roster", updated);
+                                }}
+                                size="sm"
+                              />
+                              <Input
+                                label="Division"
+                                value={entry.division}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.roster || [])];
+                                  updated[index].division = e.target.value;
+                                  handleSettingsChange("roster", updated);
+                                }}
+                                size="sm"
+                              />
+                              <Select
+                                label="Status"
+                                selectedKeys={[entry.status]}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.roster || [])];
+                                  updated[index].status = e.target.value as "active" | "loa" | "suspended";
+                                  handleSettingsChange("roster", updated);
+                                }}
+                                size="sm"
+                              >
+                                <SelectItem key="active" value="active">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                    <span>Active</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem key="loa" value="loa">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                    <span>Leave of Absence</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem key="suspended" value="suspended">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                    <span>Suspended</span>
+                                  </div>
+                                </SelectItem>
+                              </Select>
+                            </div>
+                            <div>
+                              <Input
+                                label="Join Date"
+                                type="date"
+                                value={entry.joinDate}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.roster || [])];
+                                  updated[index].joinDate = e.target.value;
+                                  handleSettingsChange("roster", updated);
+                                }}
+                                size="sm"
+                                className="max-w-xs"
+                              />
+                            </div>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
+
+              {/* SOPs Tab */}
+              <Tab
+                key="sops"
+                title={
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" />
+                    <span>SOPs</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Standard Operating Procedures</h3>
+                      <p className="text-sm text-gray-400">Department policies and procedures</p>
+                    </div>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newSOP: SOPDocument = {
+                          id: Date.now().toString(),
+                          title: "New SOP",
+                          category: "General",
+                          content: "SOP content goes here...",
+                          version: "1.0",
+                          lastUpdated: new Date().toLocaleDateString(),
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            sops: [...prev[selectedDept].sops, newSOP]
+                          }
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add SOP
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(currentSettings.sops || []).map((sop, index) => (
+                      <Card key={sop.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 grid grid-cols-3 gap-3">
+                                <Input
+                                  label="Title"
+                                  value={sop.title}
+                                  onChange={(e) => {
+                                    const updated = [...(currentSettings.sops || [])];
+                                    updated[index].title = e.target.value;
+                                    handleSettingsChange("sops", updated);
+                                  }}
+                                  size="sm"
+                                />
+                                <Input
+                                  label="Category"
+                                  value={sop.category}
+                                  onChange={(e) => {
+                                    const updated = [...(currentSettings.sops || [])];
+                                    updated[index].category = e.target.value;
+                                    handleSettingsChange("sops", updated);
+                                  }}
+                                  size="sm"
+                                />
+                                <Input
+                                  label="Version"
+                                  value={sop.version}
+                                  onChange={(e) => {
+                                    const updated = [...(currentSettings.sops || [])];
+                                    updated[index].version = e.target.value;
+                                    handleSettingsChange("sops", updated);
+                                  }}
+                                  size="sm"
+                                />
+                              </div>
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = (currentSettings.sops || []).filter((_, i) => i !== index);
+                                  handleSettingsChange("sops", updated);
+                                }}
+                                className="ml-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Textarea
+                              label="Content"
+                              value={sop.content}
+                              onChange={(e) => {
+                                const updated = [...(currentSettings.sops || [])];
+                                updated[index].content = e.target.value;
+                                handleSettingsChange("sops", updated);
+                              }}
+                              minRows={4}
+                              size="sm"
+                            />
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
+
+              {/* Stations Tab */}
+              <Tab
+                key="stations"
+                title={
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4" />
+                    <span>Stations</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white">Department Stations</h3>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newStation: Station = {
+                          id: Date.now().toString(),
+                          name: "New Station",
+                          address: "Address",
+                          phone: "(555) 0000",
+                          staff: 0,
+                          status: "Active",
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            stations: [...prev[selectedDept].stations, newStation]
+                          }
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add Station
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(currentSettings.stations || []).map((station, index) => (
+                      <Card key={station.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <h4 className="text-sm font-semibold text-white">{station.name}</h4>
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = (currentSettings.stations || []).filter((_, i) => i !== index);
+                                  handleSettingsChange("stations", updated);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Input
+                              label="Station Name"
+                              value={station.name}
+                              onChange={(e) => {
+                                const updated = [...(currentSettings.stations || [])];
+                                updated[index].name = e.target.value;
+                                handleSettingsChange("stations", updated);
+                              }}
+                              size="sm"
+                            />
+                            <Textarea
+                              label="Address"
+                              value={station.address}
+                              onChange={(e) => {
+                                const updated = [...(currentSettings.stations || [])];
+                                updated[index].address = e.target.value;
+                                handleSettingsChange("stations", updated);
+                              }}
+                              minRows={2}
+                              size="sm"
+                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              <Input
+                                label="Phone"
+                                value={station.phone}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.stations || [])];
+                                  updated[index].phone = e.target.value;
+                                  handleSettingsChange("stations", updated);
+                                }}
+                                size="sm"
+                              />
+                              <Input
+                                label="Staff Count"
+                                type="number"
+                                value={station.staff.toString()}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.stations || [])];
+                                  updated[index].staff = parseInt(e.target.value) || 0;
+                                  handleSettingsChange("stations", updated);
+                                }}
+                                size="sm"
+                              />
+                            </div>
+                            <Select
+                              label="Status"
+                              selectedKeys={[station.status]}
+                              onChange={(e) => {
+                                const updated = [...(currentSettings.stations || [])];
+                                updated[index].status = e.target.value as any;
+                                handleSettingsChange("stations", updated);
+                              }}
+                              size="sm"
+                            >
+                              <SelectItem key="Active" value="Active">Active</SelectItem>
+                              <SelectItem key="Inactive" value="Inactive">Inactive</SelectItem>
+                            </Select>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
+
+              {/* Training Tab */}
+              <Tab
+                key="training"
+                title={
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4" />
+                    <span>Training</span>
+                  </div>
+                }
+              >
+                <div className="space-y-6 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white">Training Programs</h3>
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      size="sm"
+                      onPress={() => {
+                        const newTraining: TrainingProgram = {
+                          id: Date.now().toString(),
+                          title: "New Training",
+                          description: "Training description",
+                          duration: "TBD",
+                          instructor: "Instructor Name",
+                          requirements: [],
+                        };
+                        setDepartments(prev => ({
+                          ...prev,
+                          [selectedDept]: {
+                            ...prev[selectedDept],
+                            training: [...prev[selectedDept].training, newTraining]
+                          }
+                        }));
+                        setHasChanges(true);
+                      }}
+                    >
+                      Add Training
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(currentSettings.training || []).map((training, index) => (
+                      <Card key={training.id} className="bg-gray-800/50 border border-gray-700">
+                        <CardBody className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <Input
+                                label="Training Title"
+                                value={training.title}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.training || [])];
+                                  updated[index].title = e.target.value;
+                                  handleSettingsChange("training", updated);
+                                }}
+                                className="flex-1"
+                                size="sm"
+                              />
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="light"
+                                onPress={() => {
+                                  const updated = (currentSettings.training || []).filter((_, i) => i !== index);
+                                  handleSettingsChange("training", updated);
+                                }}
+                                className="ml-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Textarea
+                              label="Description"
+                              value={training.description}
+                              onChange={(e) => {
+                                const updated = [...(currentSettings.training || [])];
+                                updated[index].description = e.target.value;
+                                handleSettingsChange("training", updated);
+                              }}
+                              minRows={2}
+                              size="sm"
+                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              <Input
+                                label="Duration"
+                                value={training.duration}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.training || [])];
+                                  updated[index].duration = e.target.value;
+                                  handleSettingsChange("training", updated);
+                                }}
+                                size="sm"
+                              />
+                              <Input
+                                label="Instructor"
+                                value={training.instructor}
+                                onChange={(e) => {
+                                  const updated = [...(currentSettings.training || [])];
+                                  updated[index].instructor = e.target.value;
+                                  handleSettingsChange("training", updated);
+                                }}
+                                size="sm"
+                              />
+                            </div>
+                            <Textarea
+                              label="Requirements (comma-separated)"
+                              value={training.requirements.join(", ")}
+                              onChange={(e) => {
+                                const updated = [...(currentSettings.training || [])];
+                                updated[index].requirements = e.target.value.split(",").map(r => r.trim()).filter(r => r);
+                                handleSettingsChange("training", updated);
+                              }}
+                              minRows={2}
+                              size="sm"
+                            />
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Tab>
             </Tabs>
+            </div>
+            </div>
           </CardBody>
         </Card>
       </div>
     </AdminLayout>
   );
 }
+
+
+
