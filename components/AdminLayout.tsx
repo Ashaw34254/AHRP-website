@@ -29,6 +29,7 @@ const navigation = [
   { name: "Application Types", href: "/admin/application-types", icon: FileText },
   { name: "Form Builder", href: "/admin/form-builder", icon: FileText },
   { name: "App Analytics", href: "/admin/application-analytics", icon: FileBarChart },
+  { name: "Reports", href: "/admin/reports", icon: Shield },
   { name: "Roles", href: "/admin/roles", icon: Shield },
   { name: "Departments", href: "/admin/departments", icon: Shield },
   { name: "CAD Analytics", href: "/admin/analytics", icon: FileBarChart },
@@ -105,7 +106,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               variant="bordered"
               color="danger"
               startContent={sidebarOpen ? <LogOut className="w-4 h-4" /> : undefined}
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onPress={() => signOut({ callbackUrl: "/" })}
               className={!sidebarOpen ? 'px-2' : ''}
             >
               {sidebarOpen ? 'Sign Out' : '🚪'}

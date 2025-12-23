@@ -173,7 +173,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Moon className="w-4 h-4" />
                 )
               }
-              onClick={toggleTheme}
+              onPress={toggleTheme}
             >
               {theme === "dark" ? "Light Mode" : "Dark Mode"}
             </Button>
@@ -183,7 +183,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               variant="bordered"
               color="danger"
               startContent={<LogOut className="w-4 h-4" />}
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onPress={() => signOut({ callbackUrl: "/" })}
             >
               Sign Out
             </Button>
@@ -387,7 +387,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {mobileMenuOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-            onClick={() => setMobileMenuOpen(false)}
+            onPress={() => setMobileMenuOpen(false)}
           />
         )}
 
@@ -407,3 +407,4 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     </div>
   );
 }
+

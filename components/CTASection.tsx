@@ -1,10 +1,24 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@nextui-org/react";
 import { motion } from "framer-motion";
 import { ArrowRight, Users, Zap } from "lucide-react";
 
 export function CTASection() {
+  const [particles, setParticles] = useState<Array<{ left: string; duration: number; delay: number; targetX: string }>>([]);
+
+  useEffect(() => {
+    // Generate particle positions only on client to avoid hydration mismatch
+    const newParticles = [...Array(15)].map(() => ({
+      left: `${Math.random() * 100}%`,
+      duration: Math.random() * 5 + 5,
+      delay: Math.random() * 5,
+      targetX: `${Math.random() * 100}%`,
+    }));
+    setParticles(newParticles);
+  }, []);
+
   return (
     <section className="py-24 px-4 relative overflow-hidden">
       {/* Animated gradient background */}
@@ -13,26 +27,23 @@ export function CTASection() {
       
       {/* Animated particles */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(15)].map((_, i) => (
+        {particles.map((particle, i) => (
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-purple-400/20 rounded-full"
             animate={{
               y: ["0%", "100%"],
-              x: [
-                `${Math.random() * 100}%`,
-                `${Math.random() * 100}%`,
-              ],
+              x: [particle.left, particle.targetX],
               opacity: [0, 1, 0],
             }}
             transition={{
-              duration: Math.random() * 5 + 5,
+              duration: particle.duration,
               repeat: Infinity,
               ease: "linear",
-              delay: Math.random() * 5,
+              delay: particle.delay,
             }}
             style={{
-              left: `${Math.random() * 100}%`,
+              left: particle.left,
               top: `-10%`,
             }}
           />

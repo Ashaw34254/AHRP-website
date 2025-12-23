@@ -196,7 +196,7 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
       <Button
         color={config.color as any}
         startContent={<Icon className="w-4 h-4" />}
-        onClick={() => setIsOpen(true)}
+        onPress={() => setIsOpen(true)}
       >
         {config.buttonText}
       </Button>
@@ -210,7 +210,7 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
         <Button
           size="sm"
           variant="light"
-          onClick={() => setIsOpen(false)}
+          onPress={() => setIsOpen(false)}
         >
           Cancel
         </Button>
@@ -366,7 +366,7 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
           <div className="flex justify-end gap-2">
             <Button
               variant="flat"
-              onClick={() => setIsOpen(false)}
+              onPress={() => setIsOpen(false)}
             >
               Cancel
             </Button>
@@ -383,3 +383,4 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
     </Card>
   );
 }
+

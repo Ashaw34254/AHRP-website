@@ -156,7 +156,7 @@ export function CADActiveCalls({ department, refreshInterval = 10000 }: CADActiv
               <AlertTriangle className="w-6 h-6 text-red-500" />
             </div>
             <p className="text-red-400 mb-4">{error}</p>
-            <Button size="sm" color="danger" variant="shadow" onClick={fetchCalls} className="font-semibold">
+            <Button size="sm" color="danger" variant="shadow" onPress={fetchCalls} className="font-semibold">
               Retry
             </Button>
           </div>

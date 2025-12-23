@@ -93,7 +93,7 @@ export default function EnhancedVoiceWidget() {
       <div
         className="fixed z-50 cursor-pointer"
         style={{ left: `${position.x}px`, top: `${position.y}px` }}
-        onClick={() => setIsMinimized(false)}
+        onPress={() => setIsMinimized(false)}
       >
         <div className="bg-gray-900/95 backdrop-blur-lg border border-gray-800 rounded-full p-3 shadow-2xl hover:scale-110 transition-transform">
           {isEnabled ? (
@@ -306,3 +306,4 @@ export default function EnhancedVoiceWidget() {
     </div>
   );
 }
+

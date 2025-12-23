@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@nextui-org/react";
 import { Session } from "next-auth";
 import { motion } from "framer-motion";
@@ -10,6 +11,20 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ session }: HeroSectionProps) {
+  const [particles, setParticles] = useState<Array<{ initialX: number; initialY: number; targetX: number; targetY: number; duration: number }>>([]);
+
+  useEffect(() => {
+    // Generate particle positions only on client to avoid hydration mismatch
+    const newParticles = [...Array(20)].map(() => ({
+      initialX: Math.random() * window.innerWidth,
+      initialY: Math.random() * window.innerHeight,
+      targetX: Math.random() * window.innerWidth,
+      targetY: Math.random() * window.innerHeight,
+      duration: Math.random() * 10 + 20,
+    }));
+    setParticles(newParticles);
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Animated background */}
@@ -33,32 +48,25 @@ export function HeroSection({ session }: HeroSectionProps) {
 
       {/* Floating particles */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => {
-          const initialX = typeof window !== 'undefined' ? Math.random() * window.innerWidth : Math.random() * 1920;
-          const initialY = typeof window !== 'undefined' ? Math.random() * window.innerHeight : Math.random() * 1080;
-          const targetY = typeof window !== 'undefined' ? Math.random() * window.innerHeight : Math.random() * 1080;
-          const targetX = typeof window !== 'undefined' ? Math.random() * window.innerWidth : Math.random() * 1920;
-          
-          return (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-purple-500/30 rounded-full"
-              initial={{
-                x: initialX,
-                y: initialY,
-              }}
-              animate={{
-                y: [null, targetY],
-                x: [null, targetX],
-              }}
-              transition={{
-                duration: Math.random() * 10 + 20,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-            />
-          );
-        })}
+        {particles.map((particle, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-purple-500/30 rounded-full"
+            initial={{
+              x: particle.initialX,
+              y: particle.initialY,
+            }}
+            animate={{
+              y: [null, particle.targetY],
+              x: [null, particle.targetX],
+            }}
+            transition={{
+              duration: particle.duration,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
       </div>
 
       {/* Content */}

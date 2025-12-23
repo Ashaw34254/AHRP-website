@@ -72,7 +72,7 @@ export function DepartmentsSection() {
                             color="success"
                             variant="flat"
                             endContent={<ArrowRight className="w-4 h-4" />}
-                            onClick={() => router.push(dept.dashboardLink)}
+                            onPress={() => router.push(dept.dashboardLink)}
                           >
                             EMS Dashboard
                           </Button>
@@ -81,7 +81,7 @@ export function DepartmentsSection() {
                             color="danger"
                             variant="flat"
                             endContent={<ArrowRight className="w-4 h-4" />}
-                            onClick={() => router.push(dept.dashboardLink2!)}
+                            onPress={() => router.push(dept.dashboardLink2!)}
                           >
                             Fire Dashboard
                           </Button>
@@ -92,7 +92,7 @@ export function DepartmentsSection() {
                           color="primary"
                           variant="flat"
                           endContent={<ArrowRight className="w-4 h-4" />}
-                          onClick={() => router.push(dept.dashboardLink)}
+                          onPress={() => router.push(dept.dashboardLink)}
                         >
                           Civilian Dashboard
                         </Button>
@@ -102,7 +102,7 @@ export function DepartmentsSection() {
                           color="danger"
                           variant="flat"
                           endContent={<ArrowRight className="w-4 h-4" />}
-                          onClick={() => router.push(dept.dashboardLink)}
+                          onPress={() => router.push(dept.dashboardLink)}
                         >
                           Criminal Dashboard
                         </Button>
@@ -112,7 +112,7 @@ export function DepartmentsSection() {
                           color="primary"
                           variant="flat"
                           endContent={<ArrowRight className="w-4 h-4" />}
-                          onClick={() => router.push(dept.dashboardLink)}
+                          onPress={() => router.push(dept.dashboardLink)}
                         >
                           View Dashboard
                         </Button>
@@ -128,3 +128,4 @@ export function DepartmentsSection() {
     </section>
   );
 }
+

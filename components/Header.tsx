@@ -20,7 +20,7 @@ import {
   Avatar,
   Badge,
 } from "@nextui-org/react";
-import { ChevronDown, LogOut, LayoutDashboard, Shield, Users } from "lucide-react";
+import { ChevronDown, LogOut, LayoutDashboard, Shield, Users, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 

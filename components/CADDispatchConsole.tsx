@@ -387,7 +387,7 @@ export function CADDispatchConsole({
                   color={selectedDepartment === "POLICE" ? "primary" : "default"}
                   variant={selectedDepartment === "POLICE" ? "solid" : "flat"}
                   startContent={<Shield className="w-4 h-4" />}
-                  onClick={() => setSelectedDepartment("POLICE")}
+                  onPress={() => setSelectedDepartment("POLICE")}
                   className="min-w-[140px]"
                 >
                   <div className="flex flex-col items-start">
@@ -401,7 +401,7 @@ export function CADDispatchConsole({
                   color={selectedDepartment === "FIRE" ? "danger" : "default"}
                   variant={selectedDepartment === "FIRE" ? "solid" : "flat"}
                   startContent={<Flame className="w-4 h-4" />}
-                  onClick={() => setSelectedDepartment("FIRE")}
+                  onPress={() => setSelectedDepartment("FIRE")}
                   className="min-w-[140px]"
                 >
                   <div className="flex flex-col items-start">
@@ -415,7 +415,7 @@ export function CADDispatchConsole({
                   color={selectedDepartment === "EMS" ? "success" : "default"}
                   variant={selectedDepartment === "EMS" ? "solid" : "flat"}
                   startContent={<Heart className="w-4 h-4" />}
-                  onClick={() => setSelectedDepartment("EMS")}
+                  onPress={() => setSelectedDepartment("EMS")}
                   className="min-w-[140px]"
                 >
                   <div className="flex flex-col items-start">
@@ -567,7 +567,7 @@ export function CADDispatchConsole({
                           <Button
                             color="primary"
                             size="sm"
-                            onClick={() => handleQuickDispatch(call)}
+                            onPress={() => handleQuickDispatch(call)}
                           >
                             Dispatch
                           </Button>
@@ -661,7 +661,7 @@ export function CADDispatchConsole({
                                 size="sm"
                                 color="secondary"
                                 variant="flat"
-                                onClick={() => handleMarkEnRoute(call.id)}
+                                onPress={() => handleMarkEnRoute(call.id)}
                               >
                                 En Route
                               </Button>
@@ -670,7 +670,7 @@ export function CADDispatchConsole({
                               size="sm"
                               color="success"
                               variant="flat"
-                              onClick={() => handleCloseCall(call.id)}
+                              onPress={() => handleCloseCall(call.id)}
                             >
                               Close
                             </Button>
@@ -853,7 +853,7 @@ export function CADDispatchConsole({
                             ? "border-indigo-600 bg-indigo-900/20"
                             : "border-gray-800 bg-gray-900/50"
                         }`}
-                        onClick={() => {
+                        onPress={() => {
                           setSelectedUnits((prev) =>
                             prev.includes(unit.id)
                               ? prev.filter((id) => id !== unit.id)
@@ -902,3 +902,4 @@ export function CADDispatchConsole({
     </>
   );
 }
+
