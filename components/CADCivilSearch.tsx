@@ -106,6 +106,15 @@ export function CADCivilSearch() {
   const { speak, isEnabled: voiceEnabled } = useVoice();
   const [searchType, setSearchType] = useState<SearchType>("citizen");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Separate citizen search fields
+  const [citizenSearch, setCitizenSearch] = useState({
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    stateId: ""
+  });
+  
   const [loading, setLoading] = useState(false);
   const [citizen, setCitizen] = useState<Citizen | null>(null);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
@@ -217,7 +226,20 @@ export function CADCivilSearch() {
   const [addingVehicleFlag, setAddingVehicleFlag] = useState(false);
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
+    // Build search query from citizen fields if searching for citizen
+    if (searchType === "citizen") {
+      const hasSearchCriteria = citizenSearch.firstName || citizenSearch.lastName || 
+                                citizenSearch.dateOfBirth || citizenSearch.stateId;
+      if (!hasSearchCriteria) {
+        toast.error("Please enter at least one search criteria");
+        return;
+      }
+    } else {
+      if (!searchQuery.trim()) {
+        toast.error("Please enter a license plate");
+        return;
+      }
+    }
 
     setLoading(true);
     setError(null);
@@ -225,9 +247,20 @@ export function CADCivilSearch() {
     setVehicle(null);
 
     try {
-      const endpoint = searchType === "citizen" 
-        ? `/api/cad/civil/citizen?q=${encodeURIComponent(searchQuery)}`
-        : `/api/cad/civil/vehicle?plate=${encodeURIComponent(searchQuery)}`;
+      let endpoint = "";
+      
+      if (searchType === "citizen") {
+        // Build query params from separate fields
+        const params = new URLSearchParams();
+        if (citizenSearch.firstName) params.append("firstName", citizenSearch.firstName);
+        if (citizenSearch.lastName) params.append("lastName", citizenSearch.lastName);
+        if (citizenSearch.dateOfBirth) params.append("dateOfBirth", citizenSearch.dateOfBirth);
+        if (citizenSearch.stateId) params.append("stateId", citizenSearch.stateId);
+        
+        endpoint = `/api/cad/civil/citizen?${params.toString()}`;
+      } else {
+        endpoint = `/api/cad/civil/vehicle?plate=${encodeURIComponent(searchQuery)}`;
+      }
 
       const response = await fetch(endpoint);
       
@@ -243,6 +276,10 @@ export function CADCivilSearch() {
       const data = await response.json();
       
       if (searchType === "citizen") {
+        if (!data.citizen) {
+          setError("No matching citizen found");
+          return;
+        }
         setCitizen(data.citizen);
       } else {
         setVehicle(data.vehicle);
@@ -1082,7 +1119,7 @@ export function CADCivilSearch() {
     <div className="space-y-4">
       <Card className="bg-gray-900/50 border border-gray-800">
         <CardBody className="p-4">
-          <div className="flex gap-4">
+          <div className="space-y-4">
             <div className="flex gap-2">
               <Button
                 size="sm"
@@ -1092,6 +1129,7 @@ export function CADCivilSearch() {
                 onPress={() => {
                   setSearchType("citizen");
                   setSearchQuery("");
+                  setCitizenSearch({ firstName: "", lastName: "", dateOfBirth: "", stateId: "" });
                   setCitizen(null);
                   setVehicle(null);
                   setError(null);
@@ -1107,6 +1145,7 @@ export function CADCivilSearch() {
                 onPress={() => {
                   setSearchType("vehicle");
                   setSearchQuery("");
+                  setCitizenSearch({ firstName: "", lastName: "", dateOfBirth: "", stateId: "" });
                   setCitizen(null);
                   setVehicle(null);
                   setError(null);
@@ -1116,27 +1155,70 @@ export function CADCivilSearch() {
               </Button>
             </div>
 
-            <Input
-              placeholder={
-                searchType === "citizen"
-                  ? "Search by name or State ID..."
-                  : "Search by license plate..."
-              }
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-              startContent={<Search className="w-4 h-4 text-gray-400" />}
-              className="flex-1"
-            />
+            {searchType === "citizen" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Input
+                  label="First Name"
+                  placeholder="John"
+                  value={citizenSearch.firstName}
+                  onChange={(e) => setCitizenSearch({ ...citizenSearch, firstName: e.target.value })}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                />
+                <Input
+                  label="Last Name"
+                  placeholder="Doe"
+                  value={citizenSearch.lastName}
+                  onChange={(e) => setCitizenSearch({ ...citizenSearch, lastName: e.target.value })}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                />
+                <Input
+                  label="Date of Birth"
+                  type="date"
+                  value={citizenSearch.dateOfBirth}
+                  onChange={(e) => setCitizenSearch({ ...citizenSearch, dateOfBirth: e.target.value })}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                />
+                <Input
+                  label="State ID"
+                  placeholder="12345678"
+                  value={citizenSearch.stateId}
+                  onChange={(e) => setCitizenSearch({ ...citizenSearch, stateId: e.target.value })}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                />
+              </div>
+            ) : (
+              <Input
+                label="License Plate"
+                placeholder="ABC-123"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                startContent={<Search className="w-4 h-4 text-gray-400" />}
+              />
+            )}
 
-            <Button
-              color="primary"
-              onPress={handleSearch}
-              isLoading={loading}
-              data-search-trigger
-            >
-              Search
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                color="primary"
+                onPress={handleSearch}
+                isLoading={loading}
+                data-search-trigger
+              >
+                Search
+              </Button>
+              <Button
+                variant="flat"
+                onPress={() => {
+                  setSearchQuery("");
+                  setCitizenSearch({ firstName: "", lastName: "", dateOfBirth: "", stateId: "" });
+                  setCitizen(null);
+                  setVehicle(null);
+                  setError(null);
+                }}
+              >
+                Clear
+              </Button>
+            </div>
           </div>
         </CardBody>
       </Card>

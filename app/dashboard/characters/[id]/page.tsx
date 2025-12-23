@@ -2,7 +2,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardBody, CardHeader, Avatar, Chip, Button, Input, Textarea, Select, SelectItem, Tabs, Tab, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { ArrowLeft, Edit, Save, Plus, Car, Trash2, Shield, User, IdCard, Briefcase, FileText, Crosshair, AlertTriangle, FileWarning, HandCuffs, Receipt, StickyNote, X, Lock, Eye, Pencil } from "lucide-react";
+import { ArrowLeft, Edit, Save, Plus, Car, Trash2, Shield, User, IdCard, Briefcase, FileText, Crosshair, AlertTriangle, FileWarning, ShieldAlert, Receipt, StickyNote, X, Lock, Eye, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import { toast } from "@/lib/toast";
@@ -41,6 +41,12 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
   const [noteForm, setNoteForm] = useState({ id: "", title: "", content: "", category: "GENERAL" });
   const [citationForm, setCitationForm] = useState({ id: "", violation: "", fine: 0, notes: "", location: "", isPaid: false });
   const [arrestForm, setArrestForm] = useState({ id: "", charges: "", narrative: "", location: "" });
+
+  // Civil Records Search State
+  const [civilSearch, setCivilSearch] = useState({ firstName: "", lastName: "", dateOfBirth: "" });
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchingCivil, setSearchingCivil] = useState(false);
 
   useEffect(() => {
     loadCharacter();
@@ -264,6 +270,49 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
       case "MEDIUM": return "primary";
       default: return "success";
     }
+  };
+
+  // Civil Records Search Handler
+  const handleCivilSearch = async () => {
+    if (!civilSearch.firstName && !civilSearch.lastName && !civilSearch.dateOfBirth) {
+      toast.error("Please enter at least one search criteria");
+      return;
+    }
+
+    setSearchingCivil(true);
+    try {
+      // Mock search results for development
+      const mockResults = [
+        {
+          id: "1",
+          firstName: civilSearch.firstName || "John",
+          lastName: civilSearch.lastName || "Doe",
+          dateOfBirth: civilSearch.dateOfBirth || "1990-05-15",
+          stateId: "12345678",
+          hasWarrants: true,
+          hasFlags: true,
+        },
+        {
+          id: "2",
+          firstName: civilSearch.firstName || "Jane",
+          lastName: civilSearch.lastName || "Smith",
+          dateOfBirth: civilSearch.dateOfBirth || "1985-08-22",
+          stateId: "87654321",
+          hasWarrants: false,
+          hasFlags: false,
+        },
+      ];
+      setSearchResults(mockResults);
+      setShowSearchResults(true);
+    } catch (error) {
+      toast.error("Search failed");
+    } finally {
+      setSearchingCivil(false);
+    }
+  };
+
+  const handleSelectCivil = (result: any) => {
+    window.location.href = `/dashboard/characters/${result.id}`;
   };
 
   return (
@@ -546,6 +595,96 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
 
           <Tab key="flags" title={<div className="flex items-center gap-2"><AlertTriangle className="w-4 h-4" />Flags & Warrants</div>}>
             <div className="space-y-6 mt-6">
+              {/* Civil Records Search */}
+              <Card className="bg-gray-900/50 border border-indigo-800">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <User className="w-5 h-5 text-indigo-400" />
+                    <h3 className="text-lg font-bold">Civil Records Search</h3>
+                  </div>
+                </CardHeader>
+                <CardBody className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Input
+                      label="First Name"
+                      placeholder="John"
+                      value={civilSearch.firstName}
+                      onChange={(e) => setCivilSearch({ ...civilSearch, firstName: e.target.value })}
+                      onKeyDown={(e) => e.key === "Enter" && handleCivilSearch()}
+                    />
+                    <Input
+                      label="Last Name"
+                      placeholder="Doe"
+                      value={civilSearch.lastName}
+                      onChange={(e) => setCivilSearch({ ...civilSearch, lastName: e.target.value })}
+                      onKeyDown={(e) => e.key === "Enter" && handleCivilSearch()}
+                    />
+                    <Input
+                      label="Date of Birth"
+                      type="date"
+                      value={civilSearch.dateOfBirth}
+                      onChange={(e) => setCivilSearch({ ...civilSearch, dateOfBirth: e.target.value })}
+                      onKeyDown={(e) => e.key === "Enter" && handleCivilSearch()}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button color="primary" onPress={handleCivilSearch} isLoading={searchingCivil}>
+                      Search Records
+                    </Button>
+                    <Button variant="flat" onPress={() => { setCivilSearch({ firstName: "", lastName: "", dateOfBirth: "" }); setSearchResults([]); setShowSearchResults(false); }}>
+                      Clear
+                    </Button>
+                  </div>
+
+                  {/* Search Results Dropdown */}
+                  {showSearchResults && searchResults.length > 0 && (
+                    <div className="border border-gray-700 rounded-lg bg-gray-800/50 divide-y divide-gray-700">
+                      <div className="p-3 bg-gray-800/70">
+                        <p className="text-sm font-semibold text-gray-300">{searchResults.length} Result(s) Found</p>
+                      </div>
+                      {searchResults.map((result) => (
+                        <div
+                          key={result.id}
+                          className="p-4 hover:bg-gray-700/50 cursor-pointer transition-colors"
+                          onClick={() => handleSelectCivil(result)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h4 className="text-lg font-bold text-white">
+                                  {result.firstName} {result.lastName}
+                                </h4>
+                                {result.hasWarrants && <Chip size="sm" color="danger" variant="flat">Active Warrant</Chip>}
+                                {result.hasFlags && <Chip size="sm" color="warning" variant="flat">Flagged</Chip>}
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <span className="text-gray-400">DOB:</span>
+                                  <span className="text-white ml-2">{result.dateOfBirth}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">State ID:</span>
+                                  <span className="text-white ml-2">{result.stateId}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <Button size="sm" color="primary" variant="flat">View</Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {showSearchResults && searchResults.length === 0 && (
+                    <Card className="bg-gray-800/30 border border-gray-700">
+                      <CardBody className="p-6 text-center">
+                        <p className="text-gray-400">No matching records found</p>
+                      </CardBody>
+                    </Card>
+                  )}
+                </CardBody>
+              </Card>
+
               <div>
                 <h3 className="text-xl font-bold mb-4">Active Flags</h3>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -637,7 +776,7 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
             </div>
           </Tab>
 
-          <Tab key="arrests" title={<div className="flex items-center gap-2"><HandCuffs className="w-4 h-4" />Arrests ({policeData.arrests.length})</div>}>
+          <Tab key="arrests" title={<div className="flex items-center gap-2"><ShieldAlert className="w-4 h-4" />Arrests ({policeData.arrests.length})</div>}>
             <div className="space-y-4 mt-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-xl font-bold">Arrest Records</h3>
@@ -650,7 +789,7 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <HandCuffs className="w-5 h-5 text-red-500" />
+                            <ShieldAlert className="w-5 h-5 text-red-500" />
                             <h4 className="text-lg font-bold">Arrest Record</h4>
                             <Chip size="sm" color={arrest.source === "user" ? "success" : "warning"} variant="flat">{arrest.source === "user" ? "User" : "CAD"}</Chip>
                           </div>
@@ -674,7 +813,7 @@ export default function CharacterDetailPage({ params }: { params: Promise<{ id: 
                   </Card>
                 ))}
               </div>
-              {policeData.arrests.length === 0 && <Card className="bg-gray-900/50 border border-gray-800"><CardBody className="p-12 text-center"><HandCuffs className="w-16 h-16 text-gray-600 mx-auto mb-4" /><p className="text-gray-400">No arrests</p></CardBody></Card>}
+              {policeData.arrests.length === 0 && <Card className="bg-gray-900/50 border border-gray-800"><CardBody className="p-12 text-center"><ShieldAlert className="w-16 h-16 text-gray-600 mx-auto mb-4" /><p className="text-gray-400">No arrests</p></CardBody></Card>}
             </div>
           </Tab>
 
