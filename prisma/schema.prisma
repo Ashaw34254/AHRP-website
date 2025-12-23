@@ -1066,17 +1066,85 @@ model DispatcherMessage {
   
   fromUserId  String
   fromName    String
+  fromCallsign String?
   
   toUserId    String?  // null for broadcast
   
   message     String
   priority    String   @default("NORMAL") // NORMAL, HIGH, URGENT
   
+  // Channel & Category system
+  channel     String?  @default("general") // general, operations, admin, shifts
+  category    String?  // traffic, medical, fire, admin, update
+  
+  // Advanced features
+  mentions    String?  // JSON array of mentioned user IDs
+  parentId    String?  // For threaded replies
+  threadId    String?  // Thread identifier
+  expiresAt   DateTime? // Auto-delete timestamp
+  department  String?  // POLICE, FIRE, EMS
+  
+  // Message status
   isRead      Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  
+  // Reactions & Edit history
+  reactions   String?  // JSON array of {emoji, userId, userName}
+  editedAt    DateTime? // Last edit timestamp
+  
+  // Attachments
+  attachmentUrl  String?
+  attachmentType String? // image, document, etc.
+  
+  // Metadata
+  callNumber  String?  // Link to CAD call
+  location    String?  // Location reference
   
   createdAt   DateTime @default(now())
   
   @@index([toUserId, isRead])
+  @@index([channel])
+  @@index([category])
+  @@index([threadId])
+  @@index([callNumber])
+}
+
+// Message Bookmarks
+model MessageBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  messageId String
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, messageId])
+  @@index([userId])
+}
+
+// Message Templates
+model MessageTemplate {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  text       String
+  category   String?
+  department String?
+  isPublic   Boolean  @default(false) // Share with department
+  createdAt  DateTime @default(now())
+  
+  @@index([userId])
+  @@index([department])
+}
+
+// Read Receipts
+model MessageReadReceipt {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  userName  String
+  readAt    DateTime @default(now())
+  
+  @@unique([messageId, userId])
+  @@index([messageId])
 }
 
 // ============================================

@@ -2,16 +2,19 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, Tab } from "@nextui-org/react";
-import { Flame, Radio, Phone, History, Siren } from "lucide-react";
+import { Heart, Radio, Phone, History, Siren, FileText, Bell, MessageSquare } from "lucide-react";
 import { CADDispatchConsole } from "@/components/CADDispatchConsole";
 import { CADActiveCalls } from "@/components/CADActiveCalls";
 import { CADUnitStatus } from "@/components/CADUnitStatus";
 import { CADNewCallForm } from "@/components/CADNewCallForm";
 import { CADCallHistory } from "@/components/CADCallHistory";
+import { IncidentReports } from "@/components/IncidentReports";
+import { PanicAlertMonitor } from "@/components/PanicAlertMonitor";
+import { DispatcherChatModal } from "@/components/DispatcherChatModal";
 import { useState } from "react";
 
-export default function FireCADPage() {
-  const [selectedTab, setSelectedTab] = useState("dispatch");
+export default function EMSDispatchPage() {
+  const [selectedTab, setSelectedTab] = useState("console");
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
@@ -20,10 +23,10 @@ export default function FireCADPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Flame className="w-8 h-8 text-red-500" />
-              Fire CAD System
+              <Heart className="w-8 h-8 text-green-500" />
+              Ambulance Victoria Dispatch
             </h1>
-            <p className="text-gray-400 mt-1">Computer-Aided Dispatch</p>
+            <p className="text-gray-400 mt-1">Medical Emergency Response</p>
           </div>
           <CADNewCallForm onCallCreated={() => setRefreshKey(prev => prev + 1)} />
         </div>
@@ -31,13 +34,13 @@ export default function FireCADPage() {
         <Tabs 
           selectedKey={selectedTab} 
           onSelectionChange={(key) => setSelectedTab(key as string)}
-          color="danger"
+          color="success"
           variant="underlined"
           classNames={{
             tabList: "gap-6 w-full relative rounded-none p-0 border-b border-gray-800",
-            cursor: "w-full bg-red-600",
+            cursor: "w-full bg-green-600",
             tab: "max-w-fit px-0 h-12",
-            tabContent: "group-data-[selected=true]:text-red-400"
+            tabContent: "group-data-[selected=true]:text-green-400"
           }}
         >
           <Tab
@@ -50,7 +53,7 @@ export default function FireCADPage() {
             }
           >
             <div className="py-6">
-              <CADDispatchConsole department="FIRE" />
+              <CADDispatchConsole department="EMS" />
             </div>
           </Tab>
 
@@ -64,7 +67,7 @@ export default function FireCADPage() {
             }
           >
             <div className="py-6">
-              <CADActiveCalls department="FIRE" key={refreshKey} />
+              <CADActiveCalls department="EMS" key={refreshKey} />
             </div>
           </Tab>
 
@@ -78,7 +81,7 @@ export default function FireCADPage() {
             }
           >
             <div className="py-6">
-              <CADUnitStatus department="FIRE" />
+              <CADUnitStatus department="EMS" />
             </div>
           </Tab>
 
@@ -92,11 +95,42 @@ export default function FireCADPage() {
             }
           >
             <div className="py-6">
-              <CADCallHistory department="FIRE" />
+              <CADCallHistory department="EMS" />
+            </div>
+          </Tab>
+
+          <Tab
+            key="incidents"
+            title={
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                <span>Incidents</span>
+              </div>
+            }
+          >
+            <div className="py-6">
+              <IncidentReports department="EMS" />
+            </div>
+          </Tab>
+
+          <Tab
+            key="panic"
+            title={
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                <span>Panic Alerts</span>
+              </div>
+            }
+          >
+            <div className="py-6">
+              <PanicAlertMonitor department="EMS" />
             </div>
           </Tab>
         </Tabs>
       </div>
+      
+      {/* Floating Chat Button */}
+      <DispatcherChatModal department="EMS" />
     </DashboardLayout>
   );
 }

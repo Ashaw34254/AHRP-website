@@ -26,10 +26,11 @@ interface Call {
 }
 
 interface CADActiveCallsProps {
+  department?: string;
   refreshInterval?: number;
 }
 
-export function CADActiveCalls({ refreshInterval = 10000 }: CADActiveCallsProps) {
+export function CADActiveCalls({ department, refreshInterval = 10000 }: CADActiveCallsProps) {
   const [calls, setCalls] = useState<Call[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +44,18 @@ export function CADActiveCalls({ refreshInterval = 10000 }: CADActiveCallsProps)
       const response = await fetch("/api/cad/calls?status=PENDING,DISPATCHED,ACTIVE");
       if (!response.ok) throw new Error("Failed to fetch calls");
       const data = await response.json();
-      setCalls(data.calls);
+      
+      // Filter by department if specified
+      let filteredCalls = data.calls;
+      if (department && department !== "ALL") {
+        filteredCalls = data.calls.filter((call: Call) => {
+          // Show unassigned calls or calls with units from this department
+          if (call.units.length === 0) return true;
+          return call.units.some(u => u.department === department);
+        });
+      }
+      
+      setCalls(filteredCalls);
       setError(null);
     } catch (err) {
       setError("Failed to load active calls");
@@ -57,7 +69,7 @@ export function CADActiveCalls({ refreshInterval = 10000 }: CADActiveCallsProps)
     fetchCalls();
     const interval = setInterval(fetchCalls, refreshInterval);
     return () => clearInterval(interval);
-  }, [refreshInterval]);
+  }, [refreshInterval, department]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {

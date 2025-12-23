@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { getDepartmentSettings } from "@/lib/department-settings";
 import { 
@@ -81,7 +82,19 @@ export default function FireDashboardPage() {
         }}>
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative h-full flex items-center px-6">
-            <Flame className="w-16 h-16 text-white mr-4" />
+            {deptSettings.theme.logoUrl ? (
+              <div className="relative w-16 h-16 mr-4 bg-white/10 rounded-xl p-2">
+                <Image
+                  src={deptSettings.theme.logoUrl}
+                  alt={`${deptSettings.theme.name} Logo`}
+                  width={64}
+                  height={64}
+                  className="object-contain"
+                />
+              </div>
+            ) : (
+              <Flame className="w-16 h-16 text-white mr-4" />
+            )}
             <div>
               <h1 className="text-3xl font-bold text-white">{deptSettings.theme.displayName}</h1>
               <p className="text-orange-100">{deptSettings.motto}</p>

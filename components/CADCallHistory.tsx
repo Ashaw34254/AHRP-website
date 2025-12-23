@@ -41,7 +41,11 @@ interface Call {
   }>;
 }
 
-export function CADCallHistory() {
+interface CADCallHistoryProps {
+  department?: string;
+}
+
+export function CADCallHistory({ department }: CADCallHistoryProps = { department: undefined }) {
   const [calls, setCalls] = useState<Call[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
@@ -54,7 +58,7 @@ export function CADCallHistory() {
 
   useEffect(() => {
     fetchCallHistory();
-  }, [filters]);
+  }, [filters, department]);
 
   const fetchCallHistory = async () => {
     setLoading(true);
@@ -70,7 +74,15 @@ export function CADCallHistory() {
       const data = await response.json();
 
       if (data.calls) {
-        setCalls(data.calls);
+        // Filter by department if specified
+        let filteredCalls = data.calls;
+        if (department && department !== "ALL") {
+          filteredCalls = data.calls.filter((call: Call) => {
+            if (call.units.length === 0) return false; // Don't show unassigned closed calls
+            return call.units.some(u => u.department === department);
+          });
+        }
+        setCalls(filteredCalls);
       }
     } catch (error) {
       console.error("Failed to fetch call history:", error);

@@ -91,9 +91,22 @@ export default function PoliceDashboardPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">{deptSettings.theme.displayName}</h1>
-            <p className="text-gray-400">Welcome back, {session?.user?.name || "Officer"}</p>
+          <div className="flex items-center gap-4">
+            {deptSettings.theme.logoUrl && (
+              <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-800/50 border border-blue-500/30 p-2">
+                <Image
+                  src={deptSettings.theme.logoUrl}
+                  alt={`${deptSettings.theme.name} Logo`}
+                  width={64}
+                  height={64}
+                  className="object-contain"
+                />
+              </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">{deptSettings.theme.displayName}</h1>
+              <p className="text-gray-400">Welcome back, {session?.user?.name || "Officer"}</p>
+            </div>
           </div>
           <Chip 
             size="lg" 

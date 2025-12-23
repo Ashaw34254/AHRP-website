@@ -29,10 +29,11 @@ interface PanicAlert {
 }
 
 interface PanicAlertMonitorProps {
+  department?: string;
   onClose?: () => void;
 }
 
-export function PanicAlertMonitor({ onClose }: PanicAlertMonitorProps) {
+export function PanicAlertMonitor({ department, onClose }: PanicAlertMonitorProps) {
   const [alerts, setAlerts] = useState<PanicAlert[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +45,10 @@ export function PanicAlertMonitor({ onClose }: PanicAlertMonitorProps) {
 
   const fetchAlerts = async () => {
     try {
-      const response = await fetch("/api/cad/panic");
+      const url = department 
+        ? `/api/cad/panic?department=${department}`
+        : "/api/cad/panic";
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch panic alerts");
       const data = await response.json();
       

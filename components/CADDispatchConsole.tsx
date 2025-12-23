@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Card,
   CardBody,
@@ -17,6 +17,8 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  Badge,
+  ButtonGroup,
 } from "@nextui-org/react";
 import {
   Radio,
@@ -27,9 +29,16 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  Activity,
+  TrendingUp,
+  Users,
+  Shield,
+  Flame,
+  Heart,
 } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useCADVoiceAlerts } from "@/lib/use-voice-alerts";
+import { getCallTypeDisplay } from "@/lib/victoria-police-config";
 
 interface Call {
   id: string;
@@ -38,10 +47,13 @@ interface Call {
   priority: string;
   status: string;
   location: string;
+  postal: string | null;
   description: string;
   callerName: string | null;
   callerPhone: string | null;
   createdAt: string;
+  dispatchedAt: string | null;
+  closedAt: string | null;
   units: Array<{
     id: string;
     callsign: string;
@@ -79,8 +91,52 @@ export function CADDispatchConsole({
   const [selectedCall, setSelectedCall] = useState<Call | null>(null);
   const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
   const [previousCallIds, setPreviousCallIds] = useState<Set<string>>(new Set());
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [selectedDepartment, setSelectedDepartment] = useState<"POLICE" | "FIRE" | "EMS">(
+    (department as "POLICE" | "FIRE" | "EMS") || "POLICE"
+  );
   const { isOpen, onOpen, onClose } = useDisclosure();
   const voiceAlerts = useCADVoiceAlerts();
+
+  // Calculate statistics based on selected department
+  const stats = useMemo(() => {
+    // Filter data by selected department only
+    const filteredUnits = units.filter(u => u.department === selectedDepartment);
+    
+    // For calls, show unassigned calls + calls assigned to this department
+    const filteredCalls = calls.filter(c => {
+      // Show unassigned calls (pending)
+      if (c.units.length === 0 && c.status === 'PENDING') return true;
+      // Show calls with units from this department
+      return c.units.some(u => u.department === selectedDepartment);
+    });
+    
+    const criticalCalls = filteredCalls.filter(c => 
+      c.priority === 'CRITICAL' && 
+      (c.status === 'PENDING' || c.status === 'DISPATCHED')
+    ).length;
+    
+    const avgResponseTime = filteredCalls
+      .filter(c => c.dispatchedAt && c.createdAt)
+      .map(c => {
+        const created = new Date(c.createdAt).getTime();
+        const dispatched = new Date(c.dispatchedAt!).getTime();
+        return (dispatched - created) / 1000 / 60; // minutes
+      })
+      .reduce((sum, time, _, arr) => sum + time / arr.length, 0);
+
+    const totalActive = filteredCalls.filter(c => 
+      c.status === 'PENDING' || c.status === 'DISPATCHED' || c.status === 'ACTIVE'
+    ).length;
+
+    return {
+      critical: criticalCalls,
+      avgResponse: avgResponseTime || 0,
+      totalActive,
+      availableUnits: filteredUnits.filter(u => u.status === 'AVAILABLE' && !u.call).length,
+      totalUnits: filteredUnits.length,
+    };
+  }, [calls, units, selectedDepartment]);
 
   useEffect(() => {
     fetchData();
@@ -94,6 +150,10 @@ export function CADDispatchConsole({
         fetch("/api/cad/calls"),
         fetch("/api/cad/units"),
       ]);
+
+      if (!callsRes.ok || !unitsRes.ok) {
+        throw new Error(`HTTP error! calls: ${callsRes.status}, units: ${unitsRes.status}`);
+      }
 
       const callsData = await callsRes.json();
       const unitsData = await unitsRes.json();
@@ -143,6 +203,7 @@ export function CADDispatchConsole({
       setPreviousCallIds(currentCallIds);
       setCalls(filteredCalls);
       setUnits(filteredUnits);
+      setLastUpdate(new Date());
     } catch (error) {
       console.error("Failed to fetch dispatch data:", error);
     } finally {
@@ -270,21 +331,35 @@ export function CADDispatchConsole({
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000 / 60);
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diff < 1) return "Just now";
-    if (diff < 60) return `${diff}m ago`;
-    if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
-    return date.toLocaleDateString();
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ${Math.floor((diff % 3600) / 60)}m ago`;
+    return date.toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
-  const availableUnits = units.filter(
+  const formatTimestamp = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  // Filter by selected department only
+  const filteredUnits = units.filter(u => u.department === selectedDepartment);
+
+  // Show unassigned calls + calls assigned to this department
+  const filteredCalls = calls.filter(c => {
+    if (c.units.length === 0 && c.status === 'PENDING') return true;
+    return c.units.some(u => u.department === selectedDepartment);
+  });
+
+  const availableUnits = filteredUnits.filter(
     (u) => u.status === "AVAILABLE" && !u.call
   );
-  const busyUnits = units.filter((u) => u.status !== "AVAILABLE" || u.call);
+  const busyUnits = filteredUnits.filter((u) => u.status !== "AVAILABLE" || u.call);
 
-  const pendingCalls = calls.filter((c) => c.status === "PENDING");
-  const activeCalls = calls.filter(
+  const pendingCalls = filteredCalls.filter((c) => c.status === "PENDING");
+  const activeCalls = filteredCalls.filter(
     (c) => c.status === "DISPATCHED" || c.status === "ACTIVE"
   );
 
@@ -298,6 +373,117 @@ export function CADDispatchConsole({
 
   return (
     <>
+      {/* Department Selector - Only show if not locked to a specific department */}
+      {!department && (
+        <Card className="border border-gray-800 mb-6">
+          <CardBody className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white mb-1">Dispatch Console</h2>
+                <p className="text-sm text-gray-400">Select your department to begin dispatching</p>
+              </div>
+              <ButtonGroup size="lg" variant="flat">
+                <Button
+                  color={selectedDepartment === "POLICE" ? "primary" : "default"}
+                  variant={selectedDepartment === "POLICE" ? "solid" : "flat"}
+                  startContent={<Shield className="w-4 h-4" />}
+                  onClick={() => setSelectedDepartment("POLICE")}
+                  className="min-w-[140px]"
+                >
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Police</span>
+                    <span className="text-xs opacity-70">
+                      {units.filter(u => u.department === 'POLICE').length} units
+                    </span>
+                  </div>
+                </Button>
+                <Button
+                  color={selectedDepartment === "FIRE" ? "danger" : "default"}
+                  variant={selectedDepartment === "FIRE" ? "solid" : "flat"}
+                  startContent={<Flame className="w-4 h-4" />}
+                  onClick={() => setSelectedDepartment("FIRE")}
+                  className="min-w-[140px]"
+                >
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Fire</span>
+                    <span className="text-xs opacity-70">
+                      {units.filter(u => u.department === 'FIRE').length} units
+                    </span>
+                  </div>
+                </Button>
+                <Button
+                  color={selectedDepartment === "EMS" ? "success" : "default"}
+                  variant={selectedDepartment === "EMS" ? "solid" : "flat"}
+                  startContent={<Heart className="w-4 h-4" />}
+                  onClick={() => setSelectedDepartment("EMS")}
+                  className="min-w-[140px]"
+                >
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Ambulance</span>
+                    <span className="text-xs opacity-70">
+                      {units.filter(u => u.department === 'EMS').length} units
+                    </span>
+                  </div>
+                </Button>
+              </ButtonGroup>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Real-time Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-gradient-to-br from-red-900/20 to-red-800/10 border border-red-800/50">
+          <CardBody className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Critical Calls</p>
+                <p className="text-3xl font-bold text-red-400 mt-1">{stats.critical}</p>
+              </div>
+              <AlertTriangle className="w-8 h-8 text-red-500 opacity-50" />
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-blue-900/20 to-blue-800/10 border border-blue-800/50">
+          <CardBody className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Active Calls</p>
+                <p className="text-3xl font-bold text-blue-400 mt-1">{stats.totalActive}</p>
+              </div>
+              <Activity className="w-8 h-8 text-blue-500 opacity-50" />
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-900/20 to-green-800/10 border border-green-800/50">
+          <CardBody className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Available Units</p>
+                <p className="text-3xl font-bold text-green-400 mt-1">{stats.availableUnits}</p>
+              </div>
+              <Users className="w-8 h-8 text-green-500 opacity-50" />
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border border-purple-800/50">
+          <CardBody className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Avg Response</p>
+                <p className="text-3xl font-bold text-purple-400 mt-1">
+                  {stats.avgResponse > 0 ? `${stats.avgResponse.toFixed(1)}m` : 'N/A'}
+                </p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-purple-500 opacity-50" />
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Call Queue */}
         <div className="lg:col-span-2 space-y-4">
@@ -337,7 +523,7 @@ export function CADDispatchConsole({
                                 color={getPriorityColor(call.priority) as any}
                                 variant="flat"
                                 startContent={
-                                  call.priority === "EMERGENCY" ? (
+                                  (call.priority === "EMERGENCY" || call.priority === "CRITICAL") ? (
                                     <AlertTriangle className="w-3 h-3" />
                                   ) : undefined
                                 }
@@ -345,26 +531,34 @@ export function CADDispatchConsole({
                                 {call.priority}
                               </Chip>
                               <Chip size="sm" variant="flat">
-                                {call.type.replace(/_/g, " ")}
+                                {getCallTypeDisplay(call.type)}
                               </Chip>
                             </div>
 
                             <div className="space-y-1 text-sm">
                               <div className="flex items-center gap-2 text-gray-300">
-                                <MapPin className="w-3 h-3" />
-                                <span>{call.location}</span>
+                                <MapPin className="w-3 h-3 flex-shrink-0" />
+                                <span className="line-clamp-1">
+                                  {call.location}
+                                  {call.postal && ` (${call.postal})`}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2 text-gray-400">
-                                <Clock className="w-3 h-3" />
-                                <span>{formatTime(call.createdAt)}</span>
+                                <Clock className="w-3 h-3 flex-shrink-0" />
+                                <span>
+                                  {formatTimestamp(call.createdAt)} - {formatTime(call.createdAt)}
+                                </span>
                               </div>
                               {call.callerName && (
                                 <div className="flex items-center gap-2 text-gray-400">
-                                  <User className="w-3 h-3" />
-                                  <span>{call.callerName}</span>
+                                  <User className="w-3 h-3 flex-shrink-0" />
+                                  <span>
+                                    {call.callerName}
+                                    {call.callerPhone && ` • ${call.callerPhone}`}
+                                  </span>
                                 </div>
                               )}
-                              <p className="text-gray-400 mt-2">
+                              <p className="text-gray-400 mt-2 line-clamp-2">
                                 {call.description}
                               </p>
                             </div>

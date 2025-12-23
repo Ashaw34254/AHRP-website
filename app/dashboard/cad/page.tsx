@@ -6,7 +6,7 @@ import { Shield, Flame, Heart, Radio, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-export default function DispatchLandingPage() {
+export default function CADLandingPage() {
   const router = useRouter();
 
   const departments = [
@@ -99,6 +99,8 @@ export default function DispatchLandingPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Card
+                  isPressable
+                  onPress={() => router.push(dept.route)}
                   className={`border-2 ${dept.borderColor} ${dept.hoverColor} transition-all duration-300 hover:scale-105 bg-gray-900/50 backdrop-blur-sm h-full`}
                 >
                   <CardHeader className={`bg-gradient-to-br ${dept.color} p-6`}>

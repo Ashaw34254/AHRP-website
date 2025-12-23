@@ -63,7 +63,11 @@ interface Officer {
   department: string;
 }
 
-export function IncidentReports() {
+interface IncidentReportsProps {
+  department?: string;
+}
+
+export function IncidentReports({ department }: IncidentReportsProps = { department: undefined }) {
   const [reports, setReports] = useState<IncidentReport[]>([]);
   const [officers, setOfficers] = useState<Officer[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,7 +102,10 @@ export function IncidentReports() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch("/api/cad/incidents");
+      const url = department 
+        ? `/api/cad/incidents?department=${department}`
+        : "/api/cad/incidents";
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setReports(data.reports || []);

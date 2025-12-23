@@ -2,12 +2,11 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, Tab } from "@nextui-org/react";
-import { Heart, Radio, Phone, Search, History, Siren } from "lucide-react";
+import { Heart, Radio, Phone, History, Siren } from "lucide-react";
 import { CADDispatchConsole } from "@/components/CADDispatchConsole";
 import { CADActiveCalls } from "@/components/CADActiveCalls";
 import { CADUnitStatus } from "@/components/CADUnitStatus";
 import { CADNewCallForm } from "@/components/CADNewCallForm";
-import { CADCivilSearch } from "@/components/CADCivilSearch";
 import { CADCallHistory } from "@/components/CADCallHistory";
 import { useState } from "react";
 
@@ -65,7 +64,7 @@ export default function EMSCADPage() {
             }
           >
             <div className="py-6">
-              <CADActiveCalls key={refreshKey} />
+              <CADActiveCalls department="EMS" key={refreshKey} />
             </div>
           </Tab>
 
@@ -84,20 +83,6 @@ export default function EMSCADPage() {
           </Tab>
 
           <Tab
-            key="civil"
-            title={
-              <div className="flex items-center gap-2">
-                <Search className="w-4 h-4" />
-                <span>Civil Records</span>
-              </div>
-            }
-          >
-            <div className="py-6">
-              <CADCivilSearch />
-            </div>
-          </Tab>
-
-          <Tab
             key="history"
             title={
               <div className="flex items-center gap-2">
@@ -107,7 +92,7 @@ export default function EMSCADPage() {
             }
           >
             <div className="py-6">
-              <CADCallHistory />
+              <CADCallHistory department="EMS" />
             </div>
           </Tab>
         </Tabs>

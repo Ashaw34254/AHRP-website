@@ -33,7 +33,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { fromUserId, fromName, toUserId, message, priority } = body;
+    const {
+      fromUserId,
+      fromName,
+      fromCallsign,
+      toUserId,
+      message,
+      priority,
+      channel,
+      category,
+      mentions,
+      parentId,
+      threadId,
+      expiresAt,
+      department,
+    } = body;
 
     if (!fromUserId || !fromName || !message) {
       return NextResponse.json(
@@ -46,9 +60,17 @@ export async function POST(request: NextRequest) {
       data: {
         fromUserId,
         fromName,
+        fromCallsign: fromCallsign || null,
         toUserId: toUserId || null,
         message,
         priority: priority || "NORMAL",
+        channel: channel || "general",
+        category: category || null,
+        mentions: mentions && mentions.length > 0 ? JSON.stringify(mentions) : null,
+        parentId: parentId || null,
+        threadId: threadId || null,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        department: department || null,
       },
     });
 

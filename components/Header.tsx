@@ -20,8 +20,9 @@ import {
   Avatar,
   Badge,
 } from "@nextui-org/react";
-import { ChevronDown, LogOut, LayoutDashboard, Shield, Sparkles, Users } from "lucide-react";
+import { ChevronDown, LogOut, LayoutDashboard, Shield, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 // Extend session type to include role
 interface ExtendedSession extends Session {
@@ -76,11 +77,18 @@ export function Header() {
         <NavbarBrand>
           <Link href="/" className="flex items-center gap-3">
             <motion.div
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg"
+              className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg"
               whileHover={{ scale: 1.05, rotate: 5 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <Sparkles className="w-5 h-5 text-white" />
+              <Image
+                src="/logo.png"
+                alt="Aurora Horizon RP Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+              />
             </motion.div>
             <div className="flex flex-col">
               <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-transparent bg-clip-text">

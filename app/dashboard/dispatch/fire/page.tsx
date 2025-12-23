@@ -2,16 +2,19 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, Tab } from "@nextui-org/react";
-import { Flame, Radio, Phone, History, Siren } from "lucide-react";
+import { Flame, Radio, Phone, History, Siren, FileText, Bell, MessageSquare } from "lucide-react";
 import { CADDispatchConsole } from "@/components/CADDispatchConsole";
 import { CADActiveCalls } from "@/components/CADActiveCalls";
 import { CADUnitStatus } from "@/components/CADUnitStatus";
 import { CADNewCallForm } from "@/components/CADNewCallForm";
 import { CADCallHistory } from "@/components/CADCallHistory";
+import { IncidentReports } from "@/components/IncidentReports";
+import { PanicAlertMonitor } from "@/components/PanicAlertMonitor";
+import { DispatcherChatModal } from "@/components/DispatcherChatModal";
 import { useState } from "react";
 
-export default function FireCADPage() {
-  const [selectedTab, setSelectedTab] = useState("dispatch");
+export default function FireDispatchPage() {
+  const [selectedTab, setSelectedTab] = useState("console");
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
@@ -21,9 +24,9 @@ export default function FireCADPage() {
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <Flame className="w-8 h-8 text-red-500" />
-              Fire CAD System
+              Fire & Rescue Dispatch
             </h1>
-            <p className="text-gray-400 mt-1">Computer-Aided Dispatch</p>
+            <p className="text-gray-400 mt-1">Emergency Response Coordination</p>
           </div>
           <CADNewCallForm onCallCreated={() => setRefreshKey(prev => prev + 1)} />
         </div>
@@ -73,7 +76,7 @@ export default function FireCADPage() {
             title={
               <div className="flex items-center gap-2">
                 <Radio className="w-4 h-4" />
-                <span>Unit Status</span>
+                <span>Apparatus Status</span>
               </div>
             }
           >
@@ -95,8 +98,39 @@ export default function FireCADPage() {
               <CADCallHistory department="FIRE" />
             </div>
           </Tab>
+
+          <Tab
+            key="incidents"
+            title={
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                <span>Incidents</span>
+              </div>
+            }
+          >
+            <div className="py-6">
+              <IncidentReports department="FIRE" />
+            </div>
+          </Tab>
+
+          <Tab
+            key="panic"
+            title={
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                <span>Panic Alerts</span>
+              </div>
+            }
+          >
+            <div className="py-6">
+              <PanicAlertMonitor department="FIRE" />
+            </div>
+          </Tab>
         </Tabs>
       </div>
+      
+      {/* Floating Chat Button */}
+      <DispatcherChatModal department="FIRE" />
     </DashboardLayout>
   );
 }

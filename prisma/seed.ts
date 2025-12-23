@@ -23,11 +23,11 @@ async function main() {
   const officer1 = await prisma.officer.create({
     data: {
       userId: user.id,
-      callsign: "1A-01",
-      name: "John Smith",
-      badge: "101",
+      callsign: "D231", // Victoria Police divisional unit
+      name: "Sarah Thompson",
+      badge: "24681",
       department: "POLICE",
-      rank: "Senior Officer",
+      rank: "Senior Constable",
       dutyStatus: "AVAILABLE",
     },
   });
@@ -35,11 +35,11 @@ async function main() {
   const officer2 = await prisma.officer.create({
     data: {
       userId: user.id,
-      callsign: "FIRE-1",
-      name: "Jane Doe",
-      badge: "F101",
+      callsign: "MFB-P1", // Melbourne Fire Brigade Pumper
+      name: "James Mitchell",
+      badge: "F2401",
       department: "FIRE",
-      rank: "Captain",
+      rank: "Station Officer",
       dutyStatus: "AVAILABLE",
     },
   });
@@ -47,7 +47,7 @@ async function main() {
   const officer3 = await prisma.officer.create({
     data: {
       userId: user.id,
-      callsign: "EMS-5",
+      callsign: "MICA-5", // Mobile Intensive Care Ambulance
       name: "Mike Johnson",
       badge: "E205",
       department: "EMS",
@@ -104,17 +104,17 @@ async function main() {
     data: { unitId: unit3.id },
   });
 
-  // Create sample calls
+  // Create sample calls with Victorian locations
   const call1 = await prisma.call.create({
     data: {
       callNumber: `2025-${String(Date.now()).slice(-6)}`,
-      type: "TRAFFIC_STOP",
+      type: "RBT_STOP",
       priority: "LOW",
       status: "PENDING",
-      location: "Main St & 1st Ave",
-      postal: "101",
-      description: "Routine traffic stop - speeding violation",
-      caller: "Officer Smith",
+      location: "Intersection of Swanston Street & Collins Street",
+      postal: "3000",
+      description: "Random Breath Test stop - routine traffic enforcement",
+      caller: "Senior Constable Thompson",
       createdById: user.id,
     },
   });
@@ -122,14 +122,14 @@ async function main() {
   const call2 = await prisma.call.create({
     data: {
       callNumber: `2025-${String(Date.now() + 1).slice(-6)}`,
-      type: "MEDICAL_EMERGENCY",
+      type: "MVA",
       priority: "HIGH",
       status: "DISPATCHED",
-      location: "Aurora Shopping Mall",
-      postal: "205",
-      description: "Person having chest pains, needs immediate medical assistance",
-      caller: "Mall Security",
-      callerPhone: "555-0123",
+      location: "Chadstone Shopping Centre Car Park",
+      postal: "3148",
+      description: "Motor vehicle accident - two vehicles, injuries reported. Patient conscious but in pain.",
+      caller: "Centre Security",
+      callerPhone: "0398 765 432",
       createdById: user.id,
       dispatchedAt: new Date(),
     },
@@ -141,11 +141,11 @@ async function main() {
       type: "STRUCTURE_FIRE",
       priority: "CRITICAL",
       status: "ACTIVE",
-      location: "123 Oak Street",
-      postal: "310",
-      description: "House fire, flames visible from second floor. Possible occupants inside.",
-      caller: "Neighbor",
-      callerPhone: "555-0456",
+      location: "123 Lygon Street, Carlton",
+      postal: "3053",
+      description: "House fire, flames visible from upper floor. Possible occupants inside. Multiple Triple Zero calls.",
+      caller: "Neighbour",
+      callerPhone: "0412 345 678",
       createdById: user.id,
       dispatchedAt: new Date(),
     },
@@ -170,16 +170,16 @@ async function main() {
     },
   });
 
-  // Create sample citizens
+  // Create sample Victorian citizens
   const citizen1 = await prisma.citizen.create({
     data: {
-      firstName: "Robert",
-      lastName: "Martinez",
-      dateOfBirth: new Date("1990-05-15"),
+      firstName: "Connor",
+      lastName: "O'Brien",
+      dateOfBirth: new Date("1992-03-18"),
       gender: "Male",
-      stateId: "DL-12345678",
-      phoneNumber: "555-1234",
-      address: "456 Main Street, Aurora",
+      stateId: "VIC-3456789",
+      phoneNumber: "0412 567 890",
+      address: "45 Chapel Street, St Kilda VIC 3182",
       driversLicense: true,
       weaponsPermit: false,
     },
@@ -187,13 +187,13 @@ async function main() {
 
   const citizen2 = await prisma.citizen.create({
     data: {
-      firstName: "Sarah",
-      lastName: "Williams",
-      dateOfBirth: new Date("1985-08-22"),
+      firstName: "Emma",
+      lastName: "Nguyen",
+      dateOfBirth: new Date("1988-11-05"),
       gender: "Female",
-      stateId: "DL-87654321",
-      phoneNumber: "555-5678",
-      address: "789 Park Avenue, Aurora",
+      stateId: "VIC-8901234",
+      phoneNumber: "0423 789 012",
+      address: "127 Brunswick Street, Fitzroy VIC 3065",
       driversLicense: true,
       weaponsPermit: true,
       isWanted: true,

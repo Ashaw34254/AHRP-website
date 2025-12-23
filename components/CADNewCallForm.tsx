@@ -5,42 +5,9 @@ import { Plus, MapPin, Phone, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/lib/toast";
 import { useSession } from "next-auth/react";
+import { VIC_CALL_TYPES, getCallTypeDisplay } from "@/lib/victoria-police-config";
 
-const CALL_TYPES = {
-  POLICE: [
-    "TRAFFIC_STOP",
-    "SUSPICIOUS_ACTIVITY",
-    "THEFT",
-    "ROBBERY",
-    "ASSAULT",
-    "DOMESTIC",
-    "SHOTS_FIRED",
-    "PURSUIT",
-    "WARRANT_SERVICE",
-    "WELFARE_CHECK",
-    "OTHER"
-  ],
-  FIRE: [
-    "STRUCTURE_FIRE",
-    "VEHICLE_FIRE",
-    "WILDFIRE",
-    "SMOKE_INVESTIGATION",
-    "HAZMAT",
-    "OTHER"
-  ],
-  EMS: [
-    "MEDICAL_EMERGENCY",
-    "VEHICLE_ACCIDENT",
-    "OVERDOSE",
-    "CARDIAC_ARREST",
-    "TRAUMA",
-    "OTHER"
-  ],
-  SHARED: [
-    "MUTUAL_AID",
-    "OTHER"
-  ]
-};
+const CALL_TYPES = VIC_CALL_TYPES;
 
 const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
@@ -187,7 +154,7 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
           <div className="grid grid-cols-4 gap-4">
             <Input
               label="Location"
-              placeholder="123 Main Street"
+              placeholder="123 Collins Street, Melbourne"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               startContent={<MapPin className="w-4 h-4 text-gray-400" />}
@@ -195,10 +162,11 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
               className="col-span-3"
             />
             <Input
-              label="Postal"
-              placeholder="101"
+              label="Postcode"
+              placeholder="3000"
               value={formData.postal}
               onChange={(e) => setFormData({ ...formData, postal: e.target.value })}
+              maxLength={4}
             />
           </div>
 
@@ -220,7 +188,7 @@ export function CADNewCallForm({ onCallCreated }: CADNewCallFormProps) {
             />
             <Input
               label="Caller Phone"
-              placeholder="555-0123"
+              placeholder="0412 345 678"
               value={formData.callerPhone}
               onChange={(e) => setFormData({ ...formData, callerPhone: e.target.value })}
               startContent={<Phone className="w-4 h-4 text-gray-400" />}
