@@ -34,7 +34,8 @@ import {
   BarChart3,
   CalendarDays,
   Inbox,
-  ShieldCheck
+  ShieldCheck,
+  Target
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@nextui-org/react";
@@ -61,6 +62,9 @@ const userNav = [
 // CAD Operations
 const cadNav = [
   { name: "Police CAD", href: "/dashboard/police/cad", icon: Shield },
+  { name: "General Duties", href: "/dashboard/police/gd", icon: Radio },
+  { name: "Highway Patrol", href: "/dashboard/police/highway", icon: Car },
+  { name: "CIB", href: "/dashboard/police/cib", icon: Target },
   { name: "Fire CAD", href: "/dashboard/fire/cad", icon: Flame },
   { name: "Ambo CAD", href: "/dashboard/ems/cad", icon: Heart },
   { name: "Dispatch Center", href: "/dashboard/dispatch", icon: Radio },

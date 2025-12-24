@@ -1941,3 +1941,424 @@ model DepartmentSettings {
   
   @@index([department])
 }
+
+// ============================================
+// CIB - CRIMINAL INVESTIGATION BRANCH
+// ============================================
+
+model Investigation {
+  id              String   @id @default(cuid())
+  investigationId String   @unique // INV-2025-001234
+  
+  title           String
+  classification  String   // ASSAULT, HOMICIDE, FRAUD, THEFT, DRUGS, CORRUPTION, ORGANISED_CRIME, CYBERCRIME, OTHER
+  status          String   @default("ACTIVE") // ACTIVE, DORMANT, ESCALATED, COURT_READY, CLOSED, ARCHIVED
+  priority        String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  
+  // Investigators
+  primaryInvestigator   String  // Officer name or ID
+  secondaryInvestigators String? // JSON array of officer names/IDs
+  
+  // Case Details
+  summary         String
+  backgroundInfo  String?
+  
+  // Linked Entities (JSON arrays of IDs)
+  linkedPersons   String?  // Character IDs
+  linkedVehicles  String?  // Vehicle registration IDs
+  linkedLocations String?  // Address strings or coordinates
+  linkedIncidents String?  // Incident report IDs
+  linkedReports   String?  // Other report IDs
+  linkedCalls     String?  // Call IDs
+  
+  // Court Integration
+  courtCaseId     String?  // Link to CourtCase
+  
+  // Case Management
+  startedAt       DateTime @default(now())
+  lastActivityAt  DateTime @default(now())
+  closedAt        DateTime?
+  
+  // Handover & Continuity
+  handoverNotes   String?  // Notes for other investigators
+  investigatorHistory String? // JSON array: [{investigator, from, to, reason}]
+  
+  // Prosecution Readiness
+  chargeRecommendations String? // JSON array of recommended charges
+  prosecutionBrief      String? // Summary for prosecution
+  evidenceSummary       String? // Key evidence overview
+  
+  // Access Control
+  securityLevel   String   @default("STANDARD") // STANDARD, CONFIDENTIAL, RESTRICTED, SECRET
+  assignedTeam    String?  // CIB, DETECTIVE, MAJOR_CRIME, SPECIAL_OPS
+  
+  // Timeline & Activity
+  timeline        InvestigationTimeline[]
+  evidence        InvestigationEvidence[]
+  notes           InvestigationNote[]
+  tasks           InvestigationTask[]
+  
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([investigationId])
+  @@index([status])
+  @@index([classification])
+  @@index([primaryInvestigator])
+  @@index([assignedTeam])
+  @@index([securityLevel])
+}
+
+model InvestigationTimeline {
+  id              String   @id @default(cuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  
+  eventType       String   // CREATED, STATUS_CHANGE, EVIDENCE_ADDED, PERSON_LINKED, TASK_COMPLETED, NOTE_ADDED, HANDOVER
+  description     String
+  
+  // Associated Data
+  metadata        String?  // JSON: Additional context data
+  
+  performedBy     String   // Officer who performed action
+  performedAt     DateTime @default(now())
+  
+  @@index([investigationId])
+  @@index([performedAt])
+}
+
+model InvestigationEvidence {
+  id              String   @id @default(cuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  
+  evidenceNumber  String   @unique // EVD-2025-001234-001
+  
+  type            String   // CCTV, PHOTO, DOCUMENT, AUDIO, WITNESS_STATEMENT, PHYSICAL, DIGITAL, FORENSIC
+  description     String
+  
+  // File/Media Information
+  fileUrl         String?  // S3/CDN URL or local path
+  fileName        String?
+  fileType        String?  // image/jpeg, video/mp4, application/pdf
+  fileSize        Int?     // In bytes
+  thumbnailUrl    String?
+  
+  // Evidence Metadata
+  collectedAt     DateTime
+  collectedBy     String   // Officer name/ID
+  location        String?  // Where evidence was collected
+  
+  // Chain of Custody
+  custodyLog      String?  // JSON array: [{officer, action, timestamp}]
+  isSeized        Boolean  @default(false)
+  seizureAuthority String? // Warrant number or authority
+  
+  // Analysis
+  forensicNotes   String?
+  analysedBy      String?
+  analysedAt      DateTime?
+  
+  // Status
+  status          String   @default("PENDING") // PENDING, PROCESSED, ANALYSED, COURT_READY, SUPERSEDED
+  isSuperseded    Boolean  @default(false)
+  supersededBy    String?  // ID of newer evidence
+  supersededReason String?
+  
+  // Relevance
+  relevanceScore  Int      @default(5) // 1-10, how relevant to case
+  tags            String?  // JSON array of tags
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([investigationId])
+  @@index([evidenceNumber])
+  @@index([type])
+  @@index([status])
+}
+
+model InvestigationNote {
+  id              String   @id @default(cuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  
+  noteType        String   @default("GENERAL") // GENERAL, INTERVIEW, OBSERVATION, LEAD, THEORY, ADMIN
+  content         String
+  
+  // Visibility & Access
+  isInternal      Boolean  @default(true)  // CIB-only notes
+  isImportant     Boolean  @default(false) // Flagged as important
+  
+  // Mentions & Assignments
+  mentionedOfficers String? // JSON array of officer IDs to notify
+  
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([investigationId])
+  @@index([noteType])
+  @@index([isImportant])
+}
+
+model InvestigationTask {
+  id              String   @id @default(cuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  
+  title           String
+  description     String?
+  
+  assignedTo      String   // Officer ID or name
+  priority        String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status          String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  
+  dueDate         DateTime?
+  completedAt     DateTime?
+  completedBy     String?
+  
+  // Task Result
+  result          String?  // Outcome or notes on completion
+  
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([investigationId])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([dueDate])
+}
+
+// ============================================
+// GENERAL DUTIES & HIGHWAY PATROL SYSTEMS
+// ============================================
+
+// Field Interactions (GD Operations)
+model FieldInteraction {
+  id              String   @id @default(cuid())
+  
+  type            String   // PERSON_STOP, VEHICLE_STOP, WELFARE_CHECK, FIELD_INTERVIEW
+  location        String
+  
+  // Officer Details
+  officerId       String?
+  officerCallsign String
+  unitId          String?
+  
+  // Involved Parties
+  persons         String?  // JSON array of person details
+  vehicles        String?  // JSON array of vehicle details
+  
+  // Outcome & Details
+  outcome         String   // VERBAL_WARNING, CITATION_ISSUED, ARREST, NO_ACTION, ESCALATED
+  reason          String?
+  notes           String?
+  
+  // Escalation
+  escalatedToCIB  Boolean  @default(false)
+  escalationNotes String?
+  
+  timestamp       DateTime @default(now())
+  duration        Int?     // Duration in minutes
+  
+  @@index([officerCallsign, timestamp])
+  @@index([type])
+  @@index([escalatedToCIB])
+}
+
+// Traffic Stops (Highway Operations)
+model TrafficStop {
+  id              String   @id @default(cuid())
+  stopNumber      String   @unique // TS-2025-001234
+  
+  // Vehicle & Driver
+  vehiclePlate    String
+  vehicleId       String?
+  driverName      String?
+  driverLicense   String?
+  
+  // Stop Details
+  location        String
+  reason          String   // SPEEDING, RECKLESS_DRIVING, DUI, REGISTRATION, etc.
+  outcome         String   // WARNING, CITATION, ARREST, IMPOUND, CLEARED
+  
+  // Officer Details
+  officerId       String?
+  officerCallsign String
+  backupUnits     String?  // JSON array of backup unit callsigns
+  
+  // Stop Metrics
+  duration        Int?     // Duration in minutes
+  occupants       Int      @default(1)
+  
+  // Related Records
+  citationIds     String?  // JSON array of citation IDs
+  warningIssued   Boolean  @default(false)
+  arrestMade      Boolean  @default(false)
+  vehicleImpounded Boolean @default(false)
+  
+  // Additional Details
+  notes           String?
+  conditions      String?  // Weather, traffic conditions
+  
+  timestamp       DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([vehiclePlate])
+  @@index([officerCallsign, timestamp])
+  @@index([outcome])
+  @@index([reason])
+}
+
+// Pursuits (Highway Operations)
+model Pursuit {
+  id              String   @id @default(cuid())
+  pursuitNumber   String   @unique // PUR-2025-001234
+  
+  // Vehicle & Suspect
+  vehiclePlate    String?
+  vehicleDesc     String?  // Make, model, color
+  suspectDesc     String?
+  
+  // Pursuit Details
+  startLocation   String
+  endLocation     String?
+  route           String?  // JSON array of locations
+  reason          String   // STOLEN_VEHICLE, EVADING_ARREST, DANGEROUS_DRIVING, etc.
+  
+  // Status & Risk
+  status          String   @default("ACTIVE") // ACTIVE, ENDED, TERMINATED, CALLED_OFF
+  riskLevel       String   // LOW, MEDIUM, HIGH, EXTREME
+  
+  // Pursuit Metrics
+  peakSpeed       Int?     // km/h
+  duration        Int      // Duration in minutes
+  distance        Float?   // Distance in km
+  
+  // Units Involved
+  primaryUnit     String   // Lead unit callsign
+  unitsInvolved   String   // JSON array of unit callsigns
+  airSupportUsed  Boolean  @default(false)
+  
+  // Outcome
+  outcome         String?  // ARREST, CRASH, ESCAPED, CALLED_OFF, TERMINATED
+  injuriesReported Boolean @default(false)
+  damageReported  Boolean  @default(false)
+  
+  // Termination Details
+  terminatedBy    String?  // Supervisor who called off pursuit
+  terminationReason String?
+  
+  // Additional Details
+  notes           String?
+  tactics         String?  // JSON array of tactics used (TYRE_DEFLATION, ROAD_BLOCK, etc.)
+  
+  startedAt       DateTime @default(now())
+  endedAt         DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([status])
+  @@index([vehiclePlate])
+  @@index([startedAt])
+  @@index([primaryUnit])
+}
+
+// Infringements / Traffic Fines (Highway Operations)
+model Infringement {
+  id                  String   @id @default(cuid())
+  infringementNumber  String   @unique // INF-2025-001234
+  
+  // Vehicle & Driver
+  vehiclePlate        String
+  vehicleId           String?
+  driverName          String
+  driverLicense       String?
+  driverAddress       String?
+  
+  // Offence Details
+  offence             String   // SPEEDING_10_20, RED_LIGHT, NO_SEATBELT, etc.
+  offenceDescription  String?
+  location            String
+  
+  // Financial
+  fineAmount          Int      // Fine in dollars
+  demeritPoints       Int      @default(0)
+  isPaid              Boolean  @default(false)
+  paidAt              DateTime?
+  paymentReference    String?
+  
+  // Court
+  courtDate           DateTime?
+  courtAppearanceRequired Boolean @default(false)
+  disputed            Boolean  @default(false)
+  
+  // Officer Details
+  issuedBy            String   // Officer callsign or badge number
+  witnessOfficers     String?  // JSON array of witness officers
+  
+  // Evidence
+  photoEvidence       String?  // JSON array of photo URLs
+  radarReading        Int?     // Speed in km/h if speeding offence
+  videoEvidence       String?  // Video URL
+  
+  // Additional Details
+  notes               String?
+  conditions          String?  // Weather, visibility, etc.
+  
+  issuedAt            DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@index([vehiclePlate])
+  @@index([driverName])
+  @@index([isPaid])
+  @@index([issuedAt])
+  @@index([offence])
+}
+
+// Defect Notices (Highway Operations - ANZ specific)
+model DefectNotice {
+  id              String   @id @default(cuid())
+  noticeNumber    String   @unique // DN-2025-001234
+  
+  // Vehicle
+  vehiclePlate    String
+  vehicleId       String?
+  ownerName       String
+  
+  // Defect Details
+  defectType      String   // LIGHTS, BRAKES, TYRES, WINDSCREEN, EMISSIONS, etc.
+  severity        String   // MINOR, MAJOR, CRITICAL
+  description     String
+  
+  // Requirements
+  rectificationRequired Boolean @default(true)
+  rectifyByDate   DateTime?
+  reinspectionRequired Boolean @default(false)
+  
+  // Status
+  status          String   @default("ISSUED") // ISSUED, RECTIFIED, FAILED_REINSPECTION, EXPIRED
+  rectifiedAt     DateTime?
+  verifiedBy      String?
+  
+  // Officer Details
+  issuedBy        String
+  location        String
+  
+  // Additional Details
+  photoEvidence   String?  // JSON array of photo URLs
+  notes           String?
+  
+  issuedAt        DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([vehiclePlate])
+  @@index([status])
+  @@index([rectifyByDate])
+}
