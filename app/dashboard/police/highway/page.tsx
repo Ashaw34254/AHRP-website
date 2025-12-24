@@ -13,7 +13,8 @@ import {
   FileText, MapPin, Shield, Hash, AlertOctagon, CheckCircle,
   XCircle, Ban, Info, Gauge, Users, Phone, Flag, Target,
   TrendingUp, Activity, Navigation, Zap, FileSignature, Settings,
-  Disc, RefreshCw, Calendar, User, Wrench, DollarSign, Radio
+  Disc, RefreshCw, Calendar, User, Wrench, DollarSign, Radio,
+  PlayCircle, PauseCircle
 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -92,11 +93,23 @@ interface Infringement {
 export default function HighwayPage() {
   const [activeTab, setActiveTab] = useState("operations");
   const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [isLive, setIsLive] = useState(true);
 
   // Vehicle lookups
   const [vehicleSearch, setVehicleSearch] = useState("");
   const [searchResults, setSearchResults] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  
+  // Statistics
+  const [highwayStats, setHighwayStats] = useState({
+    stopsToday: 0,
+    infringementsToday: 0,
+    activePursuits: 0,
+    vehiclesChecked: 0,
+    totalFines: 0,
+    avgStopDuration: 0
+  });
 
   // Traffic stops
   const [trafficStops, setTrafficStops] = useState<TrafficStop[]>([]);
@@ -124,21 +137,59 @@ export default function HighwayPage() {
     totalFines: 0,
   });
 
+  // Keyboard shortcuts
   useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 'f':
+            e.preventDefault();
+            document.getElementById('vehicle-search')?.focus();
+            break;
+          case 's':
+            e.preventDefault();
+            onStopOpen();
+            break;
+          case 'i':
+            e.preventDefault();
+            onInfringementOpen();
+            break;
+          case 'r':
+            e.preventDefault();
+            fetchAllData();
+            break;
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  const fetchAllData = () => {
     fetchTrafficStops();
     fetchPursuits();
     fetchInfringements();
     fetchStats();
+    setLastUpdate(new Date());
+    toast.success('Data refreshed');
+  };
 
-    // Auto-refresh every 15 seconds
+  useEffect(() => {
+    fetchAllData();
+
+    // Auto-refresh every 15 seconds if live
     const interval = setInterval(() => {
-      fetchTrafficStops();
-      fetchPursuits();
-      fetchStats();
+      if (isLive) {
+        fetchTrafficStops();
+        fetchPursuits();
+        fetchStats();
+        setLastUpdate(new Date());
+      }
     }, 15000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isLive]);
 
   const fetchTrafficStops = async () => {
     try {
@@ -233,21 +284,42 @@ export default function HighwayPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Car className="w-8 h-8 text-blue-500" />
-              Highway Patrol - Traffic Enforcement
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Car className="w-8 h-8 text-blue-500" />
+                Highway Patrol - Traffic Enforcement
+              </h1>
+              {activePursuits.length > 0 && (
+                <Badge
+                  content="ACTIVE PURSUIT"
+                  color="danger"
+                  variant="solid"
+                  size="sm"
+                  className="animate-pulse"
+                />
+              )}
+            </div>
             <p className="text-gray-400 mt-1">
-              Vehicle-focused enforcement and compliance operations
+              Vehicle-focused enforcement and compliance operations • Last update: {lastUpdate.toLocaleTimeString()}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
+            <Tooltip content="Click to toggle auto-refresh (updates every 15 seconds when live)">
+              <Button
+                color={isLive ? 'success' : 'default'}
+                variant="solid"
+                onPress={() => setIsLive(!isLive)}
+                className={isLive ? 'animate-pulse' : ''}
+              >
+                {isLive ? 'LIVE' : 'PAUSED'}
+              </Button>
+            </Tooltip>
             <Button
               color="primary"
               startContent={<Plus className="w-4 h-4" />}
               onPress={onStopOpen}
             >
-              Log Traffic Stop
+              Traffic Stop (Ctrl+S)
             </Button>
             <Button
               color="danger"
@@ -261,21 +333,18 @@ export default function HighwayPage() {
               startContent={<FileText className="w-4 h-4" />}
               onPress={onInfringementOpen}
             >
-              Issue Infringement
+              Infringement (Ctrl+I)
             </Button>
-            <Button
-              color="default"
-              variant="flat"
-              startContent={<RefreshCw className="w-4 h-4" />}
-              onPress={() => {
-                fetchTrafficStops();
-                fetchPursuits();
-                fetchInfringements();
-                fetchStats();
-              }}
-            >
-              Refresh
-            </Button>
+            <Tooltip content="Refresh data (Ctrl+R)">
+              <Button
+                color="default"
+                variant="flat"
+                isIconOnly
+                onPress={fetchAllData}
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </Tooltip>
           </div>
         </div>
 
@@ -381,7 +450,8 @@ export default function HighwayPage() {
             </h2>
             <div className="flex gap-3">
               <Input
-                placeholder="Enter plate number..."
+                id="vehicle-search"
+                placeholder="Enter plate number... (Ctrl+F to focus)"
                 value={vehicleSearch}
                 onChange={(e) => setVehicleSearch(e.target.value.toUpperCase())}
                 onKeyPress={(e) => e.key === "Enter" && searchVehicle()}

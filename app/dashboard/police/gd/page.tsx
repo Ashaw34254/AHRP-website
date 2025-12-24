@@ -69,6 +69,8 @@ interface FieldInteraction {
 export default function GeneralDutiesPage() {
   const [activeTab, setActiveTab] = useState("patrol");
   const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [isLive, setIsLive] = useState(true);
   
   // Patrol data
   const [units, setUnits] = useState<Unit[]>([]);
@@ -90,20 +92,54 @@ export default function GeneralDutiesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
 
-  // Fetch data
+  // Keyboard shortcuts
   useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 'n':
+            e.preventDefault();
+            onIncidentOpen();
+            break;
+          case 's':
+            e.preventDefault();
+            onStopOpen();
+            break;
+          case 'r':
+            e.preventDefault();
+            fetchAllData();
+            break;
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+  
+  const fetchAllData = () => {
     fetchPatrolData();
     fetchIncidents();
     fetchInteractions();
+    setLastUpdate(new Date());
+    toast.success('Data refreshed');
+  };
+  
+  // Fetch data
+  useEffect(() => {
+    fetchAllData();
     
-    // Auto-refresh every 10 seconds
+    // Auto-refresh every 10 seconds if live
     const interval = setInterval(() => {
-      fetchPatrolData();
-      fetchIncidents();
+      if (isLive) {
+        fetchPatrolData();
+        fetchIncidents();
+        fetchInteractions();
+      }
     }, 10000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [isLive]);
 
   const fetchPatrolData = async () => {
     try {
@@ -214,7 +250,7 @@ export default function GeneralDutiesPage() {
     return true;
   });
 
-  // Statistics
+  // Statistics (computed from current data)
   const stats = {
     onDuty: units.filter(u => u.status !== "OUT_OF_SERVICE").length,
     available: units.filter(u => u.status === "AVAILABLE").length,
@@ -239,46 +275,143 @@ export default function GeneralDutiesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Shield className="w-8 h-8 text-blue-500" />
-              General Duties - Patrol Operations
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Shield className="w-8 h-8 text-blue-500" />
+                General Duties - Patrol Operations
+              </h1>
+              <Badge
+                content={isLive ? 'LIVE' : 'PAUSED'}
+                color={isLive ? 'success' : 'warning'}
+                variant="flat"
+                size="sm"
+                className={isLive ? 'animate-pulse' : ''}
+              />
+            </div>
             <p className="text-gray-400 mt-1">
-              Frontline response and patrol management
+              Frontline response and patrol management • Last update: {lastUpdate.toLocaleTimeString()}
             </p>
           </div>
           <div className="flex gap-2">
+            <Tooltip content="Toggle auto-refresh">
+              <Button
+                isIconOnly
+                variant="flat"
+                color={isLive ? 'success' : 'default'}
+                onPress={() => setIsLive(!isLive)}
+              >
+                {isLive ? <PlayCircle className="w-4 h-4" /> : <PauseCircle className="w-4 h-4" />}
+              </Button>
+            </Tooltip>
             <Button
               color="primary"
               startContent={<Plus className="w-4 h-4" />}
               onPress={onIncidentOpen}
             >
-              New Incident
+              New Incident (Ctrl+N)
             </Button>
             <Button
               color="secondary"
               startContent={<UserPlus className="w-4 h-4" />}
               onPress={onStopOpen}
             >
-              Log Field Stop
+              Log Field Stop (Ctrl+S)
             </Button>
-            <Button
-              color="default"
-              variant="flat"
-              startContent={<RefreshCw className="w-4 h-4" />}
-              onPress={() => {
-                fetchPatrolData();
-                fetchIncidents();
-                fetchInteractions();
-              }}
-            >
-              Refresh
-            </Button>
+            <Tooltip content="Refresh data (Ctrl+R)">
+              <Button
+                color="default"
+                variant="flat"
+                isIconOnly
+                onPress={() => {
+                  fetchPatrolData();
+                  fetchIncidents();
+                  fetchInteractions();
+                  setLastUpdate(new Date());
+                }}
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </Tooltip>
           </div>
         </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {/* Enhanced Statistics Dashboard */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Card className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 border border-blue-700/30">
+            <CardBody className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">On Duty</p>
+                  <p className="text-2xl font-bold text-blue-400">{stats.onDuty}</p>
+                </div>
+                <Radio className="w-8 h-8 text-blue-500 opacity-50" />
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-900/40 to-green-800/20 border border-green-700/30">
+            <CardBody className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Available</p>
+                  <p className="text-2xl font-bold text-green-400">{stats.available}</p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-500 opacity-50" />
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-yellow-900/40 to-yellow-800/20 border border-yellow-700/30">
+            <CardBody className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Busy</p>
+                  <p className="text-2xl font-bold text-yellow-400">{stats.busy}</p>
+                </div>
+                <Activity className="w-8 h-8 text-yellow-500 opacity-50" />
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-900/40 to-orange-800/20 border border-orange-700/30">
+            <CardBody className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Active Jobs</p>
+                  <p className="text-2xl font-bold text-orange-400">{stats.activeIncidents}</p>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-orange-500 opacity-50" />
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 border border-purple-700/30">
+            <CardBody className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Pending Jobs</p>
+                  <p className="text-2xl font-bold text-purple-400">{stats.pendingIncidents}</p>
+                </div>
+                <Clock className="w-8 h-8 text-purple-500 opacity-50" />
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-indigo-900/40 to-indigo-800/20 border border-indigo-700/30">
+            <CardBody className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Stops Today</p>
+                  <p className="text-2xl font-bold text-indigo-400">{interactions.length}</p>
+                </div>
+                <UserCheck className="w-8 h-8 text-indigo-500 opacity-50" />
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+
+        {/* Original Statistics (Keep for compatibility) */}
+        <div className="hidden grid-cols-2 md:grid-cols-5 gap-4">
           <Card className="bg-gray-800/50 border border-gray-700">
             <CardBody className="p-4">
               <div className="flex items-center gap-3">

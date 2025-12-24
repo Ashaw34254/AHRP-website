@@ -76,6 +76,48 @@ interface Unit {
   } | null;
 }
 
+interface FieldInteraction {
+  id: string;
+  type: string;
+  location: string;
+  officerCallsign: string;
+  outcome: string;
+  timestamp: string;
+  escalatedToCIB: boolean;
+}
+
+interface TrafficStop {
+  id: string;
+  stopNumber: string;
+  vehiclePlate: string;
+  location: string;
+  reason: string;
+  outcome: string;
+  officerCallsign: string;
+  timestamp: string;
+}
+
+interface Pursuit {
+  id: string;
+  pursuitNumber: string;
+  vehiclePlate: string | null;
+  status: string;
+  riskLevel: string;
+  startLocation: string;
+  primaryUnit: string;
+  startedAt: string;
+}
+
+interface Infringement {
+  id: string;
+  infringementNumber: string;
+  vehiclePlate: string;
+  offence: string;
+  fineAmount: number;
+  issuedBy: string;
+  issuedAt: string;
+}
+
 interface CADDispatchConsoleProps {
   department?: string;
   refreshInterval?: number;
@@ -87,6 +129,10 @@ export function CADDispatchConsole({
 }: CADDispatchConsoleProps) {
   const [calls, setCalls] = useState<Call[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [fieldInteractions, setFieldInteractions] = useState<FieldInteraction[]>([]);
+  const [trafficStops, setTrafficStops] = useState<TrafficStop[]>([]);
+  const [pursuits, setPursuits] = useState<Pursuit[]>([]);
+  const [infringements, setInfringements] = useState<Infringement[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCall, setSelectedCall] = useState<Call | null>(null);
   const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
@@ -146,9 +192,13 @@ export function CADDispatchConsole({
 
   const fetchData = async () => {
     try {
-      const [callsRes, unitsRes] = await Promise.all([
+      const [callsRes, unitsRes, fieldRes, stopsRes, pursuitsRes, infringementsRes] = await Promise.all([
         fetch("/api/cad/calls"),
         fetch("/api/cad/units"),
+        fetch("/api/cad/field-interactions?limit=10"),
+        fetch("/api/cad/traffic-stops?limit=10"),
+        fetch("/api/cad/pursuits?status=ACTIVE"),
+        fetch("/api/cad/infringements?limit=10"),
       ]);
 
       if (!callsRes.ok || !unitsRes.ok) {
@@ -157,6 +207,10 @@ export function CADDispatchConsole({
 
       const callsData = await callsRes.json();
       const unitsData = await unitsRes.json();
+      const fieldData = await fieldRes.json().catch(() => ({ interactions: [] }));
+      const stopsData = await stopsRes.json().catch(() => ({ stops: [] }));
+      const pursuitsData = await pursuitsRes.json().catch(() => ({ pursuits: [] }));
+      const infringementsData = await infringementsRes.json().catch(() => ({ infringements: [] }));
 
       let filteredCalls = callsData.calls || [];
       let filteredUnits = unitsData.units || [];
@@ -203,6 +257,10 @@ export function CADDispatchConsole({
       setPreviousCallIds(currentCallIds);
       setCalls(filteredCalls);
       setUnits(filteredUnits);
+      setFieldInteractions(fieldData.interactions || []);
+      setTrafficStops(stopsData.stops || []);
+      setPursuits(pursuitsData.pursuits || []);
+      setInfringements(infringementsData.infringements || []);
       setLastUpdate(new Date());
     } catch (error) {
       console.error("Failed to fetch dispatch data:", error);
@@ -796,6 +854,225 @@ export function CADDispatchConsole({
                   ))}
                 </div>
               )}
+            </CardBody>
+          </Card>
+
+          {/* Live Activity Feed - NEW SECTION */}
+          <Card className="border border-gray-800 lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-purple-500" />
+                <h3 className="text-lg font-bold">Live Activity Feed</h3>
+                <Chip size="sm" color="secondary" variant="flat">
+                  GD & Highway Operations
+                </Chip>
+              </div>
+            </CardHeader>
+            <Divider />
+            <CardBody className="max-h-[400px] overflow-y-auto">
+              <div className="space-y-3">
+                {/* Active Pursuits - Highest Priority */}
+                {pursuits.map((pursuit) => (
+                  <Card
+                    key={pursuit.id}
+                    className="bg-red-900/20 border border-red-800/50"
+                  >
+                    <CardBody className="p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-red-500/20 p-2 rounded">
+                          <AlertTriangle className="w-4 h-4 text-red-500" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-mono font-semibold text-red-400">
+                              {pursuit.pursuitNumber}
+                            </span>
+                            <Chip size="sm" color="danger" variant="flat">
+                              {pursuit.riskLevel} RISK
+                            </Chip>
+                            <Chip size="sm" variant="flat">
+                              PURSUIT ACTIVE
+                            </Chip>
+                          </div>
+                          <div className="text-sm space-y-1">
+                            <div className="flex items-center gap-2 text-gray-300">
+                              <span className="font-medium">Vehicle:</span>
+                              <span>{pursuit.vehiclePlate || "Unknown"}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                              <MapPin className="w-3 h-3" />
+                              <span>{pursuit.startLocation}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                              <Radio className="w-3 h-3" />
+                              <span>Primary: {pursuit.primaryUnit}</span>
+                            </div>
+                            <div className="text-xs text-red-400 mt-2">
+                              ⚠️ Active pursuit - All units standby
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
+
+                {/* Recent Traffic Stops */}
+                {trafficStops.slice(0, 3).map((stop) => (
+                  <Card
+                    key={stop.id}
+                    className="bg-blue-900/10 border border-blue-800/30"
+                  >
+                    <CardBody className="p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-blue-500/20 p-2 rounded">
+                          <Radio className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-mono text-sm font-semibold text-blue-400">
+                              {stop.stopNumber}
+                            </span>
+                            <Chip size="sm" color="primary" variant="flat" className="text-xs">
+                              Traffic Stop
+                            </Chip>
+                          </div>
+                          <div className="text-sm space-y-1">
+                            <div className="flex items-center gap-2 text-gray-300">
+                              <span>Plate: <span className="font-mono">{stop.vehiclePlate}</span></span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                              <MapPin className="w-3 h-3" />
+                              <span className="text-xs">{stop.location}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs mt-2">
+                              <span className="text-gray-500">
+                                {stop.officerCallsign} • {stop.reason}
+                              </span>
+                              <Chip size="sm" variant="flat" className="text-xs">
+                                {stop.outcome}
+                              </Chip>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
+
+                {/* Recent Infringements */}
+                {infringements.slice(0, 2).map((inf) => (
+                  <Card
+                    key={inf.id}
+                    className="bg-orange-900/10 border border-orange-800/30"
+                  >
+                    <CardBody className="p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-orange-500/20 p-2 rounded">
+                          <AlertTriangle className="w-4 h-4 text-orange-400" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-mono text-sm font-semibold text-orange-400">
+                              {inf.infringementNumber}
+                            </span>
+                            <Chip size="sm" color="warning" variant="flat" className="text-xs">
+                              Infringement
+                            </Chip>
+                          </div>
+                          <div className="text-sm space-y-1">
+                            <div className="flex items-center gap-2 text-gray-300">
+                              <span>Plate: <span className="font-mono">{inf.vehiclePlate}</span></span>
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {inf.offence.replace(/_/g, " ")}
+                            </div>
+                            <div className="flex items-center justify-between text-xs mt-2">
+                              <span className="text-gray-500">
+                                {inf.issuedBy}
+                              </span>
+                              <span className="text-orange-400 font-semibold">
+                                ${inf.fineAmount}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
+
+                {/* Recent Field Interactions */}
+                {fieldInteractions.slice(0, 2).map((interaction) => (
+                  <Card
+                    key={interaction.id}
+                    className={`border ${
+                      interaction.escalatedToCIB
+                        ? "bg-red-900/10 border-red-800/30"
+                        : "bg-gray-900/50 border-gray-800/30"
+                    }`}
+                  >
+                    <CardBody className="p-3">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`p-2 rounded ${
+                            interaction.escalatedToCIB
+                              ? "bg-red-500/20"
+                              : "bg-gray-500/20"
+                          }`}
+                        >
+                          <User
+                            className={`w-4 h-4 ${
+                              interaction.escalatedToCIB
+                                ? "text-red-400"
+                                : "text-gray-400"
+                            }`}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Chip size="sm" variant="flat" className="text-xs">
+                              {interaction.type.replace(/_/g, " ")}
+                            </Chip>
+                            {interaction.escalatedToCIB && (
+                              <Chip size="sm" color="danger" variant="flat" className="text-xs">
+                                ⚠️ CIB ESCALATION
+                              </Chip>
+                            )}
+                          </div>
+                          <div className="text-sm space-y-1">
+                            <div className="flex items-center gap-2 text-gray-400">
+                              <MapPin className="w-3 h-3" />
+                              <span className="text-xs">{interaction.location}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs mt-2">
+                              <span className="text-gray-500">
+                                {interaction.officerCallsign}
+                              </span>
+                              <Chip size="sm" variant="flat" className="text-xs">
+                                {interaction.outcome}
+                              </Chip>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
+
+                {pursuits.length === 0 &&
+                  trafficStops.length === 0 &&
+                  infringements.length === 0 &&
+                  fieldInteractions.length === 0 && (
+                    <div className="text-center py-8 text-gray-400">
+                      <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No recent activity</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Activity from GD and Highway operations will appear here
+                      </p>
+                    </div>
+                  )}
+              </div>
             </CardBody>
           </Card>
         </div>
