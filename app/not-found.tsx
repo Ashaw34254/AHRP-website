@@ -1,10 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { Home, AlertTriangle, Search, Radio, FileText, Shield } from "lucide-react";
+import { Home, AlertTriangle, Search, Radio, FileText, Shield, Code, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function NotFound() {
+  const [currentUrl, setCurrentUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+  const isDev = process.env.NODE_ENV === 'development';
+
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+    
+    // Log 404 for developers
+    console.group('📍 404 Not Found');
+    console.warn('Path:', window.location.pathname);
+    console.warn('URL:', window.location.href);
+    console.warn('Referrer:', document.referrer);
+    console.groupEnd();
+  }, []);
+
+  const copyUrl = () => {
+    navigator.clipboard.writeText(currentUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const quickLinks = [
     { href: "/", icon: Home, label: "Homepage" },
     { href: "/dashboard", icon: Radio, label: "Dashboard" },
@@ -52,7 +74,7 @@ export default function NotFound() {
         
         {/* Description */}
         <motion.p 
-          className="text-lg text-gray-400 mb-12 text-center max-w-2xl mx-auto"
+          className="text-lg text-gray-400 mb-8 text-center max-w-2xl mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
@@ -60,6 +82,82 @@ export default function NotFound() {
           Dispatch, we&apos;ve got a 10-78 - the requested page is off the grid. 
           The page you&apos;re looking for doesn&apos;t exist, has been moved, or you don&apos;t have permission to access it.
         </motion.p>
+
+        {/* URL Display with Copy */}
+        {currentUrl && (
+          <motion.div
+            className="mb-8 max-w-2xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.45 }}
+          >
+            <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400">Requested URL:</span>
+                <button
+                  onClick={copyUrl}
+                  className="flex items-center gap-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-green-400" />
+                      <span className="text-green-400">Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <p className="text-sm text-gray-300 font-mono bg-black/30 p-3 rounded break-all">
+                {currentUrl}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Developer Debug Info */}
+        {isDev && (
+          <motion.div
+            className="mb-8 max-w-2xl mx-auto bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Code className="w-5 h-5 text-yellow-400" />
+              <span className="text-sm font-semibold text-yellow-400">Developer Info</span>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="text-gray-400">Path:</span>
+                <span className="text-gray-300 font-mono ml-2">{typeof window !== 'undefined' ? window.location.pathname : ''}</span>
+              </div>
+              <div className="pt-3 border-t border-yellow-500/20">
+                <span className="text-yellow-500 font-semibold block mb-2">Common Causes:</span>
+                <ul className="space-y-1 text-gray-400 text-xs">
+                  <li>• Page/route doesn't exist in app directory</li>
+                  <li>• Typo in the URL or link</li>
+                  <li>• Missing dynamic route handler</li>
+                  <li>• Route requires authentication (middleware redirect)</li>
+                  <li>• API route returns 404 (check API implementation)</li>
+                </ul>
+              </div>
+              <div className="pt-3 border-t border-yellow-500/20">
+                <span className="text-yellow-500 font-semibold block mb-2">Debug Steps:</span>
+                <div className="space-y-1 text-gray-400 text-xs font-mono bg-black/30 p-3 rounded">
+                  <div>1. Check app/ directory structure</div>
+                  <div>2. Verify route file naming (page.tsx, layout.tsx)</div>
+                  <div>3. Check middleware.ts for redirects</div>
+                  <div>4. Review browser console for client-side errors</div>
+                  <div>5. Check git history for deleted routes</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
         
         {/* Action Buttons */}
         <motion.div 

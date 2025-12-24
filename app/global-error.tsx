@@ -1,6 +1,16 @@
 "use client";
 
-import { Home, ServerCrash, RefreshCw, Radio, Shield } from "lucide-react";
+import { Home, ServerCrash, RefreshCw, Radio, Shield, Copy, Download, Code, Terminal, AlertCircle, Bug } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface GlobalErrorDetails {
+  message: string;
+  digest?: string;
+  stack?: string;
+  timestamp: string;
+  userAgent: string;
+  errorType: string;
+}
 
 export default function GlobalError({
   error,
@@ -9,6 +19,101 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [errorDetails, setErrorDetails] = useState<GlobalErrorDetails | null>(null);
+  const [copied, setCopied] = useState(false);
+  const isDev = process.env.NODE_ENV === 'development';
+
+  useEffect(() => {
+    // Log comprehensive error details
+    console.group('🚨 CRITICAL GLOBAL ERROR');
+    console.error('Error:', error);
+    console.error('Message:', error.message);
+    console.error('Stack:', error.stack);
+    console.error('Digest:', error.digest);
+    console.groupEnd();
+
+    // Collect error information
+    const details: GlobalErrorDetails = {
+      message: error.message,
+      digest: error.digest,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+      errorType: categorizeGlobalError(error),
+    };
+    setErrorDetails(details);
+  }, [error]);
+
+  const categorizeGlobalError = (err: Error): string => {
+    const msg = err.message.toLowerCase();
+    if (msg.includes('chunk') || msg.includes('module')) return 'Module Loading Error';
+    if (msg.includes('hydration') || msg.includes('render')) return 'React Rendering Error';
+    if (msg.includes('memory')) return 'Memory Error';
+    if (msg.includes('script')) return 'Script Loading Error';
+    return 'Critical System Error';
+  };
+
+  const copyErrorReport = () => {
+    if (!errorDetails) return;
+    
+    const report = `
+═══════════════════════════════════════════════════
+🚨 AURORA HORIZON RP - CRITICAL ERROR REPORT
+═══════════════════════════════════════════════════
+
+ERROR TYPE: ${errorDetails.errorType}
+SEVERITY: CRITICAL (Global Error)
+TIMESTAMP: ${errorDetails.timestamp}
+DIGEST: ${errorDetails.digest || 'N/A'}
+
+ERROR MESSAGE:
+${errorDetails.message}
+
+ENVIRONMENT:
+User Agent: ${errorDetails.userAgent}
+Mode: ${isDev ? 'Development' : 'Production'}
+
+${errorDetails.stack ? `STACK TRACE:\n${errorDetails.stack}\n` : ''}
+═══════════════════════════════════════════════════
+
+IMMEDIATE ACTIONS REQUIRED:
+1. Check server logs for related errors
+2. Verify all environment variables are set
+3. Check database connectivity
+4. Review recent deployments
+5. Monitor error frequency in production
+`;
+    
+    navigator.clipboard.writeText(report);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadErrorReport = () => {
+    if (!errorDetails) return;
+    
+    const report = {
+      severity: 'CRITICAL',
+      type: errorDetails.errorType,
+      timestamp: errorDetails.timestamp,
+      digest: errorDetails.digest,
+      message: errorDetails.message,
+      stack: errorDetails.stack,
+      userAgent: errorDetails.userAgent,
+      environment: isDev ? 'development' : 'production',
+    };
+    
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `critical-error-${errorDetails.digest || Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <html lang="en" className="dark">
       <body className="antialiased">
@@ -33,12 +138,23 @@ export default function GlobalError({
             <h2 className="text-4xl md:text-6xl font-bold mb-6 text-center text-white">
               10-33: Emergency - System Critical
             </h2>
+
+            {/* Error Type Badge */}
+            {errorDetails && (
+              <div className="mb-6 flex justify-center">
+                <div className="px-4 py-2 bg-red-600/30 border-2 border-red-500/50 rounded-full">
+                  <span className="text-sm font-bold text-red-300">
+                    {errorDetails.errorType}
+                  </span>
+                </div>
+              </div>
+            )}
             
             {/* Description */}
-            <div className="bg-red-900/20 border-2 border-red-500/50 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
+            <div className="bg-red-900/20 border-2 border-red-500/50 rounded-lg p-6 mb-6 max-w-2xl mx-auto">
               <div className="flex items-start gap-3">
                 <Shield className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
-                <div>
+                <div className="flex-1">
                   <p className="text-lg text-gray-300 mb-3">
                     <strong className="text-red-400">CRITICAL SYSTEM ERROR</strong>
                   </p>
@@ -46,14 +162,120 @@ export default function GlobalError({
                     A catastrophic error has occurred that affected the entire application. 
                     This is rare and our emergency response team has been automatically alerted.
                   </p>
-                  {error.digest && (
-                    <p className="text-sm text-gray-500 font-mono mt-3 bg-black/30 p-2 rounded">
-                      Emergency Code: {error.digest}
-                    </p>
+                  {errorDetails && (
+                    <div className="mt-4 space-y-2">
+                      <div className="text-sm bg-black/30 p-3 rounded">
+                        <span className="text-gray-500">Emergency Code:</span>
+                        <span className="text-gray-300 font-mono ml-2">
+                          {errorDetails.digest || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="text-sm bg-black/30 p-3 rounded">
+                        <span className="text-gray-500">Error Type:</span>
+                        <span className="text-red-400 font-mono ml-2">
+                          {errorDetails.errorType}
+                        </span>
+                      </div>
+                      <div className="text-sm bg-black/30 p-3 rounded">
+                        <span className="text-gray-500">Message:</span>
+                        <span className="text-red-400 font-mono ml-2 block mt-1">
+                          {errorDetails.message}
+                        </span>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
+
+            {/* Quick Actions */}
+            <div className="mb-6 flex justify-center gap-3">
+              <button
+                onClick={copyErrorReport}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors text-white"
+              >
+                {copied ? (
+                  <>
+                    <AlertCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-green-400">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copy Error Report</span>
+                  </>
+                )}
+              </button>
+              <button
+                onClick={downloadErrorReport}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors text-white"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download JSON</span>
+              </button>
+            </div>
+            
+            {/* Developer Debug Section */}
+            {isDev && errorDetails && (
+              <div className="bg-yellow-900/20 border-2 border-yellow-500/30 rounded-lg p-6 max-w-3xl mx-auto mb-6">
+                <h3 className="text-lg font-semibold text-yellow-400 mb-4 flex items-center gap-2">
+                  <Terminal className="w-5 h-5" />
+                  Developer Emergency Debug
+                </h3>
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <span className="text-yellow-500 font-semibold block mb-2">Stack Trace:</span>
+                    <pre className="text-xs text-gray-400 font-mono bg-black/50 p-4 rounded overflow-x-auto max-h-64 overflow-y-auto">
+                      {errorDetails.stack || 'No stack trace available'}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="text-yellow-500 font-semibold block mb-2">Critical Debug Steps:</span>
+                    <div className="space-y-1 font-mono text-xs bg-black/30 p-3 rounded text-gray-300">
+                      <div>1. Check server logs immediately</div>
+                      <div>2. Verify: <code className="text-indigo-400">npx prisma studio</code> (DB connectivity)</div>
+                      <div>3. Check environment: <code className="text-indigo-400">cat .env.local</code></div>
+                      <div>4. Rebuild: <code className="text-indigo-400">rm -rf .next && npm run dev</code></div>
+                      <div>5. Check browser console for JS errors</div>
+                      <div>6. Review recent git commits: <code className="text-indigo-400">git log -5</code></div>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-yellow-500 font-semibold block mb-2">Likely Causes:</span>
+                    <div className="text-gray-400 bg-black/30 p-3 rounded">
+                      {errorDetails.errorType === 'Module Loading Error' && (
+                        <>
+                          <div>→ Missing or corrupted npm packages</div>
+                          <div>→ Run: <code className="text-indigo-400">npm install</code> and restart</div>
+                          <div>→ Check for circular dependencies in imports</div>
+                        </>
+                      )}
+                      {errorDetails.errorType === 'React Rendering Error' && (
+                        <>
+                          <div>→ Hydration mismatch between server and client</div>
+                          <div>→ Check for browser-only code running on server</div>
+                          <div>→ Verify all components have proper "use client" directives</div>
+                        </>
+                      )}
+                      {errorDetails.errorType === 'Script Loading Error' && (
+                        <>
+                          <div>→ External script failed to load</div>
+                          <div>→ Check network connectivity and CDN status</div>
+                          <div>→ Verify script URLs are correct and accessible</div>
+                        </>
+                      )}
+                      {!['Module Loading Error', 'React Rendering Error', 'Script Loading Error'].includes(errorDetails.errorType) && (
+                        <>
+                          <div>→ Critical application logic failure</div>
+                          <div>→ Check all provider components in app/layout.tsx</div>
+                          <div>→ Verify database connection and auth setup</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">

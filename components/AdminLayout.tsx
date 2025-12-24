@@ -12,7 +12,9 @@ import {
   Settings,
   LogOut,
   Menu,
-  FileBarChart
+  FileBarChart,
+  Bug,
+  BookOpen
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@nextui-org/react";
@@ -35,6 +37,8 @@ const navigation = [
   { name: "CAD Analytics", href: "/admin/analytics", icon: FileBarChart },
   { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Audit Logs", href: "/admin/audit-logs", icon: FileBarChart },
+  { name: "Error Monitoring", href: "/admin/errors", icon: Bug },
+  { name: "Documentation", href: "/admin/docs", icon: BookOpen },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -66,7 +70,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <nav className="px-3 space-y-1 flex-1 overflow-y-auto">
             {navigation.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href || (item.href === "/admin/docs" && pathname.startsWith("/admin/docs"));
               
               return (
                 <Link
