@@ -4,14 +4,15 @@ import { prisma } from "@/lib/prisma";
 // POST /api/cad/investigations/[id]/tasks - Create task for investigation
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     
     const task = await prisma.investigationTask.create({
       data: {
-        investigationId: params.id,
+        investigationId: id,
         title: body.title,
         description: body.description,
         assignedTo: body.assignedTo,
@@ -24,7 +25,7 @@ export async function POST(
     
     // Update investigation last activity
     await prisma.investigation.update({
-      where: { id: params.id },
+      where: { id },
       data: { lastActivityAt: new Date() }
     });
     
@@ -41,14 +42,15 @@ export async function POST(
 // GET /api/cad/investigations/[id]/tasks - Get all tasks for investigation
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get("status");
     const assignedTo = searchParams.get("assignedTo");
     
-    const where: any = { investigationId: params.id };
+    const where: any = { investigationId: id };
     
     if (status) {
       where.status = status;

@@ -4,11 +4,12 @@ import { prisma } from "@/lib/prisma";
 // GET /api/cad/investigations/[id] - Get single investigation with full details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const investigation = await prisma.investigation.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         timeline: {
           orderBy: { performedAt: "desc" }
@@ -82,9 +83,10 @@ export async function GET(
 // PATCH /api/cad/investigations/[id] - Update investigation
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const updateData: any = {};
     const timelineEvents: any[] = [];
@@ -147,7 +149,7 @@ export async function PATCH(
     // Update investigator history
     if (body.addToInvestigatorHistory) {
       const existing = await prisma.investigation.findUnique({
-        where: { id: params.id },
+        where: { id },
         select: { investigatorHistory: true }
       });
       
@@ -164,7 +166,7 @@ export async function PATCH(
     
     // Update investigation
     const investigation = await prisma.investigation.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         timeline: {
@@ -189,7 +191,7 @@ export async function PATCH(
     for (const event of timelineEvents) {
       await prisma.investigationTimeline.create({
         data: {
-          investigationId: params.id,
+          investigationId: id,
           ...event
         }
       });
@@ -208,14 +210,15 @@ export async function PATCH(
 // DELETE /api/cad/investigations/[id] - Archive investigation (soft delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
     const archivedBy = searchParams.get("archivedBy") || "System";
     
     const investigation = await prisma.investigation.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: "ARCHIVED",
         closedAt: new Date(),
@@ -226,7 +229,7 @@ export async function DELETE(
     // Create timeline entry
     await prisma.investigationTimeline.create({
       data: {
-        investigationId: params.id,
+        investigationId: id,
         eventType: "STATUS_CHANGE",
         description: "Investigation archived",
         performedBy: archivedBy

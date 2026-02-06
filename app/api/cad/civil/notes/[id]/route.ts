@@ -3,14 +3,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { noteIndex } = await req.json();
     
     // Get the citizen
     const citizen = await prisma.citizen.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!citizen) {
@@ -34,7 +35,7 @@ export async function DELETE(
 
     // Update citizen
     await prisma.citizen.update({
-      where: { id: params.id },
+      where: { id },
       data: { notes: JSON.stringify(notes) },
     });
 
@@ -47,14 +48,15 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { noteIndex, content } = await req.json();
     
     // Get the citizen
     const citizen = await prisma.citizen.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!citizen) {
@@ -79,7 +81,7 @@ export async function PATCH(
 
     // Update citizen
     await prisma.citizen.update({
-      where: { id: params.id },
+      where: { id },
       data: { notes: JSON.stringify(notes) },
     });
 

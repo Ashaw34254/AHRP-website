@@ -4,11 +4,12 @@ import { auth } from "@/auth";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const application = await prisma.application.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -47,9 +48,10 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     const isDev = process.env.NODE_ENV === "development";
     
@@ -65,7 +67,7 @@ export async function PATCH(
     const { status, reviewNotes, feedback } = data;
     
     const application = await prisma.application.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status,
         reviewNotes,
@@ -90,9 +92,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     
     if (!session?.user) {
@@ -104,7 +107,7 @@ export async function DELETE(
     
     // Verify the application belongs to the user
     const application = await prisma.application.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
     
     if (!application) {
@@ -122,7 +125,7 @@ export async function DELETE(
     }
     
     await prisma.application.delete({
-      where: { id: params.id },
+      where: { id },
     });
     
     return NextResponse.json({

@@ -4,14 +4,15 @@ import { prisma } from "@/lib/prisma";
 // POST /api/cad/investigations/[id]/evidence - Add evidence to investigation
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     
     // Generate evidence number
     const investigation = await prisma.investigation.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { investigationId: true }
     });
     
@@ -23,14 +24,14 @@ export async function POST(
     }
     
     const evidenceCount = await prisma.investigationEvidence.count({
-      where: { investigationId: params.id }
+      where: { investigationId: id }
     });
     
     const evidenceNumber = `${investigation.investigationId}-EVD-${String(evidenceCount + 1).padStart(3, "0")}`;
     
     const evidence = await prisma.investigationEvidence.create({
       data: {
-        investigationId: params.id,
+        investigationId: id,
         evidenceNumber,
         type: body.type,
         description: body.description,
@@ -60,14 +61,14 @@ export async function POST(
     
     // Update investigation last activity
     await prisma.investigation.update({
-      where: { id: params.id },
+      where: { id },
       data: { lastActivityAt: new Date() }
     });
     
     // Create timeline entry
     await prisma.investigationTimeline.create({
       data: {
-        investigationId: params.id,
+        investigationId: id,
         eventType: "EVIDENCE_ADDED",
         description: `Evidence added: ${body.type} - ${body.description}`,
         metadata: JSON.stringify({
@@ -91,13 +92,14 @@ export async function POST(
 // GET /api/cad/investigations/[id]/evidence - Get all evidence for investigation
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
     const includeSuperseded = searchParams.get("includeSuperseded") === "true";
     
-    const where: any = { investigationId: params.id };
+    const where: any = { investigationId: id };
     
     if (!includeSuperseded) {
       where.isSuperseded = false;

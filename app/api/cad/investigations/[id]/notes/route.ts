@@ -4,14 +4,15 @@ import { prisma } from "@/lib/prisma";
 // POST /api/cad/investigations/[id]/notes - Add note to investigation
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     
     const note = await prisma.investigationNote.create({
       data: {
-        investigationId: params.id,
+        investigationId: id,
         noteType: body.noteType || "GENERAL",
         content: body.content,
         isInternal: body.isInternal !== undefined ? body.isInternal : true,
@@ -23,14 +24,14 @@ export async function POST(
     
     // Update investigation last activity
     await prisma.investigation.update({
-      where: { id: params.id },
+      where: { id },
       data: { lastActivityAt: new Date() }
     });
     
     // Create timeline entry
     await prisma.investigationTimeline.create({
       data: {
-        investigationId: params.id,
+        investigationId: id,
         eventType: "NOTE_ADDED",
         description: `${body.noteType || "General"} note added`,
         performedBy: body.createdBy
@@ -50,14 +51,15 @@ export async function POST(
 // GET /api/cad/investigations/[id]/notes - Get all notes for investigation
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
     const noteType = searchParams.get("noteType");
     const importantOnly = searchParams.get("importantOnly") === "true";
     
-    const where: any = { investigationId: params.id };
+    const where: any = { investigationId: id };
     
     if (noteType) {
       where.noteType = noteType;

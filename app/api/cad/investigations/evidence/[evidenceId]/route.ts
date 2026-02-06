@@ -4,9 +4,10 @@ import { prisma } from "@/lib/prisma";
 // PATCH /api/cad/investigations/evidence/[evidenceId] - Update evidence
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { evidenceId: string } }
+  { params }: { params: Promise<{ evidenceId: string }> }
 ) {
   try {
+    const { evidenceId } = await params;
     const body = await request.json();
     const updateData: any = {};
     
@@ -23,7 +24,7 @@ export async function PATCH(
     // Handle custody log update
     if (body.addToCustodyLog) {
       const existing = await prisma.investigationEvidence.findUnique({
-        where: { id: params.evidenceId },
+        where: { id: evidenceId },
         select: { custodyLog: true }
       });
       
@@ -45,7 +46,7 @@ export async function PATCH(
     }
     
     const evidence = await prisma.investigationEvidence.update({
-      where: { id: params.evidenceId },
+      where: { id: evidenceId },
       data: updateData
     });
     
@@ -62,14 +63,15 @@ export async function PATCH(
 // DELETE /api/cad/investigations/evidence/[evidenceId] - Mark evidence as superseded (soft delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { evidenceId: string } }
+  { params }: { params: Promise<{ evidenceId: string }> }
 ) {
   try {
+    const { evidenceId } = await params;
     const searchParams = request.nextUrl.searchParams;
     const reason = searchParams.get("reason") || "Removed by investigator";
     
     const evidence = await prisma.investigationEvidence.update({
-      where: { id: params.evidenceId },
+      where: { id: evidenceId },
       data: {
         isSuperseded: true,
         supersededReason: reason,

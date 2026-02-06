@@ -22,8 +22,7 @@ import {
   Textarea,
   Avatar,
   Tabs,
-  Tab,
-  Progress
+  Tab
 } from "@nextui-org/react";
 import { 
   Search,
@@ -188,6 +187,16 @@ export default function ApplicationsPage() {
       toast.error("Error updating status");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const getDepartmentColor = (dept: string): "default" | "primary" | "secondary" | "success" | "warning" | "danger" => {
+    switch(dept?.toUpperCase()) {
+      case "POLICE": return "primary";
+      case "FIRE": return "danger";
+      case "EMS": return "success";
+      case "CIVILIAN": return "secondary";
+      default: return "default";
     }
   };
 
@@ -439,19 +448,19 @@ export default function ApplicationsPage() {
                         <CardBody className="p-4">
                           <div className="flex items-center gap-4">
                             <Avatar
-                              name={selectedApplication.applicantName}
+                              name={selectedApplication.user?.name || "Unknown"}
                               size="lg"
                             />
                             <div className="flex-1">
-                              <h3 className="text-xl font-bold text-white">{selectedApplication.applicantName}</h3>
-                              <p className="text-sm text-gray-400">{selectedApplication.applicantEmail}</p>
+                              <h3 className="text-xl font-bold text-white">{selectedApplication.user?.name || "Unknown"}</h3>
+                              <p className="text-sm text-gray-400">{selectedApplication.user?.email || "No email"}</p>
                               <div className="flex gap-2 mt-2">
                                 <Chip
                                   size="sm"
                                   variant="flat"
-                                  color={getDepartmentColor(selectedApplication.department)}
+                                  color={getDepartmentColor(selectedApplication.formData?.department || selectedApplication.applicationType)}
                                 >
-                                  {selectedApplication.department}
+                                  {selectedApplication.formData?.department || selectedApplication.applicationType}
                                 </Chip>
                                 <Chip
                                   size="sm"
@@ -470,40 +479,40 @@ export default function ApplicationsPage() {
                       <div className="space-y-4">
                         <div>
                           <label className="text-sm text-gray-400 font-medium">Position Applied For</label>
-                          <p className="text-white mt-1">{selectedApplication.position}</p>
+                          <p className="text-white mt-1">{selectedApplication.formData?.position || "N/A"}</p>
                         </div>
 
                         <div>
                           <label className="text-sm text-gray-400 font-medium">Experience</label>
-                          <p className="text-white mt-1">{selectedApplication.experience}</p>
+                          <p className="text-white mt-1">{selectedApplication.formData?.experience || "N/A"}</p>
                         </div>
 
                         <div>
                           <label className="text-sm text-gray-400 font-medium">Reason for Applying</label>
-                          <p className="text-white mt-1">{selectedApplication.reason}</p>
+                          <p className="text-white mt-1">{selectedApplication.formData?.reason || "N/A"}</p>
                         </div>
 
                         <div>
                           <label className="text-sm text-gray-400 font-medium">Availability</label>
-                          <p className="text-white mt-1">{selectedApplication.availability}</p>
+                          <p className="text-white mt-1">{selectedApplication.formData?.availability || "N/A"}</p>
                         </div>
 
-                        {selectedApplication.discordId && (
+                        {selectedApplication.formData?.discordId && (
                           <div>
                             <label className="text-sm text-gray-400 font-medium">Discord ID</label>
-                            <p className="text-white mt-1">{selectedApplication.discordId}</p>
+                            <p className="text-white mt-1">{selectedApplication.formData.discordId}</p>
                           </div>
                         )}
 
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="text-sm text-gray-400 font-medium">Submitted Date</label>
-                            <p className="text-white mt-1">{selectedApplication.submittedDate}</p>
+                            <p className="text-white mt-1">{new Date(selectedApplication.createdAt).toLocaleDateString()}</p>
                           </div>
-                          {selectedApplication.reviewDate && (
+                          {selectedApplication.reviewedAt && (
                             <div>
                               <label className="text-sm text-gray-400 font-medium">Review Date</label>
-                              <p className="text-white mt-1">{selectedApplication.reviewDate}</p>
+                              <p className="text-white mt-1">{new Date(selectedApplication.reviewedAt).toLocaleDateString()}</p>
                             </div>
                           )}
                         </div>
@@ -524,16 +533,16 @@ export default function ApplicationsPage() {
                           value={reviewNote}
                           onChange={(e) => setReviewNote(e.target.value)}
                           minRows={4}
-                          isDisabled={selectedApplication.status === "approved" || selectedApplication.status === "rejected"}
+                          isDisabled={selectedApplication.status === "APPROVED" || selectedApplication.status === "REJECTED"}
                         />
                       </div>
 
                       {/* Existing Notes */}
-                      {selectedApplication.notes && (
+                      {selectedApplication.reviewNotes && (
                         <Card className="bg-blue-900/20 border border-blue-800">
                           <CardBody className="p-4">
                             <p className="text-sm text-gray-400 mb-2">Previous Review Notes:</p>
-                            <p className="text-white">{selectedApplication.notes}</p>
+                            <p className="text-white">{selectedApplication.reviewNotes}</p>
                           </CardBody>
                         </Card>
                       )}
@@ -544,26 +553,26 @@ export default function ApplicationsPage() {
                   <Button color="default" variant="flat" onPress={onClose}>
                     Close
                   </Button>
-                  {selectedApplication && selectedApplication.status === "pending" && (
-                    <Button 
-                      color="primary" 
+                  {selectedApplication && selectedApplication.status === "PENDING" && (
+                    <Button
+                      color="primary"
                       variant="flat"
                       onPress={handleStartReview}
                     >
                       Start Review
                     </Button>
                   )}
-                  {selectedApplication && (selectedApplication.status === "pending" || selectedApplication.status === "reviewing") && (
+                  {selectedApplication && (selectedApplication.status === "PENDING" || selectedApplication.status === "UNDER_REVIEW") && (
                     <>
-                      <Button 
-                        color="danger" 
-                        onPress={() => handleReview("rejected")}
+                      <Button
+                        color="danger"
+                        onPress={() => handleReview("REJECTED")}
                       >
                         Reject
                       </Button>
-                      <Button 
-                        color="success" 
-                        onPress={() => handleReview("approved")}
+                      <Button
+                        color="success"
+                        onPress={() => handleReview("APPROVED")}
                       >
                         Approve
                       </Button>

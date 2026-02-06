@@ -4,9 +4,10 @@ import { prisma } from "@/lib/prisma";
 // PATCH /api/cad/investigations/[id]/tasks/[taskId] - Update task
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; taskId: string } }
+  { params }: { params: Promise<{ id: string; taskId: string }> }
 ) {
   try {
+    const { id, taskId } = await params;
     const body = await request.json();
     const updateData: any = {};
     
@@ -25,13 +26,13 @@ export async function PATCH(
     }
     
     const task = await prisma.investigationTask.update({
-      where: { id: params.taskId },
+      where: { id: taskId },
       data: updateData
     });
     
     // Update investigation last activity
     await prisma.investigation.update({
-      where: { id: params.id },
+      where: { id },
       data: { lastActivityAt: new Date() }
     });
     
@@ -39,7 +40,7 @@ export async function PATCH(
     if (body.status === "COMPLETED") {
       await prisma.investigationTimeline.create({
         data: {
-          investigationId: params.id,
+          investigationId: id,
           eventType: "TASK_COMPLETED",
           description: `Task completed: ${task.title}`,
           performedBy: body.completedBy || body.updatedBy || "System"
@@ -60,11 +61,12 @@ export async function PATCH(
 // DELETE /api/cad/investigations/[id]/tasks/[taskId] - Delete task
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; taskId: string } }
+  { params }: { params: Promise<{ id: string; taskId: string }> }
 ) {
   try {
+    const { taskId } = await params;
     await prisma.investigationTask.delete({
-      where: { id: params.taskId }
+      where: { id: taskId }
     });
     
     return NextResponse.json({ success: true });
