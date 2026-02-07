@@ -9,7 +9,7 @@ import {
   Chip,
   Divider,
   Badge,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Bell, X, AlertTriangle, Radio, Users, Shield, FileText } from "lucide-react";
 import { toast } from "@/lib/toast";
 

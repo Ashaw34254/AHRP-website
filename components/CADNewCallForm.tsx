@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, CardHeader, Button, Input, Textarea, Select, SelectItem } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Button, Input, Textarea, Select, SelectItem } from "@heroui/react";
 import { Plus, MapPin, Phone, AlertTriangle, Flame, Heart } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/lib/toast";
@@ -226,7 +226,7 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
               isRequired
             >
               {departmentCallTypes.map((type) => (
-                <SelectItem key={type} value={type}>
+                <SelectItem key={type}>
                   {type.replace(/_/g, " ")}
                 </SelectItem>
               ))}
@@ -241,7 +241,7 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
               description={`Target response: ${departmentPriorities.find(p => p.value === formData.priority)?.responseTime || 15} min`}
             >
               {departmentPriorities.map((priority) => (
-                <SelectItem key={priority.value} value={priority.value}>
+                <SelectItem key={priority.value}>
                   {priority.label}
                 </SelectItem>
               ))}
@@ -285,10 +285,10 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
                 value={formData.fireSize}
                 onChange={(e) => setFormData({ ...formData, fireSize: e.target.value })}
               >
-                <SelectItem key="SMALL" value="SMALL">Small (Single Room)</SelectItem>
-                <SelectItem key="MEDIUM" value="MEDIUM">Medium (Multiple Rooms)</SelectItem>
-                <SelectItem key="LARGE" value="LARGE">Large (Entire Structure)</SelectItem>
-                <SelectItem key="MAJOR" value="MAJOR">Major (Multiple Structures)</SelectItem>
+                <SelectItem key="SMALL">Small (Single Room)</SelectItem>
+                <SelectItem key="MEDIUM">Medium (Multiple Rooms)</SelectItem>
+                <SelectItem key="LARGE">Large (Entire Structure)</SelectItem>
+                <SelectItem key="MAJOR">Major (Multiple Structures)</SelectItem>
               </Select>
               <Select
                 label="HAZMAT Involved"
@@ -296,8 +296,8 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
                 value={formData.hazmat ? "true" : "false"}
                 onChange={(e) => setFormData({ ...formData, hazmat: e.target.value === "true" })}
               >
-                <SelectItem key="false" value="false">No</SelectItem>
-                <SelectItem key="true" value="true">Yes - HAZMAT Response Required</SelectItem>
+                <SelectItem key="false">No</SelectItem>
+                <SelectItem key="true">Yes - HAZMAT Response Required</SelectItem>
               </Select>
             </div>
           )}
@@ -318,10 +318,10 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
                 value={formData.patientGender}
                 onChange={(e) => setFormData({ ...formData, patientGender: e.target.value })}
               >
-                <SelectItem key="MALE" value="MALE">Male</SelectItem>
-                <SelectItem key="FEMALE" value="FEMALE">Female</SelectItem>
-                <SelectItem key="OTHER" value="OTHER">Other</SelectItem>
-                <SelectItem key="UNKNOWN" value="UNKNOWN">Unknown</SelectItem>
+                <SelectItem key="MALE">Male</SelectItem>
+                <SelectItem key="FEMALE">Female</SelectItem>
+                <SelectItem key="OTHER">Other</SelectItem>
+                <SelectItem key="UNKNOWN">Unknown</SelectItem>
               </Select>
               <Select
                 label="Consciousness Level"
@@ -329,10 +329,10 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
                 value={formData.consciousness}
                 onChange={(e) => setFormData({ ...formData, consciousness: e.target.value })}
               >
-                <SelectItem key="ALERT" value="ALERT">Alert & Responsive</SelectItem>
-                <SelectItem key="VERBAL" value="VERBAL">Responds to Verbal</SelectItem>
-                <SelectItem key="PAIN" value="PAIN">Responds to Pain</SelectItem>
-                <SelectItem key="UNRESPONSIVE" value="UNRESPONSIVE">Unresponsive</SelectItem>
+                <SelectItem key="ALERT">Alert & Responsive</SelectItem>
+                <SelectItem key="VERBAL">Responds to Verbal</SelectItem>
+                <SelectItem key="PAIN">Responds to Pain</SelectItem>
+                <SelectItem key="UNRESPONSIVE">Unresponsive</SelectItem>
               </Select>
             </div>
           )}

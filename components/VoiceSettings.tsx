@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardBody, CardHeader, Switch, Select, SelectItem, Slider, Button, Divider, Tabs, Tab, Input, Chip } from '@nextui-org/react';
+import { Card, CardBody, CardHeader, Switch, Select, SelectItem, Slider, Button, Divider, Tabs, Tab, Input, Chip } from '@heroui/react';
 import { useVoice, VoiceTemplates } from '@/lib/voice-context';
 import { Volume2, Settings, BarChart3, List, Save, Trash2, BookmarkPlus, Keyboard, Shield } from 'lucide-react';
 import { useState } from 'react';
@@ -109,7 +109,7 @@ export default function VoiceSettings() {
               isDisabled={!isEnabled}
             >
               {voiceProviders.map((provider) => (
-                <SelectItem key={provider.value} value={provider.value}>
+                <SelectItem key={provider.value}>
                   {provider.label}
                 </SelectItem>
               ))}
@@ -128,7 +128,7 @@ export default function VoiceSettings() {
               isDisabled={!isEnabled}
             >
               {voiceLanguages.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value}>
+                <SelectItem key={lang.value}>
                   {lang.label}
                 </SelectItem>
               ))}
@@ -243,9 +243,9 @@ export default function VoiceSettings() {
                       onChange={(e) => setActiveDepartment(e.target.value as any)}
                       placeholder="All Departments"
                     >
-                      <SelectItem key="POLICE" value="POLICE">Police</SelectItem>
-                      <SelectItem key="FIRE" value="FIRE">Fire</SelectItem>
-                      <SelectItem key="EMS" value="EMS">EMS</SelectItem>
+                      <SelectItem key="POLICE">Police</SelectItem>
+                      <SelectItem key="FIRE">Fire</SelectItem>
+                      <SelectItem key="EMS">EMS</SelectItem>
                     </Select>
                     <p className="text-xs text-gray-500 mt-1">
                       Filter voice alerts by department
@@ -691,16 +691,16 @@ export default function VoiceSettings() {
                       }
                       isDisabled={!isEnabled}
                     >
-                      <SelectItem key="en-US-Standard-A" value="en-US-Standard-A">
+                      <SelectItem key="en-US-Standard-A">
                         Voice A (Male, Authoritative)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-B" value="en-US-Standard-B">
+                      <SelectItem key="en-US-Standard-B">
                         Voice B (Male, Deep)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-C" value="en-US-Standard-C">
+                      <SelectItem key="en-US-Standard-C">
                         Voice C (Female, Professional)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-D" value="en-US-Standard-D">
+                      <SelectItem key="en-US-Standard-D">
                         Voice D (Male, Clear)
                       </SelectItem>
                     </Select>
@@ -720,16 +720,16 @@ export default function VoiceSettings() {
                       }
                       isDisabled={!isEnabled}
                     >
-                      <SelectItem key="en-US-Standard-A" value="en-US-Standard-A">
+                      <SelectItem key="en-US-Standard-A">
                         Voice A (Male, Authoritative)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-B" value="en-US-Standard-B">
+                      <SelectItem key="en-US-Standard-B">
                         Voice B (Male, Deep)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-C" value="en-US-Standard-C">
+                      <SelectItem key="en-US-Standard-C">
                         Voice C (Female, Professional)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-D" value="en-US-Standard-D">
+                      <SelectItem key="en-US-Standard-D">
                         Voice D (Female, Calm)
                       </SelectItem>
                     </Select>
@@ -749,16 +749,16 @@ export default function VoiceSettings() {
                       }
                       isDisabled={!isEnabled}
                     >
-                      <SelectItem key="en-US-Standard-A" value="en-US-Standard-A">
+                      <SelectItem key="en-US-Standard-A">
                         Voice A (Male, Authoritative)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-B" value="en-US-Standard-B">
+                      <SelectItem key="en-US-Standard-B">
                         Voice B (Male, Deep)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-C" value="en-US-Standard-C">
+                      <SelectItem key="en-US-Standard-C">
                         Voice C (Female, Professional)
                       </SelectItem>
-                      <SelectItem key="en-US-Standard-D" value="en-US-Standard-D">
+                      <SelectItem key="en-US-Standard-D">
                         Voice D (Neutral)
                       </SelectItem>
                     </Select>

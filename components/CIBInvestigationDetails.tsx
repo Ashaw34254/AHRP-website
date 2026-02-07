@@ -5,7 +5,7 @@ import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   Button, Tabs, Tab, Card, CardBody, CardHeader, Input, Textarea,
   Select, SelectItem, Chip, Spinner, Tooltip, Badge
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   FileText, Clock, Paperclip, CheckSquare, User, Users, Shield,
   MapPin, Car, Phone, Building, File, Calendar, AlertTriangle,
@@ -271,15 +271,15 @@ export function CIBInvestigationDetails({ investigation, isOpen, onClose, onUpda
                             onChange={(e) => setEditForm({ ...editForm, classification: e.target.value })}
                             classNames={{ trigger: "bg-gray-900 border border-gray-700" }}
                           >
-                            <SelectItem key="ASSAULT" value="ASSAULT">Assault</SelectItem>
-                            <SelectItem key="HOMICIDE" value="HOMICIDE">Homicide</SelectItem>
-                            <SelectItem key="FRAUD" value="FRAUD">Fraud</SelectItem>
-                            <SelectItem key="THEFT" value="THEFT">Theft</SelectItem>
-                            <SelectItem key="DRUGS" value="DRUGS">Drugs</SelectItem>
-                            <SelectItem key="CORRUPTION" value="CORRUPTION">Corruption</SelectItem>
-                            <SelectItem key="ORGANISED_CRIME" value="ORGANISED_CRIME">Organised Crime</SelectItem>
-                            <SelectItem key="CYBERCRIME" value="CYBERCRIME">Cybercrime</SelectItem>
-                            <SelectItem key="OTHER" value="OTHER">Other</SelectItem>
+                            <SelectItem key="ASSAULT">Assault</SelectItem>
+                            <SelectItem key="HOMICIDE">Homicide</SelectItem>
+                            <SelectItem key="FRAUD">Fraud</SelectItem>
+                            <SelectItem key="THEFT">Theft</SelectItem>
+                            <SelectItem key="DRUGS">Drugs</SelectItem>
+                            <SelectItem key="CORRUPTION">Corruption</SelectItem>
+                            <SelectItem key="ORGANISED_CRIME">Organised Crime</SelectItem>
+                            <SelectItem key="CYBERCRIME">Cybercrime</SelectItem>
+                            <SelectItem key="OTHER">Other</SelectItem>
                           </Select>
 
                           <Select
@@ -288,10 +288,10 @@ export function CIBInvestigationDetails({ investigation, isOpen, onClose, onUpda
                             onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })}
                             classNames={{ trigger: "bg-gray-900 border border-gray-700" }}
                           >
-                            <SelectItem key="LOW" value="LOW">Low</SelectItem>
-                            <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-                            <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-                            <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
+                            <SelectItem key="LOW">Low</SelectItem>
+                            <SelectItem key="MEDIUM">Medium</SelectItem>
+                            <SelectItem key="HIGH">High</SelectItem>
+                            <SelectItem key="CRITICAL">Critical</SelectItem>
                           </Select>
                         </div>
 
@@ -302,12 +302,12 @@ export function CIBInvestigationDetails({ investigation, isOpen, onClose, onUpda
                             onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                             classNames={{ trigger: "bg-gray-900 border border-gray-700" }}
                           >
-                            <SelectItem key="ACTIVE" value="ACTIVE">Active</SelectItem>
-                            <SelectItem key="DORMANT" value="DORMANT">Dormant</SelectItem>
-                            <SelectItem key="ESCALATED" value="ESCALATED">Escalated</SelectItem>
-                            <SelectItem key="COURT_READY" value="COURT_READY">Court Ready</SelectItem>
-                            <SelectItem key="CLOSED" value="CLOSED">Closed</SelectItem>
-                            <SelectItem key="ARCHIVED" value="ARCHIVED">Archived</SelectItem>
+                            <SelectItem key="ACTIVE">Active</SelectItem>
+                            <SelectItem key="DORMANT">Dormant</SelectItem>
+                            <SelectItem key="ESCALATED">Escalated</SelectItem>
+                            <SelectItem key="COURT_READY">Court Ready</SelectItem>
+                            <SelectItem key="CLOSED">Closed</SelectItem>
+                            <SelectItem key="ARCHIVED">Archived</SelectItem>
                           </Select>
 
                           <Select
@@ -316,10 +316,10 @@ export function CIBInvestigationDetails({ investigation, isOpen, onClose, onUpda
                             onChange={(e) => setEditForm({ ...editForm, securityLevel: e.target.value })}
                             classNames={{ trigger: "bg-gray-900 border border-gray-700" }}
                           >
-                            <SelectItem key="STANDARD" value="STANDARD">Standard</SelectItem>
-                            <SelectItem key="CONFIDENTIAL" value="CONFIDENTIAL">Confidential</SelectItem>
-                            <SelectItem key="RESTRICTED" value="RESTRICTED">Restricted</SelectItem>
-                            <SelectItem key="SECRET" value="SECRET">Secret</SelectItem>
+                            <SelectItem key="STANDARD">Standard</SelectItem>
+                            <SelectItem key="CONFIDENTIAL">Confidential</SelectItem>
+                            <SelectItem key="RESTRICTED">Restricted</SelectItem>
+                            <SelectItem key="SECRET">Secret</SelectItem>
                           </Select>
                         </div>
 

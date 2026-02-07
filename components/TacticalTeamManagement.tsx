@@ -20,7 +20,7 @@ import {
   Tabs,
   Tab,
   Progress,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   Shield,
   Target,
@@ -684,11 +684,11 @@ export default function TacticalTeamManagement() {
                           onChange={(e) => handleQuickStatusUpdate(officer.id, e.target.value as any)}
                           className="mb-2"
                         >
-                          <SelectItem key="AVAILABLE" value="AVAILABLE">Available</SelectItem>
-                          <SelectItem key="ON_DUTY" value="ON_DUTY">On Duty</SelectItem>
-                          <SelectItem key="DEPLOYED" value="DEPLOYED">Deployed</SelectItem>
-                          <SelectItem key="OFF_DUTY" value="OFF_DUTY">Off Duty</SelectItem>
-                          <SelectItem key="TRAINING" value="TRAINING">Training</SelectItem>
+                          <SelectItem key="AVAILABLE">Available</SelectItem>
+                          <SelectItem key="ON_DUTY">On Duty</SelectItem>
+                          <SelectItem key="DEPLOYED">Deployed</SelectItem>
+                          <SelectItem key="OFF_DUTY">Off Duty</SelectItem>
+                          <SelectItem key="TRAINING">Training</SelectItem>
                         </Select>
 
                         <div className="space-y-1 text-sm text-gray-400 mb-3">
@@ -1039,8 +1039,8 @@ export default function TacticalTeamManagement() {
                 onChange={(e) => setOfficerForm({ ...officerForm, team: e.target.value as any })}
                 isRequired
               >
-                <SelectItem key="CIRT" value="CIRT">CIRT - Critical Incident Response</SelectItem>
-                <SelectItem key="SOG" value="SOG">SOG - Special Operations Group</SelectItem>
+                <SelectItem key="CIRT">CIRT - Critical Incident Response</SelectItem>
+                <SelectItem key="SOG">SOG - Special Operations Group</SelectItem>
               </Select>
 
               <Select
@@ -1049,14 +1049,14 @@ export default function TacticalTeamManagement() {
                 onChange={(e) => setOfficerForm({ ...officerForm, role: e.target.value as any })}
                 isRequired
               >
-                <SelectItem key="TEAM_LEADER" value="TEAM_LEADER">Team Leader</SelectItem>
-                <SelectItem key="BREACHER" value="BREACHER">Breacher</SelectItem>
-                <SelectItem key="SNIPER" value="SNIPER">Sniper</SelectItem>
-                <SelectItem key="NEGOTIATOR" value="NEGOTIATOR">Negotiator</SelectItem>
-                <SelectItem key="MEDIC" value="MEDIC">Tactical Medic</SelectItem>
-                <SelectItem key="K9_HANDLER" value="K9_HANDLER">K9 Handler</SelectItem>
-                <SelectItem key="EXPLOSIVES" value="EXPLOSIVES">Explosives Specialist</SelectItem>
-                <SelectItem key="ENTRY_TEAM" value="ENTRY_TEAM">Entry Team</SelectItem>
+                <SelectItem key="TEAM_LEADER">Team Leader</SelectItem>
+                <SelectItem key="BREACHER">Breacher</SelectItem>
+                <SelectItem key="SNIPER">Sniper</SelectItem>
+                <SelectItem key="NEGOTIATOR">Negotiator</SelectItem>
+                <SelectItem key="MEDIC">Tactical Medic</SelectItem>
+                <SelectItem key="K9_HANDLER">K9 Handler</SelectItem>
+                <SelectItem key="EXPLOSIVES">Explosives Specialist</SelectItem>
+                <SelectItem key="ENTRY_TEAM">Entry Team</SelectItem>
               </Select>
 
               <Select
@@ -1064,11 +1064,11 @@ export default function TacticalTeamManagement() {
                 selectedKeys={[officerForm.status]}
                 onChange={(e) => setOfficerForm({ ...officerForm, status: e.target.value as any })}
               >
-                <SelectItem key="AVAILABLE" value="AVAILABLE">Available</SelectItem>
-                <SelectItem key="ON_DUTY" value="ON_DUTY">On Duty</SelectItem>
-                <SelectItem key="DEPLOYED" value="DEPLOYED">Deployed</SelectItem>
-                <SelectItem key="OFF_DUTY" value="OFF_DUTY">Off Duty</SelectItem>
-                <SelectItem key="TRAINING" value="TRAINING">Training</SelectItem>
+                <SelectItem key="AVAILABLE">Available</SelectItem>
+                <SelectItem key="ON_DUTY">On Duty</SelectItem>
+                <SelectItem key="DEPLOYED">Deployed</SelectItem>
+                <SelectItem key="OFF_DUTY">Off Duty</SelectItem>
+                <SelectItem key="TRAINING">Training</SelectItem>
               </Select>
 
               <Input
@@ -1151,9 +1151,9 @@ export default function TacticalTeamManagement() {
                 value={newCallout.team}
                 onChange={(e) => setNewCallout({ ...newCallout, team: e.target.value as any })}
               >
-                <SelectItem key="CIRT" value="CIRT">CIRT - Critical Incident Response</SelectItem>
-                <SelectItem key="SOG" value="SOG">SOG - Special Operations Group</SelectItem>
-                <SelectItem key="BOTH" value="BOTH">Both Teams</SelectItem>
+                <SelectItem key="CIRT">CIRT - Critical Incident Response</SelectItem>
+                <SelectItem key="SOG">SOG - Special Operations Group</SelectItem>
+                <SelectItem key="BOTH">Both Teams</SelectItem>
               </Select>
 
               <Input
@@ -1176,9 +1176,9 @@ export default function TacticalTeamManagement() {
                 value={newCallout.priority}
                 onChange={(e) => setNewCallout({ ...newCallout, priority: e.target.value as any })}
               >
-                <SelectItem key="ROUTINE" value="ROUTINE">Routine</SelectItem>
-                <SelectItem key="URGENT" value="URGENT">Urgent</SelectItem>
-                <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
+                <SelectItem key="ROUTINE">Routine</SelectItem>
+                <SelectItem key="URGENT">Urgent</SelectItem>
+                <SelectItem key="CRITICAL">Critical</SelectItem>
               </Select>
 
               <Input

@@ -11,7 +11,7 @@ import {
   CardBody,
   Chip,
   Kbd,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   Search,
   User,

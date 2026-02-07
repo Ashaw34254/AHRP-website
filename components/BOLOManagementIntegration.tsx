@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Card, CardBody, Button, Chip, Input, Select, SelectItem } from '@nextui-org/react';
+import { Card, CardBody, Button, Chip, Input, Select, SelectItem } from '@heroui/react';
 import { Radio, Search, Clock, AlertTriangle, Car, User } from 'lucide-react';
 import { useCADVoiceAlerts } from '@/lib/use-voice-alerts';
 
@@ -235,9 +235,9 @@ export default function BOLOManagementIntegration() {
               selectedKeys={[filterType]}
               onChange={(e) => setFilterType(e.target.value as any)}
             >
-              <SelectItem key="all" value="all">All Types</SelectItem>
-              <SelectItem key="vehicle" value="vehicle">Vehicles</SelectItem>
-              <SelectItem key="person" value="person">Persons</SelectItem>
+              <SelectItem key="all">All Types</SelectItem>
+              <SelectItem key="vehicle">Vehicles</SelectItem>
+              <SelectItem key="person">Persons</SelectItem>
             </Select>
           </div>
         </CardBody>

@@ -19,7 +19,7 @@ import {
   SelectItem,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   MessageSquare,
   Send,
@@ -534,16 +534,16 @@ export function MDTMessaging() {
                   trigger: "bg-gray-900 border-gray-800",
                 }}
               >
-                <SelectItem key="UNIT_TO_UNIT" value="UNIT_TO_UNIT">
+                <SelectItem key="UNIT_TO_UNIT">
                   Unit to Unit
                 </SelectItem>
-                <SelectItem key="OFFICER_TO_OFFICER" value="OFFICER_TO_OFFICER">
+                <SelectItem key="OFFICER_TO_OFFICER">
                   Officer to Officer
                 </SelectItem>
-                <SelectItem key="DISPATCH" value="DISPATCH">
+                <SelectItem key="DISPATCH">
                   Dispatch Message
                 </SelectItem>
-                <SelectItem key="BROADCAST" value="BROADCAST">
+                <SelectItem key="BROADCAST">
                   Broadcast (All Units)
                 </SelectItem>
               </Select>
@@ -561,7 +561,7 @@ export function MDTMessaging() {
                   }}
                 >
                   {units.map((unit) => (
-                    <SelectItem key={unit.callsign} value={unit.callsign}>
+                    <SelectItem key={unit.callsign}>
                       {unit.callsign} - {unit.department}
                     </SelectItem>
                   ))}
@@ -581,7 +581,7 @@ export function MDTMessaging() {
                   }}
                 >
                   {officers.map((officer) => (
-                    <SelectItem key={officer.name} value={officer.name}>
+                    <SelectItem key={officer.name}>
                       {officer.name} - {officer.rank} (Badge {officer.badge})
                     </SelectItem>
                   ))}

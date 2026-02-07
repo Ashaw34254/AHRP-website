@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Input, Textarea, Button, Avatar, Divider, Switch, Tabs, Tab } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Input, Textarea, Button, Avatar, Divider, Switch, Tabs, Tab } from "@heroui/react";
 import { User, Mail, MessageSquare, Hash, Save, Link as LinkIcon, Settings, Bell, Volume2, Palette, Globe, Lock, TestTube, Radio } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/lib/toast";

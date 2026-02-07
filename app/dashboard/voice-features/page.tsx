@@ -1,7 +1,7 @@
 'use client';
 
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { Card, CardBody, Tabs, Tab } from '@nextui-org/react';
+import { Card, CardBody, Tabs, Tab } from '@heroui/react';
 import PanicButtonEnhanced from '@/components/PanicButtonEnhanced';
 import BOLOManagementIntegration from '@/components/BOLOManagementIntegration';
 import IncidentTimelineVoiceNotes from '@/components/IncidentTimelineVoiceNotes';

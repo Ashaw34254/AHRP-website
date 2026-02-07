@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardBody, Button, Chip, Progress } from '@nextui-org/react';
+import { Card, CardBody, Button, Chip, Progress } from '@heroui/react';
 import { Volume2, X, SkipForward, Trash2, Clock } from 'lucide-react';
 import { useVoice } from '@/lib/voice-context';
 

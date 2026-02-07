@@ -21,7 +21,7 @@ import {
   ModalFooter,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { toast } from "@/lib/toast";
 import {
   Plus,
@@ -886,7 +886,7 @@ export default function FormBuilderPage() {
                   }
                 >
                   {fieldTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type.value}>
                       {type.label}
                     </SelectItem>
                   ))}
@@ -901,8 +901,8 @@ export default function FormBuilderPage() {
                     })
                   }
                 >
-                  <SelectItem key="full" value="full">Full Width</SelectItem>
-                  <SelectItem key="half" value="half">Half Width</SelectItem>
+                  <SelectItem key="full">Full Width</SelectItem>
+                  <SelectItem key="half">Half Width</SelectItem>
                 </Select>
               </div>
 
@@ -1031,8 +1031,8 @@ export default function FormBuilderPage() {
                       }
                       description="Show or hide this field when conditions are met"
                     >
-                      <SelectItem key="show" value="show">Show field</SelectItem>
-                      <SelectItem key="hide" value="hide">Hide field</SelectItem>
+                      <SelectItem key="show">Show field</SelectItem>
+                      <SelectItem key="hide">Hide field</SelectItem>
                     </Select>
 
                     {fieldForm.conditionalLogic.conditions.map((condition, condIndex) => (
@@ -1088,7 +1088,7 @@ export default function FormBuilderPage() {
                             {formConfig?.fields
                               .filter((f) => f.fieldName !== fieldForm.fieldName)
                               .map((f) => (
-                                <SelectItem key={f.fieldName} value={f.fieldName}>
+                                <SelectItem key={f.fieldName}>
                                   {f.label}
                                 </SelectItem>
                               )) || []}
@@ -1112,13 +1112,13 @@ export default function FormBuilderPage() {
                               });
                             }}
                           >
-                            <SelectItem key="equals" value="equals">Equals</SelectItem>
-                            <SelectItem key="not_equals" value="not_equals">Not Equals</SelectItem>
-                            <SelectItem key="contains" value="contains">Contains</SelectItem>
-                            <SelectItem key="greater_than" value="greater_than">Greater Than</SelectItem>
-                            <SelectItem key="less_than" value="less_than">Less Than</SelectItem>
-                            <SelectItem key="is_empty" value="is_empty">Is Empty</SelectItem>
-                            <SelectItem key="is_not_empty" value="is_not_empty">Is Not Empty</SelectItem>
+                            <SelectItem key="equals">Equals</SelectItem>
+                            <SelectItem key="not_equals">Not Equals</SelectItem>
+                            <SelectItem key="contains">Contains</SelectItem>
+                            <SelectItem key="greater_than">Greater Than</SelectItem>
+                            <SelectItem key="less_than">Less Than</SelectItem>
+                            <SelectItem key="is_empty">Is Empty</SelectItem>
+                            <SelectItem key="is_not_empty">Is Not Empty</SelectItem>
                           </Select>
 
                           <Input
@@ -1184,8 +1184,8 @@ export default function FormBuilderPage() {
                             })
                           }
                         >
-                          <SelectItem key="AND" value="AND">AND (all must match)</SelectItem>
-                          <SelectItem key="OR" value="OR">OR (any must match)</SelectItem>
+                          <SelectItem key="AND">AND (all must match)</SelectItem>
+                          <SelectItem key="OR">OR (any must match)</SelectItem>
                         </Select>
                       )}
                     </div>

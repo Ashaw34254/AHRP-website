@@ -17,7 +17,7 @@ import {
   RadioGroup,
   CheckboxGroup,
   Chip,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { toast } from "@/lib/toast";
 import { Send, FileText, Save, Clock } from "lucide-react";
 import { motion } from "framer-motion";
@@ -392,7 +392,7 @@ export default function ApplyPage() {
             onChange={(e) => updateField(field.fieldName, e.target.value)}
           >
             {field.options?.map((option) => (
-              <SelectItem key={option} value={option}>
+              <SelectItem key={option}>
                 {option}
               </SelectItem>
             ))}
@@ -530,7 +530,7 @@ export default function ApplyPage() {
                   isDisabled={!!currentDraftId} // Disable type change if editing draft
                 >
                   {applicationTypes.map((type) => (
-                    <SelectItem key={type.name} value={type.name}>
+                    <SelectItem key={type.name}>
                       {type.title}
                     </SelectItem>
                   ))}

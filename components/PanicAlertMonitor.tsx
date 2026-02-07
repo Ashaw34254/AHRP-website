@@ -12,7 +12,7 @@ import {
   CardBody,
   Chip,
   Divider,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { AlertTriangle, MapPin, Clock, Radio, X, CheckCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 

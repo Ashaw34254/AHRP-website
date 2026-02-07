@@ -21,7 +21,7 @@ import {
   ModalBody,
   ModalFooter,
   Chip,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { toast } from "@/lib/toast";
 import { Plus, Trash2, FileText, Edit } from "lucide-react";
 import { motion } from "framer-motion";

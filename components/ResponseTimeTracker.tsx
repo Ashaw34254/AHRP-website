@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Chip, Progress } from "@nextui-org/react";
+import { Card, CardBody, Chip, Progress } from "@heroui/react";
 import { Clock, AlertTriangle, CheckCircle, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 

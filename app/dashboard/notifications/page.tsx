@@ -8,7 +8,7 @@ import {
   Button,
   Chip,
   Checkbox
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { 
   Bell, 
   CheckCircle, 

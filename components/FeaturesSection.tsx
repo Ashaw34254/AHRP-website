@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody } from "@nextui-org/react";
+import { Card, CardBody } from "@heroui/react";
 import { Award, Code, Ambulance, DollarSign, Globe, Cpu, Radio, Car } from "lucide-react";
 import { motion } from "framer-motion";
 

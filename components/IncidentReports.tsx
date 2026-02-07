@@ -21,7 +21,7 @@ import {
   Tabs,
   Tab,
   Badge,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   FileText,
   Plus,
@@ -637,7 +637,7 @@ export function IncidentReports({ department }: IncidentReportsProps = { departm
                   variant="bordered"
                 >
                   {officers.map((officer) => (
-                    <SelectItem key={officer.id} value={officer.id}>
+                    <SelectItem key={officer.id}>
                       {officer.name} {officer.badge ? `(#${officer.badge})` : ""}
                     </SelectItem>
                   ))}

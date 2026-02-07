@@ -1,7 +1,7 @@
 'use client';
 
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { Card, CardBody, Button, Select, SelectItem, Slider, Chip } from '@nextui-org/react';
+import { Card, CardBody, Button, Select, SelectItem, Slider, Chip } from '@heroui/react';
 import { useCADVoiceAlerts } from '@/lib/use-voice-alerts';
 import { useVoice } from '@/lib/voice-context';
 import { useState } from 'react';
@@ -138,9 +138,9 @@ export default function VoiceTestingPage() {
                 selectedKeys={[testDepartment]}
                 onChange={(e) => setTestDepartment(e.target.value as any)}
               >
-                <SelectItem key="POLICE" value="POLICE">Police</SelectItem>
-                <SelectItem key="FIRE" value="FIRE">Fire</SelectItem>
-                <SelectItem key="EMS" value="EMS">EMS</SelectItem>
+                <SelectItem key="POLICE">Police</SelectItem>
+                <SelectItem key="FIRE">Fire</SelectItem>
+                <SelectItem key="EMS">EMS</SelectItem>
               </Select>
             </CardBody>
           </Card>
@@ -153,10 +153,10 @@ export default function VoiceTestingPage() {
                 selectedKeys={[testPriority]}
                 onChange={(e) => setTestPriority(e.target.value as any)}
               >
-                <SelectItem key="low" value="low">Low</SelectItem>
-                <SelectItem key="normal" value="normal">Normal</SelectItem>
-                <SelectItem key="high" value="high">High</SelectItem>
-                <SelectItem key="critical" value="critical">Critical</SelectItem>
+                <SelectItem key="low">Low</SelectItem>
+                <SelectItem key="normal">Normal</SelectItem>
+                <SelectItem key="high">High</SelectItem>
+                <SelectItem key="critical">Critical</SelectItem>
               </Select>
             </CardBody>
           </Card>

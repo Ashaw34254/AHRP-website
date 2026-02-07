@@ -24,7 +24,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Shield, Users, Search, RefreshCw, Edit } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -215,9 +215,9 @@ export default function RolesPage() {
                   trigger: "bg-gray-800 border-gray-700",
                 }}
               >
-                <SelectItem key="all" value="all">All Roles</SelectItem>
-                <SelectItem key="admin" value="admin">Administrators</SelectItem>
-                <SelectItem key="user" value="user">Regular Users</SelectItem>
+                <SelectItem key="all">All Roles</SelectItem>
+                <SelectItem key="admin">Administrators</SelectItem>
+                <SelectItem key="user">Regular Users</SelectItem>
               </Select>
             </div>
           </CardBody>
@@ -354,10 +354,10 @@ export default function RolesPage() {
                       trigger: "bg-gray-800 border-gray-700",
                     }}
                   >
-                    <SelectItem key="user" value="user">
+                    <SelectItem key="user">
                       User - Standard member access
                     </SelectItem>
-                    <SelectItem key="admin" value="admin">
+                    <SelectItem key="admin">
                       Administrator - Full system access
                     </SelectItem>
                   </Select>

@@ -17,7 +17,7 @@ import {
   SelectItem,
   Chip,
   Pagination,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { FileText, Search, Calendar, User, Activity, Shield, Database } from "lucide-react";
 
 interface AuditLog {
@@ -224,7 +224,7 @@ export default function AuditLogsPage() {
                 onChange={(e) => setFilters({ ...filters, action: e.target.value })}
               >
                 {ACTION_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
+                  <SelectItem key={type}>
                     {type}
                   </SelectItem>
                 ))}
@@ -235,7 +235,7 @@ export default function AuditLogsPage() {
                 onChange={(e) => setFilters({ ...filters, resource: e.target.value })}
               >
                 {RESOURCE_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
+                  <SelectItem key={type}>
                     {type}
                   </SelectItem>
                 ))}

@@ -2,7 +2,7 @@
 
 import { AdminLayout } from "@/components/AdminLayout";
 import { StaffReports } from "@/components/StaffReports";
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab } from "@heroui/react";
 import { FileText, Shield } from "lucide-react";
 
 export default function AdminReportsPage() {

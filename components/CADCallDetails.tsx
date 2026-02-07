@@ -15,7 +15,7 @@ import {
   Avatar,
   Card,
   CardBody,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   MapPin,
   Phone,
@@ -458,7 +458,7 @@ export function CADCallDetails({ callId, isOpen, onClose, onUpdate }: CADCallDet
                 }}
               >
                 {STATUSES.map((status) => (
-                  <SelectItem key={status} value={status}>
+                  <SelectItem key={status}>
                     {status}
                   </SelectItem>
                 ))}
@@ -474,7 +474,7 @@ export function CADCallDetails({ callId, isOpen, onClose, onUpdate }: CADCallDet
                 }}
               >
                 {PRIORITIES.map((priority) => (
-                  <SelectItem key={priority} value={priority}>
+                  <SelectItem key={priority}>
                     {priority}
                   </SelectItem>
                 ))}
@@ -537,7 +537,7 @@ export function CADCallDetails({ callId, isOpen, onClose, onUpdate }: CADCallDet
                   }}
                 >
                   {availableUnits.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
+                    <SelectItem key={unit.id}>
                       {unit.callsign} - {unit.department}
                     </SelectItem>
                   ))}

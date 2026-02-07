@@ -15,7 +15,7 @@ import {
   Chip,
   Select,
   SelectItem,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   Zap,
   Plus,
@@ -475,10 +475,10 @@ export function QuickActions() {
                     trigger: "bg-gray-900 border-gray-800",
                   }}
                 >
-                  <SelectItem key="CALL_CREATE" value="CALL_CREATE">Create Call</SelectItem>
-                  <SelectItem key="UNIT_STATUS" value="UNIT_STATUS">Change Unit Status</SelectItem>
-                  <SelectItem key="NOTIFICATION" value="NOTIFICATION">Send Notification</SelectItem>
-                  <SelectItem key="CUSTOM" value="CUSTOM">Custom Action</SelectItem>
+                  <SelectItem key="CALL_CREATE">Create Call</SelectItem>
+                  <SelectItem key="UNIT_STATUS">Change Unit Status</SelectItem>
+                  <SelectItem key="NOTIFICATION">Send Notification</SelectItem>
+                  <SelectItem key="CUSTOM">Custom Action</SelectItem>
                 </Select>
 
                 <Select
@@ -492,11 +492,11 @@ export function QuickActions() {
                     trigger: "bg-gray-900 border-gray-800",
                   }}
                 >
-                  <SelectItem key="primary" value="primary">Primary (Blue)</SelectItem>
-                  <SelectItem key="success" value="success">Success (Green)</SelectItem>
-                  <SelectItem key="warning" value="warning">Warning (Orange)</SelectItem>
-                  <SelectItem key="danger" value="danger">Danger (Red)</SelectItem>
-                  <SelectItem key="secondary" value="secondary">Secondary (Purple)</SelectItem>
+                  <SelectItem key="primary">Primary (Blue)</SelectItem>
+                  <SelectItem key="success">Success (Green)</SelectItem>
+                  <SelectItem key="warning">Warning (Orange)</SelectItem>
+                  <SelectItem key="danger">Danger (Red)</SelectItem>
+                  <SelectItem key="secondary">Secondary (Purple)</SelectItem>
                 </Select>
               </div>
 
@@ -512,16 +512,16 @@ export function QuickActions() {
                     trigger: "bg-gray-900 border-gray-800",
                   }}
                 >
-                  <SelectItem key="Zap" value="Zap">Zap</SelectItem>
-                  <SelectItem key="Phone" value="Phone">Phone</SelectItem>
-                  <SelectItem key="Radio" value="Radio">Radio</SelectItem>
-                  <SelectItem key="AlertCircle" value="AlertCircle">Alert Circle</SelectItem>
-                  <SelectItem key="CheckCircle" value="CheckCircle">Check Circle</SelectItem>
-                  <SelectItem key="XCircle" value="XCircle">X Circle</SelectItem>
-                  <SelectItem key="Shield" value="Shield">Shield</SelectItem>
-                  <SelectItem key="UserPlus" value="UserPlus">User Plus</SelectItem>
-                  <SelectItem key="MapPin" value="MapPin">Map Pin</SelectItem>
-                  <SelectItem key="Clock" value="Clock">Clock</SelectItem>
+                  <SelectItem key="Zap">Zap</SelectItem>
+                  <SelectItem key="Phone">Phone</SelectItem>
+                  <SelectItem key="Radio">Radio</SelectItem>
+                  <SelectItem key="AlertCircle">Alert Circle</SelectItem>
+                  <SelectItem key="CheckCircle">Check Circle</SelectItem>
+                  <SelectItem key="XCircle">X Circle</SelectItem>
+                  <SelectItem key="Shield">Shield</SelectItem>
+                  <SelectItem key="UserPlus">User Plus</SelectItem>
+                  <SelectItem key="MapPin">Map Pin</SelectItem>
+                  <SelectItem key="Clock">Clock</SelectItem>
                 </Select>
 
                 <Input

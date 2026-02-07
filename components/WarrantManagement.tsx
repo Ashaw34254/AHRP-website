@@ -17,7 +17,7 @@ import {
   Chip,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Shield, Plus, Search, AlertTriangle, FileText } from "lucide-react";
 import { toast } from "@/lib/toast";
 

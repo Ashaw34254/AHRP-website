@@ -19,7 +19,7 @@ import {
   Textarea,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   Database,
   Plus,

@@ -23,7 +23,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Calendar as CalendarIcon, Plus, Edit, Trash2, MapPin, Users, RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -401,7 +401,7 @@ export default function EventsPage() {
                     }}
                   >
                     {eventTypes.map((type) => (
-                      <SelectItem key={type.key} value={type.key}>
+                      <SelectItem key={type.key}>
                         {type.label}
                       </SelectItem>
                     ))}

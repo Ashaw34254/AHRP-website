@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Accordion, AccordionItem } from "@nextui-org/react";
+import { Accordion, AccordionItem } from "@heroui/react";
 import { HelpCircle } from "lucide-react";
 
 const faqs = [

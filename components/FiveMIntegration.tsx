@@ -8,7 +8,7 @@ import {
   Button,
   Input,
   Chip,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Server, Radio, RefreshCw, CheckCircle, XCircle, Clock } from "lucide-react";
 import { toast } from "@/lib/toast";
 

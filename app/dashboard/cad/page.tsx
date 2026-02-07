@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Button } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Button } from "@heroui/react";
 import { Shield, Flame, Heart, Radio, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";

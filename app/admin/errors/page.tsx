@@ -2,8 +2,8 @@
 
 import { AdminLayout } from "@/components/AdminLayout";
 import ErrorDashboard from "@/components/ErrorDashboard";
-import { Card, CardBody } from "@nextui-org/card";
 import { Bug, Info } from "lucide-react";
+import { Card, CardBody } from "@heroui/react";
 
 export default function ErrorMonitoringPage() {
   return (

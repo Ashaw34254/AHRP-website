@@ -1,6 +1,6 @@
 "use client";
 
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/Toaster";
 import { ThemeProvider } from "@/lib/theme-context";
@@ -18,10 +18,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         <RealtimeProvider>
           <VoiceProvider>
-            <NextUIProvider>
+            <HeroUIProvider>
               {children}
               <Toaster />
-            </NextUIProvider>
+            </HeroUIProvider>
           </VoiceProvider>
         </RealtimeProvider>
       </SessionProvider>

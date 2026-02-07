@@ -19,7 +19,7 @@ import {
   SelectItem,
   Progress,
   Avatar,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { GraduationCap, Plus, Search, Award, Calendar, Clock, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -470,7 +470,7 @@ export function TrainingRecords() {
                 variant="bordered"
               >
                 {officers.map((officer) => (
-                  <SelectItem key={officer.id} value={officer.id}>
+                  <SelectItem key={officer.id}>
                     {officer.name} {officer.badge ? `(#${officer.badge})` : ""} - {officer.department}
                   </SelectItem>
                 ))}

@@ -7,7 +7,7 @@ import {
   Chip, Tabs, Tab, Spinner, Modal, ModalContent, ModalHeader, 
   ModalBody, ModalFooter, useDisclosure, Tooltip, Badge, Textarea,
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Divider
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { 
   Car, Search, Filter, Plus, Eye, AlertTriangle, Clock,
   FileText, MapPin, Shield, Hash, AlertOctagon, CheckCircle,
@@ -832,9 +832,9 @@ function InfringementsView({ infringements }: any) {
           className="max-w-xs"
           classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
         >
-          <SelectItem key="all" value="all">All</SelectItem>
-          <SelectItem key="paid" value="paid">Paid</SelectItem>
-          <SelectItem key="unpaid" value="unpaid">Unpaid</SelectItem>
+          <SelectItem key="all">All</SelectItem>
+          <SelectItem key="paid">Paid</SelectItem>
+          <SelectItem key="unpaid">Unpaid</SelectItem>
         </Select>
       </div>
 
@@ -1071,15 +1071,15 @@ function TrafficStopModal({ isOpen, onClose, onCreate }: any) {
               isRequired
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="SPEEDING" value="SPEEDING">Speeding</SelectItem>
-              <SelectItem key="RECKLESS_DRIVING" value="RECKLESS_DRIVING">Reckless Driving</SelectItem>
-              <SelectItem key="DUI" value="DUI">DUI / DWI</SelectItem>
-              <SelectItem key="REGISTRATION" value="REGISTRATION">Registration Issue</SelectItem>
-              <SelectItem key="EQUIPMENT" value="EQUIPMENT">Equipment Violation</SelectItem>
-              <SelectItem key="TRAFFIC_VIOLATION" value="TRAFFIC_VIOLATION">Traffic Violation</SelectItem>
-              <SelectItem key="SUSPICIOUS" value="SUSPICIOUS">Suspicious Vehicle</SelectItem>
-              <SelectItem key="BOLO" value="BOLO">BOLO Hit</SelectItem>
-              <SelectItem key="OTHER" value="OTHER">Other</SelectItem>
+              <SelectItem key="SPEEDING">Speeding</SelectItem>
+              <SelectItem key="RECKLESS_DRIVING">Reckless Driving</SelectItem>
+              <SelectItem key="DUI">DUI / DWI</SelectItem>
+              <SelectItem key="REGISTRATION">Registration Issue</SelectItem>
+              <SelectItem key="EQUIPMENT">Equipment Violation</SelectItem>
+              <SelectItem key="TRAFFIC_VIOLATION">Traffic Violation</SelectItem>
+              <SelectItem key="SUSPICIOUS">Suspicious Vehicle</SelectItem>
+              <SelectItem key="BOLO">BOLO Hit</SelectItem>
+              <SelectItem key="OTHER">Other</SelectItem>
             </Select>
 
             <Select
@@ -1088,11 +1088,11 @@ function TrafficStopModal({ isOpen, onClose, onCreate }: any) {
               onChange={(e) => setForm({ ...form, outcome: e.target.value })}
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="WARNING" value="WARNING">Verbal Warning</SelectItem>
-              <SelectItem key="CITATION" value="CITATION">Citation Issued</SelectItem>
-              <SelectItem key="ARREST" value="ARREST">Arrest</SelectItem>
-              <SelectItem key="IMPOUND" value="IMPOUND">Vehicle Impounded</SelectItem>
-              <SelectItem key="CLEARED" value="CLEARED">Cleared</SelectItem>
+              <SelectItem key="WARNING">Verbal Warning</SelectItem>
+              <SelectItem key="CITATION">Citation Issued</SelectItem>
+              <SelectItem key="ARREST">Arrest</SelectItem>
+              <SelectItem key="IMPOUND">Vehicle Impounded</SelectItem>
+              <SelectItem key="CLEARED">Cleared</SelectItem>
             </Select>
 
             <Input
@@ -1220,17 +1220,17 @@ function InfringementModal({ isOpen, onClose, onCreate }: any) {
               isRequired
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="SPEEDING_10_20" value="SPEEDING_10_20">Speeding 10-20 km/h over</SelectItem>
-              <SelectItem key="SPEEDING_20_30" value="SPEEDING_20_30">Speeding 20-30 km/h over</SelectItem>
-              <SelectItem key="SPEEDING_30_PLUS" value="SPEEDING_30_PLUS">Speeding 30+ km/h over</SelectItem>
-              <SelectItem key="RED_LIGHT" value="RED_LIGHT">Red Light Violation</SelectItem>
-              <SelectItem key="STOP_SIGN" value="STOP_SIGN">Stop Sign Violation</SelectItem>
-              <SelectItem key="RECKLESS" value="RECKLESS">Reckless Driving</SelectItem>
-              <SelectItem key="NO_SEATBELT" value="NO_SEATBELT">No Seatbelt</SelectItem>
-              <SelectItem key="MOBILE_PHONE" value="MOBILE_PHONE">Mobile Phone Use</SelectItem>
-              <SelectItem key="NO_REGISTRATION" value="NO_REGISTRATION">No Registration</SelectItem>
-              <SelectItem key="NO_WOF" value="NO_WOF">No WOF</SelectItem>
-              <SelectItem key="DEFECTIVE_VEHICLE" value="DEFECTIVE_VEHICLE">Defective Vehicle</SelectItem>
+              <SelectItem key="SPEEDING_10_20">Speeding 10-20 km/h over</SelectItem>
+              <SelectItem key="SPEEDING_20_30">Speeding 20-30 km/h over</SelectItem>
+              <SelectItem key="SPEEDING_30_PLUS">Speeding 30+ km/h over</SelectItem>
+              <SelectItem key="RED_LIGHT">Red Light Violation</SelectItem>
+              <SelectItem key="STOP_SIGN">Stop Sign Violation</SelectItem>
+              <SelectItem key="RECKLESS">Reckless Driving</SelectItem>
+              <SelectItem key="NO_SEATBELT">No Seatbelt</SelectItem>
+              <SelectItem key="MOBILE_PHONE">Mobile Phone Use</SelectItem>
+              <SelectItem key="NO_REGISTRATION">No Registration</SelectItem>
+              <SelectItem key="NO_WOF">No WOF</SelectItem>
+              <SelectItem key="DEFECTIVE_VEHICLE">Defective Vehicle</SelectItem>
             </Select>
 
             <Input
@@ -1381,9 +1381,9 @@ function PursuitModal({ isOpen, onClose, onCreate }: any) {
               onChange={(e) => setForm({ ...form, riskLevel: e.target.value })}
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="LOW" value="LOW">Low Risk</SelectItem>
-              <SelectItem key="MEDIUM" value="MEDIUM">Medium Risk</SelectItem>
-              <SelectItem key="HIGH" value="HIGH">High Risk</SelectItem>
+              <SelectItem key="LOW">Low Risk</SelectItem>
+              <SelectItem key="MEDIUM">Medium Risk</SelectItem>
+              <SelectItem key="HIGH">High Risk</SelectItem>
             </Select>
 
             <Input

@@ -12,7 +12,7 @@ import {
   Tab,
   Chip,
   Progress,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   TrendingUp,
   Users,
@@ -177,19 +177,19 @@ export default function AnalyticsPage() {
               onChange={(e) => setTimeRange(e.target.value)}
               className="w-40"
             >
-              <SelectItem key="24h" value="24h">
+              <SelectItem key="24h">
                 Last 24 Hours
               </SelectItem>
-              <SelectItem key="7d" value="7d">
+              <SelectItem key="7d">
                 Last 7 Days
               </SelectItem>
-              <SelectItem key="30d" value="30d">
+              <SelectItem key="30d">
                 Last 30 Days
               </SelectItem>
-              <SelectItem key="90d" value="90d">
+              <SelectItem key="90d">
                 Last 90 Days
               </SelectItem>
-              <SelectItem key="1y" value="1y">
+              <SelectItem key="1y">
                 Last Year
               </SelectItem>
             </Select>
@@ -199,16 +199,16 @@ export default function AnalyticsPage() {
               onChange={(e) => setSelectedDept(e.target.value)}
               className="w-40"
             >
-              <SelectItem key="ALL" value="ALL">
+              <SelectItem key="ALL">
                 All Departments
               </SelectItem>
-              <SelectItem key="POLICE" value="POLICE">
+              <SelectItem key="POLICE">
                 Police
               </SelectItem>
-              <SelectItem key="FIRE" value="FIRE">
+              <SelectItem key="FIRE">
                 Fire
               </SelectItem>
-              <SelectItem key="EMS" value="EMS">
+              <SelectItem key="EMS">
                 EMS
               </SelectItem>
             </Select>

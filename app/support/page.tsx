@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Button, Chip } from "@nextui-org/react";
+import { Card, CardBody, Button, Chip } from "@heroui/react";
 import { 
   Heart, 
   CreditCard, 

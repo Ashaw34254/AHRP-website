@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { CADCallDetails } from "@/components/CADCallDetails";
 
 interface Call {
@@ -173,7 +173,7 @@ export function CADCallHistory({ department }: CADCallHistoryProps = { departmen
             >
               {[{ key: "", label: "All Types" }, ...CALL_TYPES.map(type => ({ key: type, label: type.replace(/_/g, " ") }))].
                 map(item => (
-                  <SelectItem key={item.key} value={item.key}>
+                  <SelectItem key={item.key}>
                     {item.label}
                   </SelectItem>
                 ))}
@@ -194,7 +194,7 @@ export function CADCallHistory({ department }: CADCallHistoryProps = { departmen
                 { key: "MEDIUM", label: "Medium" },
                 { key: "LOW", label: "Low" },
               ].map(item => (
-                <SelectItem key={item.key} value={item.key}>
+                <SelectItem key={item.key}>
                   {item.label}
                 </SelectItem>
               ))}
@@ -214,7 +214,7 @@ export function CADCallHistory({ department }: CADCallHistoryProps = { departmen
                 { key: "30", label: "Last 30 Days" },
                 { key: "90", label: "Last 90 Days" },
               ].map(item => (
-                <SelectItem key={item.key} value={item.key}>
+                <SelectItem key={item.key}>
                   {item.label}
                 </SelectItem>
               ))}

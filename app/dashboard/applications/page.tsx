@@ -16,7 +16,7 @@ import {
   Divider,
   Accordion,
   AccordionItem
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { FileText, Clock, CheckCircle, XCircle, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";

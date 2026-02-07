@@ -13,7 +13,7 @@ import {
   TableRow,
   TableCell,
   Avatar,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { 
   Users, 
   FileText, 

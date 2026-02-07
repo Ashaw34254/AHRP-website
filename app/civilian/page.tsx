@@ -12,7 +12,7 @@ import {
   SelectItem,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { FileText, Search, Shield, User, CheckCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
@@ -243,7 +243,7 @@ export default function CivilianPortalPage() {
                         isRequired
                       >
                         {INCIDENT_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
+                          <SelectItem key={type.value}>
                             {type.label}
                           </SelectItem>
                         ))}
@@ -352,7 +352,7 @@ export default function CivilianPortalPage() {
                         isRequired
                       >
                         {REQUEST_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
+                          <SelectItem key={type.value}>
                             {type.label}
                           </SelectItem>
                         ))}

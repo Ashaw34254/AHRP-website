@@ -16,7 +16,7 @@ import {
   Divider,
   Chip,
   Textarea,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import {
   Shield,
@@ -44,6 +44,7 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@/lib/toast";
@@ -1078,22 +1079,22 @@ export default function DepartmentsPage() {
                           handleThemeChange("gradientDirection", e.target.value)
                         }
                       >
-                        <SelectItem key="to-r" value="to-r">
+                        <SelectItem key="to-r">
                           Left to Right
                         </SelectItem>
-                        <SelectItem key="to-l" value="to-l">
+                        <SelectItem key="to-l">
                           Right to Left
                         </SelectItem>
-                        <SelectItem key="to-b" value="to-b">
+                        <SelectItem key="to-b">
                           Top to Bottom
                         </SelectItem>
-                        <SelectItem key="to-t" value="to-t">
+                        <SelectItem key="to-t">
                           Bottom to Top
                         </SelectItem>
-                        <SelectItem key="to-br" value="to-br">
+                        <SelectItem key="to-br">
                           Diagonal (Top-Left to Bottom-Right)
                         </SelectItem>
-                        <SelectItem key="to-bl" value="to-bl">
+                        <SelectItem key="to-bl">
                           Diagonal (Top-Right to Bottom-Left)
                         </SelectItem>
                       </Select>
@@ -1115,16 +1116,16 @@ export default function DepartmentsPage() {
                           handleThemeChange("borderStyle", e.target.value)
                         }
                       >
-                        <SelectItem key="solid" value="solid">
+                        <SelectItem key="solid">
                           Solid
                         </SelectItem>
-                        <SelectItem key="dashed" value="dashed">
+                        <SelectItem key="dashed">
                           Dashed
                         </SelectItem>
-                        <SelectItem key="dotted" value="dotted">
+                        <SelectItem key="dotted">
                           Dotted
                         </SelectItem>
-                        <SelectItem key="none" value="none">
+                        <SelectItem key="none">
                           None
                         </SelectItem>
                       </Select>
@@ -2004,11 +2005,11 @@ export default function DepartmentsPage() {
                                     handleSettingsChange("announcements", updated);
                                   }}
                                 >
-                                  <SelectItem key="Policy" value="Policy">Policy</SelectItem>
-                                  <SelectItem key="Event" value="Event">Event</SelectItem>
-                                  <SelectItem key="Notice" value="Notice">Notice</SelectItem>
-                                  <SelectItem key="Training" value="Training">Training</SelectItem>
-                                  <SelectItem key="Alert" value="Alert">Alert</SelectItem>
+                                  <SelectItem key="Policy">Policy</SelectItem>
+                                  <SelectItem key="Event">Event</SelectItem>
+                                  <SelectItem key="Notice">Notice</SelectItem>
+                                  <SelectItem key="Training">Training</SelectItem>
+                                  <SelectItem key="Alert">Alert</SelectItem>
                                 </Select>
                               </div>
                               <Button
@@ -2373,12 +2374,12 @@ export default function DepartmentsPage() {
                                 }}
                                 size="sm"
                               >
-                                <SelectItem key="blue" value="blue">Blue</SelectItem>
-                                <SelectItem key="green" value="green">Green</SelectItem>
-                                <SelectItem key="red" value="red">Red</SelectItem>
-                                <SelectItem key="yellow" value="yellow">Yellow</SelectItem>
-                                <SelectItem key="purple" value="purple">Purple</SelectItem>
-                                <SelectItem key="orange" value="orange">Orange</SelectItem>
+                                <SelectItem key="blue">Blue</SelectItem>
+                                <SelectItem key="green">Green</SelectItem>
+                                <SelectItem key="red">Red</SelectItem>
+                                <SelectItem key="yellow">Yellow</SelectItem>
+                                <SelectItem key="purple">Purple</SelectItem>
+                                <SelectItem key="orange">Orange</SelectItem>
                               </Select>
                             </div>
                           </div>
@@ -2624,19 +2625,19 @@ export default function DepartmentsPage() {
                                 }}
                                 size="sm"
                               >
-                                <SelectItem key="active" value="active">
+                                <SelectItem key="active">
                                   <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-green-500"></div>
                                     <span>Active</span>
                                   </div>
                                 </SelectItem>
-                                <SelectItem key="loa" value="loa">
+                                <SelectItem key="loa">
                                   <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
                                     <span>Leave of Absence</span>
                                   </div>
                                 </SelectItem>
-                                <SelectItem key="suspended" value="suspended">
+                                <SelectItem key="suspended">
                                   <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-red-500"></div>
                                     <span>Suspended</span>
@@ -2894,8 +2895,8 @@ export default function DepartmentsPage() {
                               }}
                               size="sm"
                             >
-                              <SelectItem key="Active" value="Active">Active</SelectItem>
-                              <SelectItem key="Inactive" value="Inactive">Inactive</SelectItem>
+                              <SelectItem key="Active">Active</SelectItem>
+                              <SelectItem key="Inactive">Inactive</SelectItem>
                             </Select>
                           </div>
                         </CardBody>

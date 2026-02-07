@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import { Card, CardBody, CardHeader, Chip, Button, Select, SelectItem } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Chip, Button, Select, SelectItem } from "@heroui/react";
 import { Map as MapIcon, MapPin, Radio, Crosshair } from "lucide-react";
 
 // Dynamically import map components to avoid SSR issues

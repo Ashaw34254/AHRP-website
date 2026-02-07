@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
-import { Card, CardBody, CardHeader, Select, SelectItem, Chip } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Select, SelectItem, Chip } from "@heroui/react";
 import { toast } from "@/lib/toast";
 import { 
   TrendingUp, 
@@ -142,10 +142,10 @@ export default function ApplicationAnalyticsPage() {
               trigger: "bg-gray-800 border-gray-700",
             }}
           >
-            <SelectItem key="7" value="7">Last 7 days</SelectItem>
-            <SelectItem key="30" value="30">Last 30 days</SelectItem>
-            <SelectItem key="90" value="90">Last 90 days</SelectItem>
-            <SelectItem key="365" value="365">Last year</SelectItem>
+            <SelectItem key="7">Last 7 days</SelectItem>
+            <SelectItem key="30">Last 30 days</SelectItem>
+            <SelectItem key="90">Last 90 days</SelectItem>
+            <SelectItem key="365">Last year</SelectItem>
           </Select>
         </div>
 

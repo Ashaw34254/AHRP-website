@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm info:*)",
+      "Bash(npm install:*)",
+      "Bash(powershell -Command \"Get-ChildItem -Recurse -Include *.tsx,*.ts -Exclude node_modules -Path components,app | ForEach-Object { \\(Get-Content $_FullName -Raw\\) -replace ''@nextui-org/react'',''@heroui/react'' | Set-Content $_FullName -NoNewline }\")",
+      "Bash(powershell -Command:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(npx next build:*)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}

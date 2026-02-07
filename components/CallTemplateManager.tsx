@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Button, Input, Textarea, Select, SelectItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@nextui-org/react";
+import { Card, CardBody, Button, Input, Textarea, Select, SelectItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
 import { Plus, FileText, Trash2, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "@/lib/toast";
@@ -224,7 +224,7 @@ export function CallTemplateManager({ department, onUseTemplate }: CallTemplateM
                   isRequired
                 >
                   {departmentCallTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
+                    <SelectItem key={type}>
                       {type.replace(/_/g, " ")}
                     </SelectItem>
                   ))}
@@ -238,7 +238,7 @@ export function CallTemplateManager({ department, onUseTemplate }: CallTemplateM
                   isRequired
                 >
                   {DEPARTMENT_PRIORITIES[department].map((priority) => (
-                    <SelectItem key={priority.value} value={priority.value}>
+                    <SelectItem key={priority.value}>
                       {priority.label}
                     </SelectItem>
                   ))}

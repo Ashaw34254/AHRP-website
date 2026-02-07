@@ -16,7 +16,7 @@ import {
   Radio,
   RadioGroup,
   CheckboxGroup,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { toast } from "@/lib/toast";
 import { Send, FileText } from "lucide-react";
 import { motion } from "framer-motion";
@@ -212,7 +212,7 @@ export default function DynamicApplicationForm({ initialType = "whitelist" }: Dy
             onChange={(e) => updateField(field.fieldName, e.target.value)}
           >
             {field.options?.map((option) => (
-              <SelectItem key={option} value={option}>
+              <SelectItem key={option}>
                 {option}
               </SelectItem>
             ))}
@@ -306,16 +306,16 @@ export default function DynamicApplicationForm({ initialType = "whitelist" }: Dy
                   trigger: "bg-gray-800 border-gray-700",
                 }}
               >
-                <SelectItem key="whitelist" value="whitelist">
+                <SelectItem key="whitelist">
                   Whitelist Application
                 </SelectItem>
-                <SelectItem key="police" value="police">
+                <SelectItem key="police">
                   Police Department
                 </SelectItem>
-                <SelectItem key="ems" value="ems">
+                <SelectItem key="ems">
                   EMS/Medical
                 </SelectItem>
-                <SelectItem key="fire" value="fire">
+                <SelectItem key="fire">
                   Fire Department
                 </SelectItem>
               </Select>

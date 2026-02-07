@@ -14,7 +14,7 @@ import {
   CardBody,
   Chip,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Paperclip, Upload, X, File, Image, Video, FileText } from "lucide-react";
 import { toast } from "@/lib/toast";
 

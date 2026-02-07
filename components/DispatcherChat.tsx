@@ -14,7 +14,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { MessageCircle, Send, Users, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 

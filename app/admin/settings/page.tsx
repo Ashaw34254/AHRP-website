@@ -21,7 +21,7 @@ import {
   Select,
   SelectItem,
   Divider,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Settings as SettingsIcon, Save, Plus, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -381,11 +381,11 @@ export default function SettingsPage() {
                     trigger: "bg-gray-800 border-gray-700",
                   }}
                 >
-                  <SelectItem key="general" value="general">General</SelectItem>
-                  <SelectItem key="auth" value="auth">Authentication</SelectItem>
-                  <SelectItem key="notifications" value="notifications">Notifications</SelectItem>
-                  <SelectItem key="cad" value="cad">CAD System</SelectItem>
-                  <SelectItem key="whitelist" value="whitelist">Whitelist</SelectItem>
+                  <SelectItem key="general">General</SelectItem>
+                  <SelectItem key="auth">Authentication</SelectItem>
+                  <SelectItem key="notifications">Notifications</SelectItem>
+                  <SelectItem key="cad">CAD System</SelectItem>
+                  <SelectItem key="whitelist">Whitelist</SelectItem>
                 </Select>
 
                 <Input
@@ -407,10 +407,10 @@ export default function SettingsPage() {
                     trigger: "bg-gray-800 border-gray-700",
                   }}
                 >
-                  <SelectItem key="string" value="string">String</SelectItem>
-                  <SelectItem key="number" value="number">Number</SelectItem>
-                  <SelectItem key="boolean" value="boolean">Boolean</SelectItem>
-                  <SelectItem key="json" value="json">JSON</SelectItem>
+                  <SelectItem key="string">String</SelectItem>
+                  <SelectItem key="number">Number</SelectItem>
+                  <SelectItem key="boolean">Boolean</SelectItem>
+                  <SelectItem key="json">JSON</SelectItem>
                 </Select>
 
                 {newSetting.dataType === "boolean" ? (

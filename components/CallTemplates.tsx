@@ -18,7 +18,7 @@ import {
   SelectItem,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   FileText,
   Plus,
@@ -563,9 +563,9 @@ export function CallTemplates() {
                     trigger: "bg-gray-900 border-gray-800",
                   }}
                 >
-                  <SelectItem key="POLICE" value="POLICE">Police</SelectItem>
-                  <SelectItem key="FIRE" value="FIRE">Fire</SelectItem>
-                  <SelectItem key="EMS" value="EMS">EMS</SelectItem>
+                  <SelectItem key="POLICE">Police</SelectItem>
+                  <SelectItem key="FIRE">Fire</SelectItem>
+                  <SelectItem key="EMS">EMS</SelectItem>
                 </Select>
 
                 <Select
@@ -579,10 +579,10 @@ export function CallTemplates() {
                     trigger: "bg-gray-900 border-gray-800",
                   }}
                 >
-                  <SelectItem key="LOW" value="LOW">Low</SelectItem>
-                  <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-                  <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-                  <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
+                  <SelectItem key="LOW">Low</SelectItem>
+                  <SelectItem key="MEDIUM">Medium</SelectItem>
+                  <SelectItem key="HIGH">High</SelectItem>
+                  <SelectItem key="CRITICAL">Critical</SelectItem>
                 </Select>
               </div>
 

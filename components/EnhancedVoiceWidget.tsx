@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Chip, Progress } from '@nextui-org/react';
+import { Button, Chip, Progress } from '@heroui/react';
 import { useVoice } from '@/lib/voice-context';
 import { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX, SkipForward, Square, Minimize2, Maximize2, Move } from 'lucide-react';

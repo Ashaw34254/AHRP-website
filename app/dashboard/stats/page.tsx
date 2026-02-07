@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Chip, Progress, Tabs, Tab } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Chip, Progress, Tabs, Tab } from "@heroui/react";
 import { TrendingUp, Award, Clock, Target, Users, Zap, Trophy, Star } from "lucide-react";
 
 // Mock statistics data

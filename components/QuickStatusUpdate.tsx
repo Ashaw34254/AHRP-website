@@ -1,6 +1,6 @@
 "use client";
 
-import { Select, SelectItem, Chip } from "@nextui-org/react";
+import { Select, SelectItem, Chip } from "@heroui/react";
 import { toast } from "@/lib/toast";
 import { useState } from "react";
 import { getStatusCodesByDepartment, type Department } from "@/lib/department-config";
@@ -102,7 +102,7 @@ export function QuickStatusUpdate({
       }}
     >
       {statusOptions.map((status) => (
-        <SelectItem key={status.code} value={status.code} textValue={status.label}>
+        <SelectItem key={status.code} textValue={status.label}>
           <div className="flex items-center gap-2">
             <Chip size="sm" color={status.color as any} variant="dot">
               {status.code}

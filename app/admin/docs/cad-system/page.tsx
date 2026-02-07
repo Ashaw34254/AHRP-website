@@ -1,9 +1,8 @@
 "use client";
 
 import { AdminLayout } from "@/components/AdminLayout";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Radio, Download } from "lucide-react";
-import { Button } from "@nextui-org/button";
+import { Card, CardBody, CardHeader, Button } from "@heroui/react";
 
 export default function CADSystemDocsPage() {
   return (
@@ -170,7 +169,7 @@ export default function CADSystemDocsPage() {
                 <p className="text-xs text-gray-400 mt-1">Fetch all units with officers and assigned calls</p>
               </div>
               <div className="p-4 bg-gray-900 rounded-lg">
-                <code className="text-sm text-green-400">GET /api/cad/civil/citizen?q={query}</code>
+                <code className="text-sm text-green-400">{"GET /api/cad/civil/citizen?q={query}"}</code>
                 <p className="text-xs text-gray-400 mt-1">Search citizen by name or State ID</p>
               </div>
             </CardBody>

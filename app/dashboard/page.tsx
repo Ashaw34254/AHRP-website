@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, Avatar, Chip, Button, Badge, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, Avatar, Chip, Button, Badge, Skeleton } from "@heroui/react";
 import { Calendar, MapPin, Clock, Plus, Edit } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/lib/toast";

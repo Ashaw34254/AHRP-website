@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, CardHeader, Chip, Button, Select, SelectItem, Badge } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Chip, Button, Select, SelectItem, Badge } from "@heroui/react";
 import { Phone, MapPin, Clock, AlertTriangle, Filter, Radio, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CADCallDetails } from "./CADCallDetails";
@@ -184,10 +184,10 @@ export function CADActiveCalls({ department, refreshInterval = 10000 }: CADActiv
               className="w-48"
               startContent={<Radio className="w-4 h-4" />}
             >
-              <SelectItem key="ALL" value="ALL">All Departments ({departmentCounts.ALL || 0})</SelectItem>
-              <SelectItem key="POLICE" value="POLICE">Police ({departmentCounts.POLICE || 0})</SelectItem>
-              <SelectItem key="FIRE" value="FIRE">Fire ({departmentCounts.FIRE || 0})</SelectItem>
-              <SelectItem key="EMS" value="EMS">EMS ({departmentCounts.EMS || 0})</SelectItem>
+              <SelectItem key="ALL">All Departments ({departmentCounts.ALL || 0})</SelectItem>
+              <SelectItem key="POLICE">Police ({departmentCounts.POLICE || 0})</SelectItem>
+              <SelectItem key="FIRE">Fire ({departmentCounts.FIRE || 0})</SelectItem>
+              <SelectItem key="EMS">EMS ({departmentCounts.EMS || 0})</SelectItem>
             </Select>
 
             <Select
@@ -198,11 +198,11 @@ export function CADActiveCalls({ department, refreshInterval = 10000 }: CADActiv
               className="w-44"
               startContent={<AlertTriangle className="w-4 h-4" />}
             >
-              <SelectItem key="ALL" value="ALL">All Priorities</SelectItem>
-              <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
-              <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-              <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-              <SelectItem key="LOW" value="LOW">Low</SelectItem>
+              <SelectItem key="ALL">All Priorities</SelectItem>
+              <SelectItem key="CRITICAL">Critical</SelectItem>
+              <SelectItem key="HIGH">High</SelectItem>
+              <SelectItem key="MEDIUM">Medium</SelectItem>
+              <SelectItem key="LOW">Low</SelectItem>
             </Select>
 
             <Select
@@ -212,10 +212,10 @@ export function CADActiveCalls({ department, refreshInterval = 10000 }: CADActiv
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-44"
             >
-              <SelectItem key="ALL" value="ALL">All Statuses</SelectItem>
-              <SelectItem key="PENDING" value="PENDING">Pending</SelectItem>
-              <SelectItem key="DISPATCHED" value="DISPATCHED">Dispatched</SelectItem>
-              <SelectItem key="ACTIVE" value="ACTIVE">Active</SelectItem>
+              <SelectItem key="ALL">All Statuses</SelectItem>
+              <SelectItem key="PENDING">Pending</SelectItem>
+              <SelectItem key="DISPATCHED">Dispatched</SelectItem>
+              <SelectItem key="ACTIVE">Active</SelectItem>
             </Select>
 
             <div className="ml-auto flex items-center gap-2">

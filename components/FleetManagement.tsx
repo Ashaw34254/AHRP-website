@@ -19,7 +19,7 @@ import {
   SelectItem,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Car, Plus, Search, Wrench, AlertTriangle, CheckCircle, Calendar } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -336,10 +336,10 @@ export function FleetManagement() {
                 trigger: "bg-gray-800/50 border-gray-700",
               }}
             >
-              <SelectItem key="ALL" value="ALL">All Departments</SelectItem>
-              <SelectItem key="POLICE" value="POLICE">Police</SelectItem>
-              <SelectItem key="FIRE" value="FIRE">Fire</SelectItem>
-              <SelectItem key="EMS" value="EMS">EMS</SelectItem>
+              <SelectItem key="ALL">All Departments</SelectItem>
+              <SelectItem key="POLICE">Police</SelectItem>
+              <SelectItem key="FIRE">Fire</SelectItem>
+              <SelectItem key="EMS">EMS</SelectItem>
             </Select>
           </div>
         </CardBody>

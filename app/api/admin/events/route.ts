@@ -7,16 +7,16 @@ export async function GET() {
   try {
     const session = await auth();
     const isDev = process.env.NODE_ENV === "development";
-    
+
     if (!isDev && (!session?.user || session.user.role !== "admin")) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
-    
+
     const events = await prisma.event.findMany({
-      orderBy: { startDate: "desc" },
+      orderBy: { startTime: "desc" },
       include: {
         _count: {
           select: {
@@ -25,18 +25,18 @@ export async function GET() {
         },
       },
     });
-    
+
     return NextResponse.json({
       success: true,
       events: events.map(event => ({
         id: event.id,
         title: event.title,
         description: event.description,
-        startDate: event.startDate.toISOString(),
-        endDate: event.endDate?.toISOString(),
+        startDate: event.startTime.toISOString(),
+        endDate: event.endTime?.toISOString(),
         location: event.location,
         type: event.type || "community",
-        maxParticipants: event.maxParticipants,
+        maxParticipants: event.maxAttendees,
         participants: event._count.rsvps,
         createdAt: event.createdAt.toISOString(),
       })),
@@ -55,35 +55,36 @@ export async function POST(request: Request) {
   try {
     const session = await auth();
     const isDev = process.env.NODE_ENV === "development";
-    
+
     if (!isDev && (!session?.user || session.user.role !== "admin")) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
-    
+
     const data = await request.json();
-    
+
     const event = await prisma.event.create({
       data: {
         title: data.title,
         description: data.description,
-        startDate: new Date(data.startDate),
-        endDate: data.endDate ? new Date(data.endDate) : null,
+        startTime: new Date(data.startDate),
+        endTime: data.endDate ? new Date(data.endDate) : null,
         location: data.location,
         type: data.type,
-        maxParticipants: data.maxParticipants ? parseInt(data.maxParticipants) : null,
+        maxAttendees: data.maxParticipants ? parseInt(data.maxParticipants) : null,
+        createdBy: session?.user?.id || "system",
       },
     });
-    
+
     return NextResponse.json({
       success: true,
       event: {
         id: event.id,
         title: event.title,
         description: event.description,
-        startDate: event.startDate.toISOString(),
+        startDate: event.startTime.toISOString(),
       },
     });
   } catch (error) {
@@ -100,39 +101,37 @@ export async function PATCH(request: Request) {
   try {
     const session = await auth();
     const isDev = process.env.NODE_ENV === "development";
-    
+
     if (!isDev && (!session?.user || session.user.role !== "admin")) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
-    
+
     const { eventId, updates } = await request.json();
-    
+
     if (!eventId) {
       return NextResponse.json(
         { success: false, message: "Event ID required" },
         { status: 400 }
       );
     }
-    
-    const updateData: any = { ...updates };
-    if (updates.startDate) {
-      updateData.startDate = new Date(updates.startDate);
-    }
-    if (updates.endDate) {
-      updateData.endDate = new Date(updates.endDate);
-    }
-    if (updates.maxParticipants) {
-      updateData.maxParticipants = parseInt(updates.maxParticipants);
-    }
-    
+
+    const updateData: Record<string, unknown> = {};
+    if (updates.title) updateData.title = updates.title;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.location !== undefined) updateData.location = updates.location;
+    if (updates.type) updateData.type = updates.type;
+    if (updates.startDate) updateData.startTime = new Date(updates.startDate);
+    if (updates.endDate) updateData.endTime = new Date(updates.endDate);
+    if (updates.maxParticipants) updateData.maxAttendees = parseInt(updates.maxParticipants);
+
     const event = await prisma.event.update({
       where: { id: eventId },
       data: updateData,
     });
-    
+
     return NextResponse.json({
       success: true,
       event,
@@ -151,28 +150,28 @@ export async function DELETE(request: Request) {
   try {
     const session = await auth();
     const isDev = process.env.NODE_ENV === "development";
-    
+
     if (!isDev && (!session?.user || session.user.role !== "admin")) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
-    
+
     const { searchParams } = new URL(request.url);
     const eventId = searchParams.get("eventId");
-    
+
     if (!eventId) {
       return NextResponse.json(
         { success: false, message: "Event ID required" },
         { status: 400 }
       );
     }
-    
+
     await prisma.event.delete({
       where: { id: eventId },
     });
-    
+
     return NextResponse.json({
       success: true,
       message: "Event deleted successfully",

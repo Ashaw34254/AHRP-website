@@ -17,7 +17,7 @@ import {
   useDisclosure,
   Chip,
   Textarea,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { MapPin, Plus, Edit2, Trash2, Users, Activity, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -370,7 +370,7 @@ export function ZoneManagement() {
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               >
                 {STATUSES.map((status) => (
-                  <SelectItem key={status.value} value={status.value}>
+                  <SelectItem key={status.value}>
                     {status.label}
                   </SelectItem>
                 ))}
@@ -382,7 +382,7 @@ export function ZoneManagement() {
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
               >
                 {PRIORITIES.map((priority) => (
-                  <SelectItem key={priority.value} value={priority.value}>
+                  <SelectItem key={priority.value}>
                     {priority.label}
                   </SelectItem>
                 ))}

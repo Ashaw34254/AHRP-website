@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { ErrorLogger, ErrorLog } from "@/lib/error-logger";
-import { 
-  AlertCircle, 
-  Bug, 
-  Database, 
-  Network, 
-  Shield, 
-  Code, 
+import {
+  AlertCircle,
+  Bug,
+  Database,
+  Network,
+  Shield,
+  Code,
   Download,
   Trash2,
   RefreshCw,
@@ -16,10 +16,7 @@ import {
   ChevronUp,
   Filter
 } from "lucide-react";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
-import { Button } from "@nextui-org/button";
-import { Chip } from "@nextui-org/chip";
-import { Select, SelectItem } from "@nextui-org/select";
+import { Card, CardBody, CardHeader, Button, Chip, Select, SelectItem } from "@heroui/react";
 
 const severityColors = {
   low: "primary",
@@ -148,11 +145,11 @@ ${error.context ? `\nContext:\n${JSON.stringify(error.context, null, 2)}` : ''}
                 selectedKeys={[severityFilter]}
                 onChange={(e) => setSeverityFilter(e.target.value)}
               >
-                <SelectItem key="all" value="all">All</SelectItem>
-                <SelectItem key="critical" value="critical">Critical</SelectItem>
-                <SelectItem key="high" value="high">High</SelectItem>
-                <SelectItem key="medium" value="medium">Medium</SelectItem>
-                <SelectItem key="low" value="low">Low</SelectItem>
+                <SelectItem key="all">All</SelectItem>
+                <SelectItem key="critical">Critical</SelectItem>
+                <SelectItem key="high">High</SelectItem>
+                <SelectItem key="medium">Medium</SelectItem>
+                <SelectItem key="low">Low</SelectItem>
               </Select>
 
               <Select
@@ -162,12 +159,12 @@ ${error.context ? `\nContext:\n${JSON.stringify(error.context, null, 2)}` : ''}
                 selectedKeys={[categoryFilter]}
                 onChange={(e) => setCategoryFilter(e.target.value)}
               >
-                <SelectItem key="all" value="all">All</SelectItem>
-                <SelectItem key="network" value="network">Network</SelectItem>
-                <SelectItem key="database" value="database">Database</SelectItem>
-                <SelectItem key="api" value="api">API</SelectItem>
-                <SelectItem key="authentication" value="authentication">Auth</SelectItem>
-                <SelectItem key="runtime" value="runtime">Runtime</SelectItem>
+                <SelectItem key="all">All</SelectItem>
+                <SelectItem key="network">Network</SelectItem>
+                <SelectItem key="database">Database</SelectItem>
+                <SelectItem key="api">API</SelectItem>
+                <SelectItem key="authentication">Auth</SelectItem>
+                <SelectItem key="runtime">Runtime</SelectItem>
               </Select>
             </div>
 

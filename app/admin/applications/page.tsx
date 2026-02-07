@@ -23,7 +23,7 @@ import {
   Avatar,
   Tabs,
   Tab
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { 
   Search,
   FileText,

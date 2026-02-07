@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Card, CardBody, Chip } from "@nextui-org/react";
+import { Card, CardBody, Chip } from "@heroui/react";
 import { Sparkles, Wrench, Bug, Plus, Calendar } from "lucide-react";
 
 const updates = [

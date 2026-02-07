@@ -19,7 +19,7 @@ import {
   DropdownItem,
   Avatar,
   Badge,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { ChevronDown, LogOut, LayoutDashboard, Shield, Users, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";

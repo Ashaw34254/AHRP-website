@@ -1,9 +1,8 @@
 "use client";
 
 import { AdminLayout } from "@/components/AdminLayout";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { FileText, Download, ExternalLink } from "lucide-react";
-import { Button } from "@nextui-org/button";
+import { Card, CardBody, CardHeader, Button } from "@heroui/react";
 
 export default function ErrorSystemDocsPage() {
   return (

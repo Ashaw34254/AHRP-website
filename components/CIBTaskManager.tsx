@@ -5,7 +5,7 @@ import {
   Card, CardBody, Button, Input, Textarea, Select, SelectItem,
   Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   useDisclosure, Tooltip, Checkbox
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   CheckSquare, Plus, Circle, CheckCircle, X, Calendar, User, Clock, Edit
 } from "lucide-react";
@@ -361,10 +361,10 @@ export function CIBTaskManager({ investigationId, tasks, onUpdate }: Props) {
                   onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
                   classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
                 >
-                  <SelectItem key="LOW" value="LOW">Low</SelectItem>
-                  <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-                  <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-                  <SelectItem key="URGENT" value="URGENT">Urgent</SelectItem>
+                  <SelectItem key="LOW">Low</SelectItem>
+                  <SelectItem key="MEDIUM">Medium</SelectItem>
+                  <SelectItem key="HIGH">High</SelectItem>
+                  <SelectItem key="URGENT">Urgent</SelectItem>
                 </Select>
               </div>
 

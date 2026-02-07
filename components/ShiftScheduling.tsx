@@ -19,7 +19,7 @@ import {
   Avatar,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Calendar, Plus, Clock, Users, Sun, Moon, Sunset, CheckCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -525,7 +525,7 @@ export function ShiftScheduling() {
                 variant="bordered"
               >
                 {officers.map((officer) => (
-                  <SelectItem key={officer.id} value={officer.id}>
+                  <SelectItem key={officer.id}>
                     {officer.name} {officer.badge ? `(#${officer.badge})` : ""} - {officer.department}
                   </SelectItem>
                 ))}

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { CheckCircle, Target, Users, Heart, Shield, Sparkles, BookOpen, Trophy } from "lucide-react";
-import { Card, CardBody } from "@nextui-org/react";
+import { Card, CardBody } from "@heroui/react";
 
 const highlights = [
   "Professional staff and management team",

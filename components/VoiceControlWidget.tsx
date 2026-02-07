@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Chip } from '@nextui-org/react';
+import { Button, Chip } from '@heroui/react';
 import { useVoice } from '@/lib/voice-context';
 import { useState } from 'react';
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Button, Chip, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Button, Chip, Skeleton } from "@heroui/react";
 import { Calendar as CalendarIcon, Clock, Users, MapPin, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 

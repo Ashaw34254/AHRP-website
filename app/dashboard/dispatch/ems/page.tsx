@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab } from "@heroui/react";
 import { Heart, Radio, Phone, History, Siren, FileText, Bell, MessageSquare } from "lucide-react";
 import { CADDispatchConsole } from "@/components/CADDispatchConsole";
 import { CADActiveCalls } from "@/components/CADActiveCalls";

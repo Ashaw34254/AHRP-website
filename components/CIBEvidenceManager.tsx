@@ -5,7 +5,7 @@ import {
   Card, CardBody, CardHeader, Button, Input, Textarea, Select, SelectItem,
   Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   useDisclosure, Tooltip, Progress
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   Paperclip, Plus, Eye, Download, FileText, Image, Video, File,
   User, Calendar, MapPin, Shield, AlertTriangle, Check, X, Upload, Link2
@@ -307,15 +307,15 @@ export function CIBEvidenceManager({ investigationId, evidence, onUpdate }: Prop
                 onChange={(e) => setNewEvidence({ ...newEvidence, type: e.target.value })}
                 classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
               >
-                <SelectItem key="PHOTO" value="PHOTO">Photo</SelectItem>
-                <SelectItem key="CCTV" value="CCTV">CCTV Footage</SelectItem>
-                <SelectItem key="VIDEO" value="VIDEO">Video</SelectItem>
-                <SelectItem key="DOCUMENT" value="DOCUMENT">Document</SelectItem>
-                <SelectItem key="AUDIO" value="AUDIO">Audio Recording</SelectItem>
-                <SelectItem key="WITNESS_STATEMENT" value="WITNESS_STATEMENT">Witness Statement</SelectItem>
-                <SelectItem key="PHYSICAL" value="PHYSICAL">Physical Evidence</SelectItem>
-                <SelectItem key="DIGITAL" value="DIGITAL">Digital Evidence</SelectItem>
-                <SelectItem key="FORENSIC" value="FORENSIC">Forensic Evidence</SelectItem>
+                <SelectItem key="PHOTO">Photo</SelectItem>
+                <SelectItem key="CCTV">CCTV Footage</SelectItem>
+                <SelectItem key="VIDEO">Video</SelectItem>
+                <SelectItem key="DOCUMENT">Document</SelectItem>
+                <SelectItem key="AUDIO">Audio Recording</SelectItem>
+                <SelectItem key="WITNESS_STATEMENT">Witness Statement</SelectItem>
+                <SelectItem key="PHYSICAL">Physical Evidence</SelectItem>
+                <SelectItem key="DIGITAL">Digital Evidence</SelectItem>
+                <SelectItem key="FORENSIC">Forensic Evidence</SelectItem>
               </Select>
 
               <Textarea

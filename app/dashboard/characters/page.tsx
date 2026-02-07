@@ -20,7 +20,7 @@ import {
   Tabs,
   Tab,
   Skeleton,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Plus, User, Edit, Trash2, Users, Calendar, Shield } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { OfficerProfiles } from "@/components/OfficerProfiles";

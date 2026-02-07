@@ -18,7 +18,7 @@ import {
   SelectItem,
   Tabs,
   Tab,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   AlertTriangle,
   Bell,
@@ -588,19 +588,19 @@ export function SupervisorAlerts() {
                     trigger: "bg-gray-900 border-gray-800",
                   }}
                 >
-                  <SelectItem key="GENERAL" value="GENERAL">
+                  <SelectItem key="GENERAL">
                     General
                   </SelectItem>
-                  <SelectItem key="EMERGENCY" value="EMERGENCY">
+                  <SelectItem key="EMERGENCY">
                     Emergency
                   </SelectItem>
-                  <SelectItem key="OFFICER_SAFETY" value="OFFICER_SAFETY">
+                  <SelectItem key="OFFICER_SAFETY">
                     Officer Safety
                   </SelectItem>
-                  <SelectItem key="APPROVAL_REQUEST" value="APPROVAL_REQUEST">
+                  <SelectItem key="APPROVAL_REQUEST">
                     Approval Request
                   </SelectItem>
-                  <SelectItem key="POLICY_VIOLATION" value="POLICY_VIOLATION">
+                  <SelectItem key="POLICY_VIOLATION">
                     Policy Violation
                   </SelectItem>
                 </Select>
@@ -616,16 +616,16 @@ export function SupervisorAlerts() {
                     trigger: "bg-gray-900 border-gray-800",
                   }}
                 >
-                  <SelectItem key="LOW" value="LOW">
+                  <SelectItem key="LOW">
                     Low
                   </SelectItem>
-                  <SelectItem key="MEDIUM" value="MEDIUM">
+                  <SelectItem key="MEDIUM">
                     Medium
                   </SelectItem>
-                  <SelectItem key="HIGH" value="HIGH">
+                  <SelectItem key="HIGH">
                     High
                   </SelectItem>
-                  <SelectItem key="CRITICAL" value="CRITICAL">
+                  <SelectItem key="CRITICAL">
                     Critical
                   </SelectItem>
                 </Select>

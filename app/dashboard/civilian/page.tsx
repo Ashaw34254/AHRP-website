@@ -10,7 +10,7 @@ import {
   Tab,
   Avatar,
   Progress
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { 
   Briefcase,
   Users,

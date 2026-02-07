@@ -19,7 +19,7 @@ import {
   Divider,
   useDisclosure,
   Image,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { AlertTriangle, User, Car, Plus, X, CheckCircle, Clock } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -363,13 +363,13 @@ export function BOLOSystem() {
                   setFormData({ ...formData, type: e.target.value })
                 }
               >
-                <SelectItem key="PERSON" value="PERSON">
+                <SelectItem key="PERSON">
                   Person
                 </SelectItem>
-                <SelectItem key="VEHICLE" value="VEHICLE">
+                <SelectItem key="VEHICLE">
                   Vehicle
                 </SelectItem>
-                <SelectItem key="OTHER" value="OTHER">
+                <SelectItem key="OTHER">
                   Other
                 </SelectItem>
               </Select>
@@ -381,16 +381,16 @@ export function BOLOSystem() {
                   setFormData({ ...formData, priority: e.target.value })
                 }
               >
-                <SelectItem key="LOW" value="LOW">
+                <SelectItem key="LOW">
                   Low
                 </SelectItem>
-                <SelectItem key="MEDIUM" value="MEDIUM">
+                <SelectItem key="MEDIUM">
                   Medium
                 </SelectItem>
-                <SelectItem key="HIGH" value="HIGH">
+                <SelectItem key="HIGH">
                   High
                 </SelectItem>
-                <SelectItem key="CRITICAL" value="CRITICAL">
+                <SelectItem key="CRITICAL">
                   Critical
                 </SelectItem>
               </Select>

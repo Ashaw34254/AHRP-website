@@ -7,7 +7,7 @@ import {
   Card, CardBody, CardHeader, Button, Input, Select, SelectItem,
   Chip, Tabs, Tab, Spinner, Modal, ModalContent, ModalHeader, 
   ModalBody, ModalFooter, useDisclosure, Tooltip, Textarea
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { 
   Shield, Search, Filter, Plus, Eye, AlertTriangle, Clock,
   FileText, Users, MapPin, Car, Building, Phone, File,
@@ -312,16 +312,16 @@ export default function CIBPage() {
                   trigger: "bg-gray-800/50 border border-gray-700"
                 }}
               >
-                <SelectItem key="all" value="all">All Classifications</SelectItem>
-                <SelectItem key="ASSAULT" value="ASSAULT">Assault</SelectItem>
-                <SelectItem key="HOMICIDE" value="HOMICIDE">Homicide</SelectItem>
-                <SelectItem key="FRAUD" value="FRAUD">Fraud</SelectItem>
-                <SelectItem key="THEFT" value="THEFT">Theft</SelectItem>
-                <SelectItem key="DRUGS" value="DRUGS">Drugs</SelectItem>
-                <SelectItem key="CORRUPTION" value="CORRUPTION">Corruption</SelectItem>
-                <SelectItem key="ORGANISED_CRIME" value="ORGANISED_CRIME">Organised Crime</SelectItem>
-                <SelectItem key="CYBERCRIME" value="CYBERCRIME">Cybercrime</SelectItem>
-                <SelectItem key="OTHER" value="OTHER">Other</SelectItem>
+                <SelectItem key="all">All Classifications</SelectItem>
+                <SelectItem key="ASSAULT">Assault</SelectItem>
+                <SelectItem key="HOMICIDE">Homicide</SelectItem>
+                <SelectItem key="FRAUD">Fraud</SelectItem>
+                <SelectItem key="THEFT">Theft</SelectItem>
+                <SelectItem key="DRUGS">Drugs</SelectItem>
+                <SelectItem key="CORRUPTION">Corruption</SelectItem>
+                <SelectItem key="ORGANISED_CRIME">Organised Crime</SelectItem>
+                <SelectItem key="CYBERCRIME">Cybercrime</SelectItem>
+                <SelectItem key="OTHER">Other</SelectItem>
               </Select>
 
               <Select
@@ -332,11 +332,11 @@ export default function CIBPage() {
                   trigger: "bg-gray-800/50 border border-gray-700"
                 }}
               >
-                <SelectItem key="all" value="all">All Priorities</SelectItem>
-                <SelectItem key="LOW" value="LOW">Low</SelectItem>
-                <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-                <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-                <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
+                <SelectItem key="all">All Priorities</SelectItem>
+                <SelectItem key="LOW">Low</SelectItem>
+                <SelectItem key="MEDIUM">Medium</SelectItem>
+                <SelectItem key="HIGH">High</SelectItem>
+                <SelectItem key="CRITICAL">Critical</SelectItem>
               </Select>
 
               <Input
@@ -358,11 +358,11 @@ export default function CIBPage() {
                   trigger: "bg-gray-800/50 border border-gray-700"
                 }}
               >
-                <SelectItem key="all" value="all">All Teams</SelectItem>
-                <SelectItem key="CIB" value="CIB">CIB</SelectItem>
-                <SelectItem key="DETECTIVE" value="DETECTIVE">Detective</SelectItem>
-                <SelectItem key="MAJOR_CRIME" value="MAJOR_CRIME">Major Crime</SelectItem>
-                <SelectItem key="SPECIAL_OPS" value="SPECIAL_OPS">Special Operations</SelectItem>
+                <SelectItem key="all">All Teams</SelectItem>
+                <SelectItem key="CIB">CIB</SelectItem>
+                <SelectItem key="DETECTIVE">Detective</SelectItem>
+                <SelectItem key="MAJOR_CRIME">Major Crime</SelectItem>
+                <SelectItem key="SPECIAL_OPS">Special Operations</SelectItem>
               </Select>
             </div>
           </CardBody>
@@ -613,15 +613,15 @@ function NewInvestigationModal({ isOpen, onClose, onCreate }: any) {
                 onChange={(e) => setForm({ ...form, classification: e.target.value })}
                 classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
               >
-                <SelectItem key="ASSAULT" value="ASSAULT">Assault</SelectItem>
-                <SelectItem key="HOMICIDE" value="HOMICIDE">Homicide</SelectItem>
-                <SelectItem key="FRAUD" value="FRAUD">Fraud</SelectItem>
-                <SelectItem key="THEFT" value="THEFT">Theft</SelectItem>
-                <SelectItem key="DRUGS" value="DRUGS">Drugs</SelectItem>
-                <SelectItem key="CORRUPTION" value="CORRUPTION">Corruption</SelectItem>
-                <SelectItem key="ORGANISED_CRIME" value="ORGANISED_CRIME">Organised Crime</SelectItem>
-                <SelectItem key="CYBERCRIME" value="CYBERCRIME">Cybercrime</SelectItem>
-                <SelectItem key="OTHER" value="OTHER">Other</SelectItem>
+                <SelectItem key="ASSAULT">Assault</SelectItem>
+                <SelectItem key="HOMICIDE">Homicide</SelectItem>
+                <SelectItem key="FRAUD">Fraud</SelectItem>
+                <SelectItem key="THEFT">Theft</SelectItem>
+                <SelectItem key="DRUGS">Drugs</SelectItem>
+                <SelectItem key="CORRUPTION">Corruption</SelectItem>
+                <SelectItem key="ORGANISED_CRIME">Organised Crime</SelectItem>
+                <SelectItem key="CYBERCRIME">Cybercrime</SelectItem>
+                <SelectItem key="OTHER">Other</SelectItem>
               </Select>
 
               <Select
@@ -630,10 +630,10 @@ function NewInvestigationModal({ isOpen, onClose, onCreate }: any) {
                 onChange={(e) => setForm({ ...form, priority: e.target.value })}
                 classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
               >
-                <SelectItem key="LOW" value="LOW">Low</SelectItem>
-                <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-                <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-                <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
+                <SelectItem key="LOW">Low</SelectItem>
+                <SelectItem key="MEDIUM">Medium</SelectItem>
+                <SelectItem key="HIGH">High</SelectItem>
+                <SelectItem key="CRITICAL">Critical</SelectItem>
               </Select>
             </div>
 
@@ -669,10 +669,10 @@ function NewInvestigationModal({ isOpen, onClose, onCreate }: any) {
                 onChange={(e) => setForm({ ...form, assignedTeam: e.target.value })}
                 classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
               >
-                <SelectItem key="CIB" value="CIB">CIB</SelectItem>
-                <SelectItem key="DETECTIVE" value="DETECTIVE">Detective</SelectItem>
-                <SelectItem key="MAJOR_CRIME" value="MAJOR_CRIME">Major Crime</SelectItem>
-                <SelectItem key="SPECIAL_OPS" value="SPECIAL_OPS">Special Operations</SelectItem>
+                <SelectItem key="CIB">CIB</SelectItem>
+                <SelectItem key="DETECTIVE">Detective</SelectItem>
+                <SelectItem key="MAJOR_CRIME">Major Crime</SelectItem>
+                <SelectItem key="SPECIAL_OPS">Special Operations</SelectItem>
               </Select>
             </div>
 
@@ -682,10 +682,10 @@ function NewInvestigationModal({ isOpen, onClose, onCreate }: any) {
               onChange={(e) => setForm({ ...form, securityLevel: e.target.value })}
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="STANDARD" value="STANDARD">Standard</SelectItem>
-              <SelectItem key="CONFIDENTIAL" value="CONFIDENTIAL">Confidential</SelectItem>
-              <SelectItem key="RESTRICTED" value="RESTRICTED">Restricted</SelectItem>
-              <SelectItem key="SECRET" value="SECRET">Secret</SelectItem>
+              <SelectItem key="STANDARD">Standard</SelectItem>
+              <SelectItem key="CONFIDENTIAL">Confidential</SelectItem>
+              <SelectItem key="RESTRICTED">Restricted</SelectItem>
+              <SelectItem key="SECRET">Secret</SelectItem>
             </Select>
           </div>
         </ModalBody>

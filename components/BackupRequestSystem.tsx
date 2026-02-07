@@ -18,7 +18,7 @@ import {
   Chip,
   Divider,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Users, MapPin, Clock, Radio, AlertTriangle, CheckCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -382,13 +382,13 @@ export function BackupRequestSystem() {
                   setFormData({ ...formData, department: e.target.value })
                 }
               >
-                <SelectItem key="POLICE" value="POLICE">
+                <SelectItem key="POLICE">
                   Police
                 </SelectItem>
-                <SelectItem key="FIRE" value="FIRE">
+                <SelectItem key="FIRE">
                   Fire
                 </SelectItem>
-                <SelectItem key="EMS" value="EMS">
+                <SelectItem key="EMS">
                   EMS
                 </SelectItem>
               </Select>
@@ -400,13 +400,13 @@ export function BackupRequestSystem() {
                   setFormData({ ...formData, urgency: e.target.value })
                 }
               >
-                <SelectItem key="ROUTINE" value="ROUTINE">
+                <SelectItem key="ROUTINE">
                   Routine
                 </SelectItem>
-                <SelectItem key="URGENT" value="URGENT">
+                <SelectItem key="URGENT">
                   Urgent
                 </SelectItem>
-                <SelectItem key="EMERGENCY" value="EMERGENCY">
+                <SelectItem key="EMERGENCY">
                   Emergency
                 </SelectItem>
               </Select>

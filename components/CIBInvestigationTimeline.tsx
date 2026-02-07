@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Chip } from "@nextui-org/react";
+import { Card, CardBody, Chip } from "@heroui/react";
 import {
   FileText, Clock, User, Plus, Edit, CheckSquare, Link2,
   AlertTriangle, Shield, ArrowRight, Paperclip, Users, MapPin

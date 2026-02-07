@@ -7,7 +7,7 @@ import {
   Chip, Tabs, Tab, Spinner, Modal, ModalContent, ModalHeader, 
   ModalBody, ModalFooter, useDisclosure, Tooltip, Badge, Textarea,
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { 
   Shield, Search, Filter, Plus, Eye, AlertTriangle, Clock,
   FileText, Users, MapPin, Car, Phone, Radio, AlertOctagon,
@@ -700,10 +700,10 @@ function IncidentQueueView({
           className="max-w-xs"
           classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
         >
-          <SelectItem key="all" value="all">All Status</SelectItem>
-          <SelectItem key="PENDING" value="PENDING">Pending</SelectItem>
-          <SelectItem key="DISPATCHED" value="DISPATCHED">Dispatched</SelectItem>
-          <SelectItem key="ACTIVE" value="ACTIVE">Active</SelectItem>
+          <SelectItem key="all">All Status</SelectItem>
+          <SelectItem key="PENDING">Pending</SelectItem>
+          <SelectItem key="DISPATCHED">Dispatched</SelectItem>
+          <SelectItem key="ACTIVE">Active</SelectItem>
         </Select>
 
         <Select
@@ -713,11 +713,11 @@ function IncidentQueueView({
           className="max-w-xs"
           classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
         >
-          <SelectItem key="all" value="all">All Priorities</SelectItem>
-          <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
-          <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-          <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-          <SelectItem key="LOW" value="LOW">Low</SelectItem>
+          <SelectItem key="all">All Priorities</SelectItem>
+          <SelectItem key="CRITICAL">Critical</SelectItem>
+          <SelectItem key="HIGH">High</SelectItem>
+          <SelectItem key="MEDIUM">Medium</SelectItem>
+          <SelectItem key="LOW">Low</SelectItem>
         </Select>
       </div>
 
@@ -973,15 +973,15 @@ function NewIncidentModal({ isOpen, onClose, onCreate }: any) {
               isRequired
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="TRAFFIC_STOP" value="TRAFFIC_STOP">Traffic Stop</SelectItem>
-              <SelectItem key="SUSPICIOUS_ACTIVITY" value="SUSPICIOUS_ACTIVITY">Suspicious Activity</SelectItem>
-              <SelectItem key="THEFT" value="THEFT">Theft</SelectItem>
-              <SelectItem key="ASSAULT" value="ASSAULT">Assault</SelectItem>
-              <SelectItem key="BURGLARY" value="BURGLARY">Burglary</SelectItem>
-              <SelectItem key="DOMESTIC" value="DOMESTIC">Domestic Disturbance</SelectItem>
-              <SelectItem key="PUBLIC_ORDER" value="PUBLIC_ORDER">Public Order</SelectItem>
-              <SelectItem key="WELFARE_CHECK" value="WELFARE_CHECK">Welfare Check</SelectItem>
-              <SelectItem key="OTHER" value="OTHER">Other</SelectItem>
+              <SelectItem key="TRAFFIC_STOP">Traffic Stop</SelectItem>
+              <SelectItem key="SUSPICIOUS_ACTIVITY">Suspicious Activity</SelectItem>
+              <SelectItem key="THEFT">Theft</SelectItem>
+              <SelectItem key="ASSAULT">Assault</SelectItem>
+              <SelectItem key="BURGLARY">Burglary</SelectItem>
+              <SelectItem key="DOMESTIC">Domestic Disturbance</SelectItem>
+              <SelectItem key="PUBLIC_ORDER">Public Order</SelectItem>
+              <SelectItem key="WELFARE_CHECK">Welfare Check</SelectItem>
+              <SelectItem key="OTHER">Other</SelectItem>
             </Select>
 
             <Select
@@ -990,10 +990,10 @@ function NewIncidentModal({ isOpen, onClose, onCreate }: any) {
               onChange={(e) => setForm({ ...form, priority: e.target.value })}
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="LOW" value="LOW">Low</SelectItem>
-              <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-              <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-              <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
+              <SelectItem key="LOW">Low</SelectItem>
+              <SelectItem key="MEDIUM">Medium</SelectItem>
+              <SelectItem key="HIGH">High</SelectItem>
+              <SelectItem key="CRITICAL">Critical</SelectItem>
             </Select>
 
             <Input
@@ -1105,9 +1105,9 @@ function FieldStopModal({ isOpen, onClose, onCreate }: any) {
               onChange={(e) => setForm({ ...form, type: e.target.value })}
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="PERSON_STOP" value="PERSON_STOP">Person Stop</SelectItem>
-              <SelectItem key="VEHICLE_STOP" value="VEHICLE_STOP">Vehicle Stop</SelectItem>
-              <SelectItem key="WELFARE_CHECK" value="WELFARE_CHECK">Welfare Check</SelectItem>
+              <SelectItem key="PERSON_STOP">Person Stop</SelectItem>
+              <SelectItem key="VEHICLE_STOP">Vehicle Stop</SelectItem>
+              <SelectItem key="WELFARE_CHECK">Welfare Check</SelectItem>
             </Select>
 
             <Input
@@ -1126,11 +1126,11 @@ function FieldStopModal({ isOpen, onClose, onCreate }: any) {
               onChange={(e) => setForm({ ...form, outcome: e.target.value })}
               classNames={{ trigger: "bg-gray-800/50 border border-gray-700" }}
             >
-              <SelectItem key="VERBAL_WARNING" value="VERBAL_WARNING">Verbal Warning</SelectItem>
-              <SelectItem key="CITATION_ISSUED" value="CITATION_ISSUED">Citation Issued</SelectItem>
-              <SelectItem key="ARREST" value="ARREST">Arrest</SelectItem>
-              <SelectItem key="NO_ACTION" value="NO_ACTION">No Action Required</SelectItem>
-              <SelectItem key="ESCALATED" value="ESCALATED">Escalated to CIB</SelectItem>
+              <SelectItem key="VERBAL_WARNING">Verbal Warning</SelectItem>
+              <SelectItem key="CITATION_ISSUED">Citation Issued</SelectItem>
+              <SelectItem key="ARREST">Arrest</SelectItem>
+              <SelectItem key="NO_ACTION">No Action Required</SelectItem>
+              <SelectItem key="ESCALATED">Escalated to CIB</SelectItem>
             </Select>
 
             <Textarea

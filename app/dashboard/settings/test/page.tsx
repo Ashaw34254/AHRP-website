@@ -1,7 +1,7 @@
 'use client';
 
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { Card, CardBody, CardHeader, Button, Chip, Progress } from '@nextui-org/react';
+import { Card, CardBody, CardHeader, Button, Chip, Progress } from '@heroui/react';
 import { TestTube, CheckCircle, XCircle, AlertCircle, Loader2, Volume2, Radio, Database, Wifi, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/lib/toast';

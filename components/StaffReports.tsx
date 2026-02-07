@@ -24,7 +24,7 @@ import {
   TableRow,
   TableCell,
   Spinner,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   FileText,
   Search,
@@ -256,11 +256,11 @@ export function StaffReports() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <SelectItem key="all" value="all">All Status</SelectItem>
-              <SelectItem key="PENDING" value="PENDING">Pending</SelectItem>
-              <SelectItem key="UNDER_REVIEW" value="UNDER_REVIEW">Under Review</SelectItem>
-              <SelectItem key="RESOLVED" value="RESOLVED">Resolved</SelectItem>
-              <SelectItem key="CLOSED" value="CLOSED">Closed</SelectItem>
+              <SelectItem key="all">All Status</SelectItem>
+              <SelectItem key="PENDING">Pending</SelectItem>
+              <SelectItem key="UNDER_REVIEW">Under Review</SelectItem>
+              <SelectItem key="RESOLVED">Resolved</SelectItem>
+              <SelectItem key="CLOSED">Closed</SelectItem>
             </Select>
 
             <Select
@@ -268,11 +268,11 @@ export function StaffReports() {
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
             >
-              <SelectItem key="all" value="all">All Priorities</SelectItem>
-              <SelectItem key="LOW" value="LOW">Low</SelectItem>
-              <SelectItem key="MEDIUM" value="MEDIUM">Medium</SelectItem>
-              <SelectItem key="HIGH" value="HIGH">High</SelectItem>
-              <SelectItem key="CRITICAL" value="CRITICAL">Critical</SelectItem>
+              <SelectItem key="all">All Priorities</SelectItem>
+              <SelectItem key="LOW">Low</SelectItem>
+              <SelectItem key="MEDIUM">Medium</SelectItem>
+              <SelectItem key="HIGH">High</SelectItem>
+              <SelectItem key="CRITICAL">Critical</SelectItem>
             </Select>
 
             <Select
@@ -280,12 +280,12 @@ export function StaffReports() {
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
             >
-              <SelectItem key="all" value="all">All Types</SelectItem>
-              <SelectItem key="PLAYER" value="PLAYER">Player Report</SelectItem>
-              <SelectItem key="STAFF" value="STAFF">Staff Report</SelectItem>
-              <SelectItem key="BUG" value="BUG">Bug Report</SelectItem>
-              <SelectItem key="SUGGESTION" value="SUGGESTION">Suggestion</SelectItem>
-              <SelectItem key="OTHER" value="OTHER">Other</SelectItem>
+              <SelectItem key="all">All Types</SelectItem>
+              <SelectItem key="PLAYER">Player Report</SelectItem>
+              <SelectItem key="STAFF">Staff Report</SelectItem>
+              <SelectItem key="BUG">Bug Report</SelectItem>
+              <SelectItem key="SUGGESTION">Suggestion</SelectItem>
+              <SelectItem key="OTHER">Other</SelectItem>
             </Select>
           </div>
 

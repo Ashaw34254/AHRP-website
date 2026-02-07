@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Input, Textarea, Select, SelectItem, Button, Chip, Avatar, Progress } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Input, Textarea, Select, SelectItem, Button, Chip, Avatar, Progress } from "@heroui/react";
 import { User, Briefcase, Shield, ArrowLeft, Eye, Ruler, Heart, IdCard, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/lib/toast";
@@ -262,7 +262,7 @@ export default function NewCharacterPage() {
                       <Input label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })} isRequired />
                       <Select label="Gender" placeholder="Select gender" selectedKeys={formData.gender ? [formData.gender] : []} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} isRequired>
                         {genders.map((gender) => (
-                          <SelectItem key={gender.value} value={gender.value}>{gender.label}</SelectItem>
+                          <SelectItem key={gender.value}>{gender.label}</SelectItem>
                         ))}
                       </Select>
                     </div>
@@ -293,19 +293,19 @@ export default function NewCharacterPage() {
                         <Input label="Weight" placeholder="180lbs or 82kg" value={formData.weight} onChange={(e) => setFormData({ ...formData, weight: e.target.value })} />
                         <Select label="Build" placeholder="Select build" selectedKeys={formData.build ? [formData.build] : []} onChange={(e) => setFormData({ ...formData, build: e.target.value })}>
                           {builds.map((build) => (
-                            <SelectItem key={build.value} value={build.value}>{build.label}</SelectItem>
+                            <SelectItem key={build.value}>{build.label}</SelectItem>
                           ))}
                         </Select>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Select label="Eye Color" placeholder="Select eye color" selectedKeys={formData.eyeColor ? [formData.eyeColor] : []} onChange={(e) => setFormData({ ...formData, eyeColor: e.target.value })}>
                           {eyeColors.map((color) => (
-                            <SelectItem key={color.value} value={color.value}>{color.label}</SelectItem>
+                            <SelectItem key={color.value}>{color.label}</SelectItem>
                           ))}
                         </Select>
                         <Select label="Hair Color" placeholder="Select hair color" selectedKeys={formData.hairColor ? [formData.hairColor] : []} onChange={(e) => setFormData({ ...formData, hairColor: e.target.value })}>
                           {hairColors.map((color) => (
-                            <SelectItem key={color.value} value={color.value}>{color.label}</SelectItem>
+                            <SelectItem key={color.value}>{color.label}</SelectItem>
                           ))}
                         </Select>
                       </div>
@@ -325,14 +325,14 @@ export default function NewCharacterPage() {
                         <Input label="State ID Number" placeholder="Auto-generated or enter custom" value={formData.stateId} onChange={(e) => setFormData({ ...formData, stateId: e.target.value })} description="Leave blank for auto-generation" />
                         <Select label="Driver's License Status" placeholder="Select license status" selectedKeys={formData.licenseStatus ? [formData.licenseStatus] : []} onChange={(e) => setFormData({ ...formData, licenseStatus: e.target.value })}>
                           {licenseStatuses.map((status) => (
-                            <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
+                            <SelectItem key={status.value}>{status.label}</SelectItem>
                           ))}
                         </Select>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Select label="Blood Type" placeholder="Select blood type" selectedKeys={formData.bloodType ? [formData.bloodType] : []} onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })} startContent={<Heart className="w-4 h-4 text-red-400" />}>
                           {bloodTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                            <SelectItem key={type.value}>{type.label}</SelectItem>
                           ))}
                         </Select>
                         <div className="flex flex-col gap-2">
@@ -374,7 +374,7 @@ export default function NewCharacterPage() {
                     <CardBody className="space-y-4">
                       <Select label="Department" placeholder="Select department" selectedKeys={formData.department ? [formData.department] : []} onChange={(e) => setFormData({ ...formData, department: e.target.value })} description="Choose Civilian if not employed by a department">
                         {departments.map((dept) => (
-                          <SelectItem key={dept.value} value={dept.value}>{dept.label}</SelectItem>
+                          <SelectItem key={dept.value}>{dept.label}</SelectItem>
                         ))}
                       </Select>
                       {formData.department !== "CIVILIAN" ? (

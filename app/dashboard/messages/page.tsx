@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Avatar, Chip, Input, Button, Badge } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Avatar, Chip, Input, Button, Badge } from "@heroui/react";
 import { MessageSquare, Send, Search } from "lucide-react";
 import { useState } from "react";
 

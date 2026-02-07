@@ -19,7 +19,7 @@ import {
   useDisclosure,
   Badge,
   ButtonGroup,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   Radio,
   Phone,

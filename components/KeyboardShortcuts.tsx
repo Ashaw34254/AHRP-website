@@ -14,7 +14,7 @@ import {
   useDisclosure,
   Chip,
   Switch,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   Keyboard,
   Plus,

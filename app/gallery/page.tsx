@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardBody, Chip, Modal, ModalContent, ModalBody, Button } from "@nextui-org/react";
+import { Card, CardBody, Chip, Modal, ModalContent, ModalBody, Button } from "@heroui/react";
 import { X, Download, Share2, Calendar, Tag } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";

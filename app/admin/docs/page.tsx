@@ -2,7 +2,6 @@
 "use client";
 
 import { AdminLayout } from "@/components/AdminLayout";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { 
   BookOpen, 
   FileText, 
@@ -50,15 +49,11 @@ import {
   X,
   Info
 } from "lucide-react";
-import { Button } from "@nextui-org/button";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useState, useMemo, useEffect } from "react";
-import { Input } from "@nextui-org/input";
-import { Chip } from "@nextui-org/chip";
-import { Select, SelectItem } from "@nextui-org/select";
-import { Kbd } from "@nextui-org/kbd";
 import { toast } from "@/lib/toast";
+import { Card, CardBody, CardHeader, Button, Input, Chip, Select, SelectItem, Kbd } from "@heroui/react";
 
 type ViewMode = "user" | "staff" | "dev";
 type LayoutMode = "grid" | "list";
@@ -824,10 +819,10 @@ export default function AdminDocsIndexPage() {
                   className="w-full md:w-48"
                   startContent={<SortAsc className="w-4 h-4" />}
                 >
-                  <SelectItem key="alphabetical" value="alphabetical">Alphabetical</SelectItem>
-                  <SelectItem key="newest" value="newest">Newest First</SelectItem>
-                  <SelectItem key="popular" value="popular">Most Popular</SelectItem>
-                  <SelectItem key="recent" value="recent">Recently Viewed</SelectItem>
+                  <SelectItem key="alphabetical">Alphabetical</SelectItem>
+                  <SelectItem key="newest">Newest First</SelectItem>
+                  <SelectItem key="popular">Most Popular</SelectItem>
+                  <SelectItem key="recent">Recently Viewed</SelectItem>
                 </Select>
 
                 {/* Layout Toggle */}

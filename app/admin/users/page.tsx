@@ -23,7 +23,7 @@ import {
   useDisclosure,
   Select,
   SelectItem,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { 
   Search,
   RefreshCw,
@@ -325,8 +325,8 @@ export default function UsersPage() {
                       trigger: "bg-gray-800 border-gray-700",
                     }}
                   >
-                    <SelectItem key="user" value="user">User</SelectItem>
-                    <SelectItem key="admin" value="admin">Admin</SelectItem>
+                    <SelectItem key="user">User</SelectItem>
+                    <SelectItem key="admin">Admin</SelectItem>
                   </Select>
                 </div>
               )}

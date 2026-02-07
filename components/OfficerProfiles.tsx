@@ -20,7 +20,7 @@ import {
   Select,
   SelectItem,
   Textarea,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { User, Plus, Search, Award, TrendingUp, Clock, Shield, Phone, FileWarning } from "lucide-react";
 import { toast } from "@/lib/toast";
 

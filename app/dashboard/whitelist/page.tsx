@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardBody, CardHeader, Chip, Input, Button, Divider, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Chip, Input, Button, Divider, Skeleton } from "@heroui/react";
 import { Shield, CheckCircle, XCircle, Clock, AlertTriangle, Save } from "lucide-react";
 import { toast } from "@/lib/toast";
 

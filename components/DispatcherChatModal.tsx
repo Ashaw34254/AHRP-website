@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, Badge, Card, CardBody, Chip } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, Button, Badge, Card, CardBody, Chip } from "@heroui/react";
 import { MessageSquare, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DispatcherChat } from "./DispatcherChat";

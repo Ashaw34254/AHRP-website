@@ -12,7 +12,7 @@ import {
   ModalFooter,
   useDisclosure,
   Textarea,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { toast } from "@/lib/toast";
 import { Radio } from "lucide-react";
 
@@ -166,14 +166,14 @@ export function TenCodesDropdown({
         {Object.entries(codesByCategory).flatMap(([category, categoryCodes]) => [
           <SelectItem
             key={`category-${category}`}
-            value=""
+           
             className="font-semibold text-gray-500"
             isDisabled
           >
             {category.toUpperCase()}
           </SelectItem>,
           ...categoryCodes.map((code) => (
-            <SelectItem key={code.code} value={code.code}>
+            <SelectItem key={code.code}>
               {code.code} - {code.meaning}
             </SelectItem>
           ))

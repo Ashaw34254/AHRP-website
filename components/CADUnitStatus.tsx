@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Chip, Avatar } from "@nextui-org/react";
+import { Card, CardBody, Chip, Avatar } from "@heroui/react";
 import { Radio, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { QuickStatusUpdate } from "@/components/QuickStatusUpdate";

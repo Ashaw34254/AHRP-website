@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { Session } from "next-auth";
 import { motion } from "framer-motion";
 import { PlayCircle, Users, Zap } from "lucide-react";
