@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@auth/core": "^0.41.1",
-    "@libsql/client": "^0.15.15",
     "@heroui/react": "^2.8.8",
+    "@libsql/client": "^0.15.15",
     "@prisma/adapter-libsql": "^7.2.0",
     "@prisma/client": "5.22.0",
     "@prisma/driver-adapter-utils": "^7.2.0",
@@ -37,6 +37,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.20",
+    "baseline-browser-mapping": "^2.9.19",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.10",
     "postcss": "^8.4.49",
