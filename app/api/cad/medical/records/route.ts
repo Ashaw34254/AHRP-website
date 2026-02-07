@@ -25,9 +25,12 @@ export async function POST(request: NextRequest) {
       bloodType,
       allergies,
       medications,
-      medicalHistory,
+      conditions,
       emergencyContact,
-      notes,
+      insuranceInfo,
+      updatedBy,
+      patientId,
+      stateId,
     } = body;
 
     if (!patientName) {
@@ -37,13 +40,16 @@ export async function POST(request: NextRequest) {
     const record = await prisma.medicalRecord.create({
       data: {
         patientName,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        dateOfBirth: dateOfBirth || "",
         bloodType: bloodType || null,
         allergies: allergies || null,
         medications: medications || null,
-        medicalHistory: medicalHistory || null,
+        conditions: conditions || null,
         emergencyContact: emergencyContact || null,
-        notes: notes || null,
+        insuranceInfo: insuranceInfo || null,
+        updatedBy: updatedBy || "System",
+        patientId: patientId || null,
+        stateId: stateId || null,
       },
     });
 

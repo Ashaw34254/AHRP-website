@@ -16,7 +16,8 @@ client_scripts {
     'client/plate-scanner.lua',
     'client/tablet.lua',
     'client/wars2x-integration.lua',
-    'client/voice-alerts.lua'
+    'client/voice-alerts.lua',
+    'client/reports.lua'
 }
 
 -- Server scripts
@@ -27,7 +28,8 @@ server_scripts {
     'server/sync.lua',
     'server/dispatch.lua',
     'server/plate-scanner.lua',
-    'server/wars2x-integration.lua'
+    'server/wars2x-integration.lua',
+    'server/reports.lua'
 }
 
 -- Shared scripts
@@ -35,8 +37,12 @@ shared_scripts {
     'shared/utils.lua'
 }
 
+-- NUI page
+ui_page 'html/index.html'
+
 -- HTML/NUI files
 files {
+    'html/index.html',
     'html/voice-tts.js'
 }
 

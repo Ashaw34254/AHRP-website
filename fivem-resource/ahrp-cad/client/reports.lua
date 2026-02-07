@@ -154,30 +154,21 @@ function IsUnitOnDuty()
     return unitInfo ~= nil and unitInfo.callsign ~= nil
 end
 
--- Get unit info (integrate with existing CAD system)
+-- Get unit info from existing CAD system (client/main.lua state)
 function GetUnitInfo()
-    -- This should pull from your existing CAD system
-    -- Return format: { id = "unit_id", callsign = "A-12", badge = "1234", currentCallId = nil }
-    
-    -- Example implementation - adapt to your system
-    if unitCallsign then
+    if CurrentUnit then
         return {
-            id = unitId or "unknown",
-            callsign = unitCallsign,
-            badge = unitBadge,
-            currentCallId = assignedCallId
+            id = CurrentUnit.id or "unknown",
+            callsign = CurrentUnit.callsign,
+            badge = CurrentUnit.badge,
+            currentCallId = AssignedCall and AssignedCall.id or nil
         }
     end
-    
+
     return nil
 end
 
--- Show in-game notification
-function ShowNotification(message)
-    SetNotificationTextEntry("STRING")
-    AddTextComponentString(message)
-    DrawNotification(false, false)
-end
+-- ShowNotification is provided by client/notifications.lua (loaded first in manifest)
 
 -- Thread to handle ESC key to close UI
 CreateThread(function()

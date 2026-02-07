@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHRP CAD</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: transparent; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+
+        /* IFrame overlay */
+        #cad-frame {
+            display: none;
+            position: fixed;
+            top: 3vh;
+            left: 3vw;
+            width: 94vw;
+            height: 94vh;
+            border: 2px solid rgba(59, 130, 246, 0.5);
+            border-radius: 12px;
+            z-index: 100;
+            background: #000;
+        }
+
+        /* Notification container */
+        #notifications {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            line-height: 1.4;
+            opacity: 0;
+            transform: translateX(100px);
+            animation: slideIn 0.3s ease forwards;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .notification.removing {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        .notification.info { background: rgba(59, 130, 246, 0.9); border-left: 4px solid #3b82f6; }
+        .notification.success { background: rgba(34, 197, 94, 0.9); border-left: 4px solid #22c55e; }
+        .notification.warning { background: rgba(234, 179, 8, 0.9); border-left: 4px solid #eab308; color: #000; }
+        .notification.error { background: rgba(239, 68, 68, 0.9); border-left: 4px solid #ef4444; }
+
+        /* Report form */
+        #report-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            max-height: 80vh;
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            z-index: 150;
+            overflow-y: auto;
+            color: #fff;
+        }
+
+        #report-form h2 { margin-bottom: 16px; font-size: 18px; color: #3b82f6; }
+        #report-form label { display: block; margin: 10px 0 4px; font-size: 12px; color: #9ca3af; }
+        #report-form input, #report-form textarea, #report-form select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 13px;
+        }
+        #report-form textarea { resize: vertical; min-height: 80px; }
+        #report-form .btn-row { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+        #report-form button {
+            padding: 8px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .btn-submit { background: #3b82f6; color: #fff; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: #9ca3af; }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideOut {
+            to { opacity: 0; transform: translateX(100px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- CAD IFrame -->
+    <iframe id="cad-frame" frameborder="0" allowfullscreen></iframe>
+
+    <!-- Notifications -->
+    <div id="notifications"></div>
+
+    <!-- Report Form -->
+    <div id="report-form">
+        <h2>Incident Report</h2>
+        <label>Title</label>
+        <input type="text" id="report-title" placeholder="Brief title...">
+
+        <label>Type</label>
+        <select id="report-type"></select>
+
+        <label>Location</label>
+        <input type="text" id="report-location" readonly>
+
+        <label>Narrative</label>
+        <textarea id="report-narrative" placeholder="Describe the incident..."></textarea>
+
+        <label>Suspects</label>
+        <textarea id="report-suspects" rows="2" placeholder="Names, descriptions..."></textarea>
+
+        <label>Victims</label>
+        <textarea id="report-victims" rows="2" placeholder="Names, descriptions..."></textarea>
+
+        <label>Witnesses</label>
+        <textarea id="report-witnesses" rows="2" placeholder="Names, contact info..."></textarea>
+
+        <label>Evidence</label>
+        <textarea id="report-evidence" rows="2" placeholder="Items collected, photos..."></textarea>
+
+        <div class="btn-row">
+            <button class="btn-cancel" onclick="closeReportForm()">Cancel</button>
+            <button class="btn-submit" onclick="submitReport()">Submit Report</button>
+        </div>
+    </div>
+
+    <script src="voice-tts.js"></script>
+    <script>
+        // CAD IFrame
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+
+            if (data.type === 'openUrl') {
+                const frame = document.getElementById('cad-frame');
+                frame.src = data.url;
+                frame.style.display = 'block';
+            }
+
+            if (data.type === 'closeUrl') {
+                const frame = document.getElementById('cad-frame');
+                frame.style.display = 'none';
+                frame.src = '';
+            }
+
+            // Notifications
+            if (data.action === 'notify') {
+                showNotification(data.message, data.type || 'info');
+            }
+
+            if (data.action === 'advancedNotify') {
+                showNotification(
+                    (data.title ? '<strong>' + data.title + '</strong><br>' : '') + data.message,
+                    data.type || 'info',
+                    data.duration || 5000
+                );
+            }
+
+            // Report form
+            if (data.action === 'openReportForm') {
+                openReportForm(data.data);
+            }
+
+            if (data.action === 'closeReportForm') {
+                closeReportForm();
+            }
+        });
+
+        // Notification system
+        function showNotification(message, type, duration) {
+            duration = duration || 4000;
+            const container = document.getElementById('notifications');
+            const el = document.createElement('div');
+            el.className = 'notification ' + type;
+            el.innerHTML = cleanGTAText(message);
+            container.appendChild(el);
+
+            setTimeout(function() {
+                el.classList.add('removing');
+                setTimeout(function() { el.remove(); }, 300);
+            }, duration);
+        }
+
+        // Clean GTA text formatting codes (~b~, ~r~, etc.)
+        function cleanGTAText(text) {
+            return text
+                .replace(/~b~/g, '').replace(/~r~/g, '').replace(/~g~/g, '')
+                .replace(/~y~/g, '').replace(/~s~/g, '').replace(/~w~/g, '')
+                .replace(/~n~/g, '<br>');
+        }
+
+        // Report form
+        function openReportForm(data) {
+            const form = document.getElementById('report-form');
+            document.getElementById('report-location').value = data.location || '';
+
+            // Populate report types
+            const select = document.getElementById('report-type');
+            select.innerHTML = '';
+            (data.reportTypes || []).forEach(function(t) {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t.replace(/_/g, ' ');
+                select.appendChild(opt);
+            });
+
+            form.style.display = 'block';
+        }
+
+        function closeReportForm() {
+            document.getElementById('report-form').style.display = 'none';
+            fetch('https://' + GetParentResourceName() + '/closeReportForm', {
+                method: 'POST', body: JSON.stringify({})
+            });
+        }
+
+        function submitReport() {
+            const data = {
+                title: document.getElementById('report-title').value,
+                type: document.getElementById('report-type').value,
+                location: document.getElementById('report-location').value,
+                narrative: document.getElementById('report-narrative').value,
+                suspects: document.getElementById('report-suspects').value,
+                victims: document.getElementById('report-victims').value,
+                witnesses: document.getElementById('report-witnesses').value,
+                evidence: document.getElementById('report-evidence').value
+            };
+
+            fetch('https://' + GetParentResourceName() + '/submitReport', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        // Helper for NUI resource name
+        function GetParentResourceName() {
+            return window.GetParentResourceName ? window.GetParentResourceName() : 'ahrp-cad';
+        }
+    </script>
+</body>
+</html>

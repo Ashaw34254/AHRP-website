@@ -225,12 +225,10 @@ end)
 RegisterCommand('togglevoice', function()
     voiceEnabled = not voiceEnabled
     
-    ShowNotification({
-        type = voiceEnabled and 'success' or 'warning',
-        title = 'Voice Alerts',
-        message = voiceEnabled and 'Voice alerts enabled' or 'Voice alerts disabled',
-        duration = 3000
-    })
+    ShowNotification(
+        voiceEnabled and "~g~Voice alerts enabled" or "~y~Voice alerts disabled",
+        voiceEnabled and "success" or "warning"
+    )
     
     print(string.format("[AHRP-CAD Voice] Voice alerts %s", voiceEnabled and "enabled" or "disabled"))
 end)
@@ -253,12 +251,7 @@ RegisterCommand('clearvoice', function()
         type = 'stopSpeaking'
     })
     
-    ShowNotification({
-        type = 'success',
-        title = 'Voice Queue',
-        message = 'Voice queue cleared',
-        duration = 2000
-    })
+    ShowNotification("~g~Voice queue cleared", "success")
 end)
 
 -- Export functions

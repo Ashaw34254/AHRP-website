@@ -20,13 +20,12 @@ end)
 
 -- Submit report to website API endpoint
 function SubmitReportToAPI(reportData, source)
-    local apiUrl = Config.ApiUrl .. "/fivem/reports"
-    local apiKey = Config.ApiKey
-    
+    local apiUrl = Config.WebsiteURL .. "/api/fivem/reports"
+
     -- Prepare headers
     local headers = {
         ["Content-Type"] = "application/json",
-        ["x-api-key"] = apiKey
+        ["Authorization"] = "Bearer " .. Config.APIKey
     }
     
     -- Convert to JSON
@@ -98,14 +97,14 @@ end, false)
 
 -- Fetch reports from website API
 function FetchReportsFromAPI(source, status)
-    local apiUrl = Config.ApiUrl .. "/fivem/reports"
-    
+    local apiUrl = Config.WebsiteURL .. "/api/fivem/reports"
+
     if status then
         apiUrl = apiUrl .. "?status=" .. status
     end
-    
+
     local headers = {
-        ["x-api-key"] = Config.ApiKey
+        ["Authorization"] = "Bearer " .. Config.APIKey
     }
     
     PerformHttpRequest(apiUrl, function(statusCode, response, headers)
