@@ -30,10 +30,10 @@ export async function GET(request: Request) {
     });
     
     // Calculate statistics
-    const totalApplications = applications.length;
-    const pendingApplications = applications.filter(a => a.status === "PENDING").length;
-    const approvedApplications = applications.filter(a => a.status === "APPROVED").length;
-    const rejectedApplications = applications.filter(a => a.status === "REJECTED").length;
+    //const totalApplications = applications.length;
+   // const pendingApplications = applications.filter(a => a.status === "PENDING").length;
+   // const approvedApplications = applications.filter(a => a.status === "APPROVED").length;
+   // const rejectedApplications = applications.filter(a => a.status === "REJECTED").length;
     
     // Calculate average processing time (for reviewed applications)
     const reviewedApplications = applications.filter(a => a.reviewedAt && a.submittedDate);
@@ -93,10 +93,10 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       analytics: {
-        totalApplications,
-        pendingApplications,
-        approvedApplications,
-        rejectedApplications,
+        //totalApplications,
+       // pendingApplications,
+        //approvedApplications,
+        //rejectedApplications,
         averageProcessingTime,
         applicationsByType,
         applicationsByStatus,
