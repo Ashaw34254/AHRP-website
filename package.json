@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@auth/core": "^0.41.1",
+    "@auth/prisma-adapter": "^2.11.1",
     "@heroui/react": "^2.8.8",
     "@heroui/theme": "^2.4.26",
     "@libsql/client": "^0.15.15",
