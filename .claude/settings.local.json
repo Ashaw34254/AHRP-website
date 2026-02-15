@@ -12,7 +12,9 @@
       "Bash(grep:*)",
       "Bash(find:*)",
       "Bash(npx prisma db push:*)",
-      "Bash(DATABASE_URL=\"postgres://461c590ea09e7bea1571a72831f14aeb5896e3d0048fd3ade8ca45e4154a33ca:sk_guu_7L_rWD3ZuxqQ5gGyN@db.prisma.io:5432/postgres?sslmode=require\" npx prisma db push:*)"
+      "Bash(DATABASE_URL=\"postgres://461c590ea09e7bea1571a72831f14aeb5896e3d0048fd3ade8ca45e4154a33ca:sk_guu_7L_rWD3ZuxqQ5gGyN@db.prisma.io:5432/postgres?sslmode=require\" npx prisma db push:*)",
+      "Bash(npx prisma db execute:*)",
+      "Bash(npx prisma migrate:*)"
     ]
   }
 }

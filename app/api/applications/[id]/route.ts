@@ -56,7 +56,7 @@ export async function PATCH(
     const isDev = process.env.NODE_ENV === "development";
     
     // Check if user is admin (skip in dev mode)
-    if (!isDev && (!session?.user || session.user.role !== "admin")) {
+    if (!isDev && (!session?.user || !["admin", "owner"].includes(session.user.role))) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }

@@ -163,7 +163,7 @@ export function Header() {
               >
                 Dashboard
               </DropdownItem>
-              {session.user?.role === "admin" ? (
+              {session.user?.role === "admin" || session.user?.role === "owner" ? (
                 <DropdownItem
                   key="admin"
                   startContent={<Shield className="w-4 h-4" />}

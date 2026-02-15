@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const session = await auth();
     const isDev = process.env.NODE_ENV === "development";
     
-    if (!isDev && (!session?.user || session.user.role !== "admin")) {
+    if (!isDev && (!session?.user || !["admin", "owner"].includes(session.user.role))) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
@@ -83,7 +83,7 @@ export async function PATCH(request: Request) {
     const session = await auth();
     const isDev = process.env.NODE_ENV === "development";
     
-    if (!isDev && (!session?.user || session.user.role !== "admin")) {
+    if (!isDev && (!session?.user || !["admin", "owner"].includes(session.user.role))) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
@@ -128,7 +128,7 @@ export async function DELETE(request: Request) {
     const session = await auth();
     const isDev = process.env.NODE_ENV === "development";
     
-    if (!isDev && (!session?.user || session.user.role !== "admin")) {
+    if (!isDev && (!session?.user || !["admin", "owner"].includes(session.user.role))) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }

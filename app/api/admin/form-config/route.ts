@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     const isDev = process.env.NODE_ENV === "development";
     
     // Skip auth check in development mode
-    if (!isDev && (!session?.user || session.user.role !== "admin")) {
+    if (!isDev && (!session?.user || !["admin", "owner"].includes(session.user.role))) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
