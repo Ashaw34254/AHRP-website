@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
     // Calculate distances
     const unitsWithDistance: UnitDistance[] = units
-      .map((unit) => {
+      .map((unit: typeof units[number]) => {
         // Parse location string if it exists (expected format: "lat,lon")
         let unitLat: number | null = null;
         let unitLon: number | null = null;

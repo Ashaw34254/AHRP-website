@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     });
 
     // Parse JSON fields for response
-    const stopsWithParsedData = stops.map(stop => ({
+    const stopsWithParsedData = stops.map((stop: typeof stops[number]) => ({
       ...stop,
       citationIds: stop.citationIds ? JSON.parse(stop.citationIds) : [],
       backupUnits: stop.backupUnits ? JSON.parse(stop.backupUnits) : [],

@@ -69,7 +69,7 @@ export async function GET(request: Request) {
     });
     
     // Parse JSON formData for each application
-    const applicationsWithParsedData = applications.map(app => ({
+    const applicationsWithParsedData = applications.map((app: typeof applications[number]) => ({
       ...app,
       formData: JSON.parse(app.formData),
     }));

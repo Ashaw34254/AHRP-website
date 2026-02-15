@@ -20,7 +20,7 @@ export async function POST(request: Request) {
           } catch {
             // If not JSON, treat as comma-separated string
             if (typeof citizen.flags === 'string') {
-              existingFlags = citizen.flags.split(',').map(f => f.trim()).filter(Boolean);
+              existingFlags = citizen.flags.split(',').map((f: string) => f.trim()).filter(Boolean);
             }
           }
         }
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
             } catch {
               // If not JSON, treat as comma-separated string
               if (typeof existingCitizen.flags === 'string') {
-                existingFlags = existingCitizen.flags.split(',').map(f => f.trim()).filter(Boolean);
+                existingFlags = existingCitizen.flags.split(',').map((f: string) => f.trim()).filter(Boolean);
               }
             }
           }
@@ -155,13 +155,13 @@ export async function DELETE(request: Request) {
           existingFlags = JSON.parse(citizen.flags);
         } catch {
           if (typeof citizen.flags === 'string') {
-            existingFlags = citizen.flags.split(',').map(f => f.trim()).filter(Boolean);
+            existingFlags = citizen.flags.split(',').map((f: string) => f.trim()).filter(Boolean);
           }
         }
       }
 
       // Remove the flag
-      existingFlags = existingFlags.filter(f => f !== flagType);
+      existingFlags = existingFlags.filter((f: string) => f !== flagType);
 
       await prisma.citizen.update({
         where: { id },

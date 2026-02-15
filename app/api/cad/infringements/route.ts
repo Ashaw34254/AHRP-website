@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     });
 
     // Parse JSON fields for response
-    const infringementsWithParsedData = infringements.map(inf => ({
+    const infringementsWithParsedData = infringements.map((inf: typeof infringements[number]) => ({
       ...inf,
       witnessOfficers: inf.witnessOfficers ? JSON.parse(inf.witnessOfficers) : [],
       photoEvidence: inf.photoEvidence ? JSON.parse(inf.photoEvidence) : [],

@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Group settings by category
-    const grouped = settings.reduce((acc, setting) => {
+    const grouped = settings.reduce((acc: Record<string, any[]>, setting: typeof settings[number]) => {
       if (!acc[setting.category]) {
         acc[setting.category] = [];
       }

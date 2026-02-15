@@ -128,7 +128,7 @@ export async function GET() {
     
     // For each department, use DB value or default
     for (const dept of ["POLICE", "FIRE", "EMS"]) {
-      const dbSettings = settings.find(s => s.department === dept);
+      const dbSettings = settings.find((s: typeof settings[number]) => s.department === dept);
       
       if (dbSettings) {
         result[dept] = {

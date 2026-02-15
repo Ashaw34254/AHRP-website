@@ -19,7 +19,7 @@ export async function GET() {
       },
     });
 
-    const formattedCallouts = callouts.map((callout) => ({
+    const formattedCallouts = callouts.map((callout: typeof callouts[number]) => ({
       id: callout.id,
       calloutTime: callout.calloutTime.toISOString(),
       incidentType: callout.incidentType,
@@ -29,7 +29,7 @@ export async function GET() {
       team: callout.team,
       requestedBy: callout.requestedBy,
       approvedBy: callout.approvedBy,
-      officers: callout.officers.map((o) => o.id),
+      officers: callout.officers.map((o: typeof callout.officers[number]) => o.id),
       briefing: callout.briefing,
       stagingArea: callout.stagingArea,
     }));
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
         where: { id: callout.id },
         data: {
           officers: {
-            connect: availableOfficers.map((o) => ({ id: o.id })),
+            connect: availableOfficers.map((o: typeof availableOfficers[number]) => ({ id: o.id })),
           },
         },
       });
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       // Update officer statuses to DEPLOYED
       await prisma.officer.updateMany({
         where: {
-          id: { in: availableOfficers.map((o) => o.id) },
+          id: { in: availableOfficers.map((o: typeof availableOfficers[number]) => o.id) },
         },
         data: {
           dutyStatus: "BUSY",

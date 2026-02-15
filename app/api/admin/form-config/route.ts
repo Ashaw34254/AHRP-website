@@ -34,13 +34,13 @@ export async function GET(request: Request) {
     // Parse JSON options for each field
     const config = {
       ...formConfig,
-      fields: formConfig.fields.map((field) => ({
+      fields: formConfig.fields.map((field: typeof formConfig.fields[number]) => ({
         ...field,
         options: field.options ? JSON.parse(field.options) : null,
         conditionalLogic: field.conditionalLogic ? JSON.parse(field.conditionalLogic) : null,
       })),
     };
-    
+
     return NextResponse.json({
       success: true,
       config,
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
     // Parse JSON options for each field
     const config = updatedConfig ? {
       ...updatedConfig,
-      fields: updatedConfig.fields.map((field) => ({
+      fields: updatedConfig.fields.map((field: typeof updatedConfig.fields[number]) => ({
         ...field,
         options: field.options ? JSON.parse(field.options) : null,
         conditionalLogic: field.conditionalLogic ? JSON.parse(field.conditionalLogic) : null,

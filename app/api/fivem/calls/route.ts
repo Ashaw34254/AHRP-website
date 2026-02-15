@@ -19,7 +19,7 @@ export async function GET() {
     });
 
     // Format for FiveM consumption
-    const formatted = calls.map((call) => ({
+    const formatted = calls.map((call: typeof calls[number]) => ({
       id: call.id,
       callNumber: call.callNumber,
       type: call.type,
@@ -29,7 +29,7 @@ export async function GET() {
       longitude: call.longitude,
       description: call.description,
       status: call.status,
-      units: call.units.map((u) => u.callsign),
+      units: call.units.map((u: typeof call.units[number]) => u.callsign),
       createdAt: call.createdAt,
     }));
 

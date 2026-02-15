@@ -31,8 +31,8 @@ export async function GET(request: NextRequest) {
     });
 
     // Merge officer data with characters where applicable
-    const charactersWithOfficers = characters.map(char => {
-      const officer = officers.find(o => o.department === char.department);
+    const charactersWithOfficers = characters.map((char: typeof characters[number]) => {
+      const officer = officers.find((o: typeof officers[number]) => o.department === char.department);
       return {
         ...char,
         officer: officer || null,

@@ -75,7 +75,7 @@ export async function GET(
     });
     
     // Parse mentioned officers
-    const parsedNotes = notes.map(n => ({
+    const parsedNotes = notes.map((n: typeof notes[number]) => ({
       ...n,
       mentionedOfficers: n.mentionedOfficers ? JSON.parse(n.mentionedOfficers) : []
     }));

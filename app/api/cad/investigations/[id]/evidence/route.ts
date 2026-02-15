@@ -111,7 +111,7 @@ export async function GET(
     });
     
     // Parse custody logs and tags
-    const parsedEvidence = evidence.map(e => ({
+    const parsedEvidence = evidence.map((e: typeof evidence[number]) => ({
       ...e,
       custodyLog: e.custodyLog ? JSON.parse(e.custodyLog) : [],
       tags: e.tags ? JSON.parse(e.tags) : []

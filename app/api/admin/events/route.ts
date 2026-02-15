@@ -28,7 +28,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      events: events.map(event => ({
+      events: events.map((event: typeof events[number]) => ({
         id: event.id,
         title: event.title,
         description: event.description,

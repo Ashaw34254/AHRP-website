@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const formattedReports = reports.map((report) => ({
+    const formattedReports = reports.map((report: typeof reports[number]) => ({
       id: report.id,
       reportNumber: report.reportNumber,
       title: report.title,

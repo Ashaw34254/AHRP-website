@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     });
 
     // Parse JSON fields for response
-    const pursuitsWithParsedData = pursuits.map(pursuit => ({
+    const pursuitsWithParsedData = pursuits.map((pursuit: typeof pursuits[number]) => ({
       ...pursuit,
       unitsInvolved: pursuit.unitsInvolved ? JSON.parse(pursuit.unitsInvolved) : [],
       route: pursuit.route ? JSON.parse(pursuit.route) : [],

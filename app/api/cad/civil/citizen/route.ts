@@ -136,7 +136,7 @@ export async function GET(request: Request) {
       });
 
       // Convert Characters to Citizen format
-      citizens = characters.map(character => ({
+      citizens = characters.map((character: typeof characters[number]) => ({
         id: character.id,
         firstName: character.firstName,
         lastName: character.lastName,
@@ -186,7 +186,7 @@ export async function GET(request: Request) {
           flags = JSON.parse(citizen.flags);
         } catch {
           if (typeof citizen.flags === 'string') {
-            flags = citizen.flags.split(',').map(f => f.trim()).filter(Boolean);
+            flags = citizen.flags.split(',').map((f: string) => f.trim()).filter(Boolean);
           }
         }
       }
@@ -232,7 +232,7 @@ export async function GET(request: Request) {
     // If multiple results, return them as an array
     if (citizens.length > 1) {
       return NextResponse.json({ 
-        citizens: citizens.map(c => ({
+        citizens: citizens.map((c: typeof citizens[number]) => ({
           id: c.id,
           firstName: c.firstName,
           lastName: c.lastName,

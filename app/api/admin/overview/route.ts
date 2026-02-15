@@ -80,7 +80,7 @@ export async function GET() {
         totalCharacters,
         totalEvents,
       },
-      recentUsers: recentUsers.map(user => ({
+      recentUsers: recentUsers.map((user: typeof recentUsers[number]) => ({
         id: user.id,
         name: user.name,
         email: user.email,
@@ -89,7 +89,7 @@ export async function GET() {
         createdAt: user.createdAt.toISOString(),
         characterCount: user._count.characters,
       })),
-      recentApplications: recentApplications.map(app => ({
+      recentApplications: recentApplications.map((app: typeof recentApplications[number]) => ({
         id: app.id,
         type: app.applicationType,
         status: app.status,

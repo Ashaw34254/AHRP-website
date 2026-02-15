@@ -82,14 +82,14 @@ export async function GET(request: NextRequest) {
     // Get user stats
     const stats = {
       totalCharacters: characters.length,
-      activeCharacters: officers.filter(o => o.dutyStatus === 'AVAILABLE').length,
-      pendingApplications: applications.filter(a => a.status === 'pending').length,
+      activeCharacters: officers.filter((o: typeof officers[number]) => o.dutyStatus === 'AVAILABLE').length,
+      pendingApplications: applications.filter((a: typeof applications[number]) => a.status === 'pending').length,
       upcomingEvents: upcomingEvents.length,
     };
 
     // Merge officer data with characters where applicable
-    const charactersWithOfficers = characters.map(char => {
-      const officer = officers.find(o => o.department === char.department);
+    const charactersWithOfficers = characters.map((char: typeof characters[number]) => {
+      const officer = officers.find((o: typeof officers[number]) => o.department === char.department);
       return {
         ...char,
         officer: officer || null,
