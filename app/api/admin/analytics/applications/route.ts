@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import type { Application } from "@prisma/client";
+
+type ApplicationRecord = Awaited<ReturnType<typeof prisma.application.findMany>>[number];
 
 export async function GET(request: Request) {
   try {
@@ -31,31 +32,31 @@ export async function GET(request: Request) {
     });
     
     // Calculate statistics
-    //const totalApplications = applications.length;
-   // const pendingApplications = applications.filter(a => a.status === "PENDING").length;
-   // const approvedApplications = applications.filter(a => a.status === "APPROVED").length;
-   // const rejectedApplications = applications.filter(a => a.status === "REJECTED").length;
+    //const totalApplicationRecords = applications.length;
+   // const pendingApplicationRecords = applications.filter(a => a.status === "PENDING").length;
+   // const approvedApplicationRecords = applications.filter(a => a.status === "APPROVED").length;
+   // const rejectedApplicationRecords = applications.filter(a => a.status === "REJECTED").length;
     
     // Calculate average processing time (for reviewed applications)
-    const reviewedApplications = applications.filter((a: Application) => a.reviewedAt && a.submittedDate);
-    const totalProcessingTime = reviewedApplications.reduce((sum: number, app: Application) => {
+    const reviewedApplicationRecords = applications.filter((a: ApplicationRecord) => a.reviewedAt && a.submittedDate);
+    const totalProcessingTime = reviewedApplicationRecords.reduce((sum: number, app: ApplicationRecord) => {
       const submitted = new Date(app.submittedDate!).getTime();
       const reviewed = new Date(app.reviewedAt!).getTime();
       return sum + (reviewed - submitted);
     }, 0);
-    const averageProcessingTime = reviewedApplications.length > 0
-      ? totalProcessingTime / reviewedApplications.length / (1000 * 60 * 60) // Convert to hours
+    const averageProcessingTime = reviewedApplicationRecords.length > 0
+      ? totalProcessingTime / reviewedApplicationRecords.length / (1000 * 60 * 60) // Convert to hours
       : 0;
     
     // Group by application type
     const applicationsByType: Record<string, number> = {};
-    applications.forEach((app: Application) => {
+    applications.forEach((app: ApplicationRecord) => {
       applicationsByType[app.applicationType] = (applicationsByType[app.applicationType] || 0) + 1;
     });
 
     // Group by status
     const applicationsByStatus: Record<string, number> = {};
-    applications.forEach((app: Application) => {
+    applications.forEach((app: ApplicationRecord) => {
       applicationsByStatus[app.status] = (applicationsByStatus[app.status] || 0) + 1;
     });
     
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
       const nextDate = new Date(date);
       nextDate.setDate(nextDate.getDate() + 1);
       
-      const count = applications.filter((app: Application) => {
+      const count = applications.filter((app: ApplicationRecord) => {
         const appDate = new Date(app.createdAt);
         return appDate >= date && appDate < nextDate;
       }).length;
@@ -83,7 +84,7 @@ export async function GET(request: Request) {
     }
     
     // Recent activity (last 20 applications)
-    const recentActivity = applications.slice(0, 20).map((app: Application) => ({
+    const recentActivity = applications.slice(0, 20).map((app: ApplicationRecord) => ({
       id: app.id,
       applicationType: app.applicationType,
       status: app.status,
@@ -94,10 +95,10 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       analytics: {
-        //totalApplications,
-       // pendingApplications,
-        //approvedApplications,
-        //rejectedApplications,
+        //totalApplicationRecords,
+       // pendingApplicationRecords,
+        //approvedApplicationRecords,
+        //rejectedApplicationRecords,
         averageProcessingTime,
         applicationsByType,
         applicationsByStatus,
