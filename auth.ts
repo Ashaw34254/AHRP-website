@@ -10,6 +10,11 @@ export const config = {
     Discord({
       clientId: process.env.AUTH_DISCORD_ID,
       clientSecret: process.env.AUTH_DISCORD_SECRET,
+      authorization: {
+        params: {
+          scope: "identify email",
+        },
+      },
     }),
   ],
   callbacks: {
