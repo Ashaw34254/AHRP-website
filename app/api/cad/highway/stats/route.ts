@@ -50,7 +50,7 @@ export async function GET() {
       },
     });
 
-    const totalFines = unpaidInfringements.reduce((sum, inf) => sum + inf.fineAmount, 0);
+    const totalFines = unpaidInfringements.reduce((sum: number, inf: typeof unpaidInfringements[number]) => sum + inf.fineAmount, 0);
 
     const stats = {
       stopsToday,
