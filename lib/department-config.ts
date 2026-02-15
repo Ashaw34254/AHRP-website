@@ -273,11 +273,11 @@ export function getStatusCodesByDepartment(department: Department) {
 }
 
 export function getSuggestedUnits(callType: string): string[] {
-  return CALL_TYPE_UNIT_SUGGESTIONS[callType] || [];
+  return (CALL_TYPE_UNIT_SUGGESTIONS as Record<string, string[]>)[callType] || [];
 }
 
 export function getResponseTimeTarget(department: Department, priority: string): number {
-  return RESPONSE_TIME_TARGETS[department]?.[priority] || 15;
+  return (RESPONSE_TIME_TARGETS[department] as Record<string, number>)?.[priority] || 15;
 }
 
 export function shouldNotifyDepartments(callType: string): Department[] {

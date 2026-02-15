@@ -21,7 +21,7 @@ const footerLinks = {
     { name: "Updates", href: "/#updates" },
   ],
   community: [
-    { name: "Discord Server", href: "https://discord.gg/ahrp", external: true },
+    { name: "Discord Server", href: "https://discord.gg/VusbA9SpXv", external: true },
     { name: "Application", href: "/apply" },
     { name: "Staff Team", href: "/staff" },
     { name: "Rules & Guidelines", href: "/rules" },
@@ -35,7 +35,7 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: MessageCircle, href: "https://discord.gg/ahrp", name: "Discord", color: "hover:text-indigo-400" },
+  { icon: MessageCircle, href: "https://discord.gg/VusbA9SpXv", name: "Discord", color: "hover:text-indigo-400" },
   { icon: Twitter, href: "#", name: "Twitter", color: "hover:text-blue-400" },
   { icon: Youtube, href: "#", name: "YouTube", color: "hover:text-red-500" },
   { icon: Instagram, href: "#", name: "Instagram", color: "hover:text-pink-400" },
@@ -44,10 +44,10 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="relative bg-gradient-to-b from-black via-gray-950 to-black border-t border-gray-800 overflow-hidden">
-      {/* Background decoration */}
+      {/* Background decorations */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.05),transparent_50%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f1f_1px,transparent_1px),linear-gradient(to_bottom,#1f1f1f_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10" />
-      
+
       <div className="max-w-7xl mx-auto px-4 py-16 relative z-10">
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
@@ -77,19 +77,21 @@ export function Footer() {
                 </div>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                A next-generation FiveM roleplay community dedicated to realistic, 
-                story-driven experiences with professional staff and custom systems.
+                A next-generation FiveM roleplay community focused on realistic, story-driven experiences with professional staff and custom systems.
               </p>
-              
+
               {/* Contact Info */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-center gap-3 text-sm text-gray-400">
                   <MapPin className="w-4 h-4 text-purple-400" />
                   <span>Australia / New Zealand</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-400">
                   <Mail className="w-4 h-4 text-purple-400" />
-                  <a href="mailto:contact@ahrp.com" className="hover:text-purple-400 transition-colors">
+                  <a 
+                    href="mailto:contact@ahrp.com" 
+                    className="hover:text-purple-400 transition-colors"
+                  >
                     contact@ahrp.com
                   </a>
                 </div>
@@ -98,69 +100,32 @@ export function Footer() {
           </div>
 
           {/* Links Columns */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Company</h4>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-purple-400 transition-colors text-sm block"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Community</h4>
-            <ul className="space-y-3">
-              {footerLinks.community.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-purple-400 transition-colors text-sm block"
-                    {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Resources</h4>
-            <ul className="space-y-3">
-              {footerLinks.resources.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-purple-400 transition-colors text-sm block"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          {Object.entries(footerLinks).map(([section, links], i) => (
+            <motion.div
+              key={section}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 * (i + 1) }}
+            >
+              <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+                {section.charAt(0).toUpperCase() + section.slice(1)}
+              </h4>
+              <ul className="space-y-3">
+                {links.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-400 hover:text-purple-400 transition-colors text-sm block"
+                      {...("external" in link && link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
         </div>
 
         {/* Divider */}

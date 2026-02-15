@@ -6,38 +6,47 @@ import { HelpCircle } from "lucide-react";
 
 const faqs = [
   {
-    question: "How do I join Aurora Horizon RP?",
-    answer: "First, join our Discord server and read through the rules and guidelines. Then, submit a whitelist application with your character backstory. Once approved by our staff team, you'll receive access to the server and can begin your roleplay journey.",
+    question: "What is the roleplay style on AHRP?",
+    answer: "Aurora Horizon RP focuses on realistic, story-driven roleplay. Players are expected to follow immersive scenarios, whether in police, EMS, civilian life, or criminal enterprises. Our rules encourage teamwork, proper procedure, and meaningful character development.",
   },
   {
-    question: "Is the server whitelisted?",
-    answer: "Yes, Aurora Horizon RP is a whitelisted community. This ensures quality roleplay and allows us to maintain our high standards. The application process helps us understand your roleplay style and ensures you're a good fit for our community.",
+    question: "Are there custom vehicles, weapons, or scripts?",
+    answer: "Yes! AHRP features custom vehicles, tools, and scripts designed to enhance realism and roleplay immersion without disrupting balance. All content is integrated to make gameplay feel authentic and engaging.",
   },
   {
-    question: "What are the server requirements?",
-    answer: "You'll need FiveM installed, a working microphone for voice communication, and a stable internet connection. We also require all players to be 18+ and follow our community guidelines for mature, realistic roleplay.",
+    question: "Can I create my own storylines or businesses?",
+    answer: "Absolutely! Players are encouraged to roleplay creatively beyond departments, including businesses, shops, criminal enterprises, or personal story arcs, as long as it fits within the server rules and immersion standards.",
   },
   {
-    question: "Can I play as a police officer or EMS immediately?",
-    answer: "Department positions require additional applications and training. New players typically start as civilians to learn the server mechanics and roleplay standards. Once you're familiar with the community, you can apply for department positions.",
+    question: "Do I need previous RP experience?",
+    answer: "No prior experience is required. New players can start as civilians or in departments and learn roleplay expectations on the job. However, familiarity with FiveM and RP etiquette can help you get started faster.",
   },
   {
-    question: "What makes AHRP different from other servers?",
-    answer: "We feature a custom-built CAD system, professional department structures, experienced staff, and a commitment to realistic roleplay. Our focus on long-term character development and story-driven experiences sets us apart from other communities.",
+    question: "How do promotions or rank progression work?",
+    answer: "Rank progression in police, EMS, or other roles is based on experience, performance, and training. Higher or specialised positions, such as CIU, require applications, additional training, or seniority within the department.",
   },
   {
-    question: "Is there an economy system?",
-    answer: "Yes, we have a balanced economy with various legal and illegal ways to earn money. You can own businesses, work jobs, participate in the criminal underworld, or pursue department careers. The economy is designed for long-term engagement.",
+    question: "How does the community handle griefing or rule-breaking?",
+    answer: "AHRP has a fair and professional staff team that enforces rules and addresses issues promptly. The focus is on maintaining immersion and ensuring all players can enjoy a positive and realistic roleplay environment.",
   },
   {
-    question: "What time zone is the server most active?",
-    answer: "AHRP is optimized for Australian and New Zealand time zones (AEST/NZST), but we have players from around the world. Peak hours are typically 6 PM - 2 AM AEST, with active players throughout the day.",
+    question: "Is voice chat mandatory?",
+    answer: "Voice chat is highly recommended for roleplay and team coordination, especially in police or EMS roles. Text chat may be used in certain situations, but immersion and communication work best through voice.",
   },
   {
-    question: "How often are there server events?",
-    answer: "We host regular community events including races, department training scenarios, civilian gatherings, and special storyline events. Staff-organized events typically occur weekly, with spontaneous roleplay scenarios happening daily.",
+    question: "How do I get help or support on the server?",
+    answer: "Players can reach out to staff directly via Discord, in-game support channels, or consult guides and pinned resources. Our community is welcoming and ready to assist new players at any time.",
+  },
+  {
+    question: "What types of server events are available?",
+    answer: "AHRP hosts a mix of events, including community races, department training exercises, civilian gatherings, and ongoing story-driven events. Staff organise weekly events, with daily spontaneous roleplay scenarios to keep the world active.",
+  },
+  {
+    question: "Are there any age or content restrictions?",
+    answer: "Yes. AHRP is an 18+ server. All players are expected to engage in mature, realistic roleplay and follow community guidelines regarding behaviour, language, and content.",
   },
 ];
+
 
 export function FAQSection() {
   return (
@@ -99,26 +108,31 @@ export function FAQSection() {
           </Accordion>
         </motion.div>
 
-        {/* Still have questions CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="mt-12 text-center"
-        >
-          <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/30 rounded-2xl p-8">
-            <h3 className="text-2xl font-bold text-white mb-3">
-              Still have questions?
-            </h3>
-            <p className="text-gray-400 mb-6">
-              Join our Discord and our friendly staff team will be happy to help!
-            </p>
-            <button className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70">
-              Join Discord
-            </button>
-          </div>
-        </motion.div>
+      <motion.div
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ delay: 0.4, duration: 0.6 }}
+  className="mt-12 text-center"
+>
+  <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/30 rounded-2xl p-8">
+    <h3 className="text-2xl font-bold text-white mb-3">
+      Still have questions?
+    </h3>
+    <p className="text-gray-400 mb-6">
+      Join our Discord and our friendly staff team will be happy to help!
+    </p>
+    <a
+      href="https://discord.gg/VusbA9SpXv" // Replace with your actual Discord invite
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-block px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70"
+    >
+      Join Discord
+    </a>
+  </div>
+</motion.div>
+
       </div>
     </section>
   );

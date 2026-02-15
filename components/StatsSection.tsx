@@ -6,7 +6,7 @@ import { Users, Clock, Award, Zap, Shield, Heart } from "lucide-react";
 const stats = [
   {
     icon: Users,
-    value: "500+",
+    value: "23+",
     label: "Active Players",
     gradient: "from-indigo-500 to-purple-500",
     iconBg: "bg-gradient-to-br from-indigo-500 to-purple-500",
@@ -22,7 +22,7 @@ const stats = [
   },
   {
     icon: Award,
-    value: "50+",
+    value: "10",
     label: "Staff Members",
     gradient: "from-pink-500 to-red-500",
     iconBg: "bg-gradient-to-br from-pink-500 to-red-500",

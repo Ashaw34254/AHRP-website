@@ -89,7 +89,7 @@ export function CTASection() {
           >
             <Button
               as="a"
-              href="https://discord.gg/ahrp"
+              href="https://discord.gg/VusbA9SpXv"
               target="_blank"
               size="lg"
               color="primary"

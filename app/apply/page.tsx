@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -62,7 +62,15 @@ interface FormConfig {
   fields: FormField[];
 }
 
-export default function ApplyPage() {
+export default function ApplyPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+      <ApplyPage />
+    </Suspense>
+  );
+}
+
+function ApplyPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();

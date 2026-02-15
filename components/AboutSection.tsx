@@ -76,54 +76,57 @@ export function AboutSection() {
           </h2>
           
           <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-4xl mx-auto mb-6">
-            Aurora Horizon RP is a premium FiveM community dedicated to realistic, 
-            story-driven roleplay. We pride ourselves on professional management, fair staff, 
-            and a commitment to long-term character development.
+            Aurora Horizon RP is a premier FiveM roleplay community committed to delivering immersive, story-driven experiences. Our focus is on creating a realistic world where player choices matter, characters evolve over time, and every action has meaningful consequences.
+
+We pride ourselves on:
+
+Professional management that ensures a smooth, consistent experience for all players.
+
+Fair and approachable staff who enforce rules transparently while supporting roleplay freedom.
+
+Long-term character development, encouraging players to build stories, relationships, and legacies within our world.
+
+At Aurora Horizon RP, our goal is more than just gameplay—it’s a thriving community where creativity, collaboration, and realism come together, giving every player a space to explore and grow in their roleplay journey.
           </p>
           
-          <p className="text-base md:text-lg text-gray-400 leading-relaxed max-w-3xl mx-auto">
-            Whether you&apos;re interested in law enforcement, emergency services, civilian life, 
-            or criminal enterprises, Aurora Horizon RP provides a mature and immersive environment 
-            for your roleplay journey. Our custom-built CAD system, extensive department structures, 
-            and dedicated community create an unparalleled roleplay experience.
-          </p>
+      
         </motion.div>
 
         {/* Core Values Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
-        >
-          {coreValues.map((value, index) => {
-            const Icon = value.icon;
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-              >
-                <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/40 border border-gray-800 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 h-full">
-                  <CardBody className="p-6">
-                    <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${value.gradient} mb-4`}>
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-3">
-                      {value.title}
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      {value.description}
-                    </p>
-                  </CardBody>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+<motion.div
+  initial={{ opacity: 0, y: 30 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ delay: 0.2, duration: 0.6 }}
+  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+>
+  {coreValues.map((value, index) => {
+    const Icon = value.icon;
+
+    return (
+      <motion.div
+        key={value.title} // use title instead of index for better key stability
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.1 * index, duration: 0.5, ease: 'easeOut' }}
+      >
+        <Card className="h-full bg-gradient-to-br from-gray-900/80 to-gray-800/40 border border-gray-800 hover:border-purple-500/50 transition-all duration-300 hover:scale-105">
+          <CardBody className="p-6 flex flex-col">
+            <div
+              className={`inline-flex items-center justify-center p-3 rounded-xl bg-gradient-to-br ${value.gradient} mb-4`}
+            >
+              <Icon className="w-6 h-6 text-white" aria-hidden="true" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">{value.description}</p>
+          </CardBody>
+        </Card>
+      </motion.div>
+    );
+  })}
+</motion.div>
+
 
         {/* Statistics Bar */}
         <motion.div
@@ -157,34 +160,41 @@ export function AboutSection() {
             })}
           </div>
         </motion.div>
+{/* What Makes Us Special */}
+<motion.section
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ delay: 0.5, duration: 0.6 }}
+  className="py-12"
+>
+  <h3 className="text-3xl font-bold text-center text-white mb-10">
+    What Makes Us{' '}
+    <span className="bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
+      Special
+    </span>
+  </h3>
 
-        {/* What Makes Us Special */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-        >
-          <h3 className="text-3xl font-bold text-center text-white mb-8">
-            What Makes Us <span className="bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">Special</span>
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {highlights.map((highlight, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.05 * index, duration: 0.5 }}
-                className="flex items-center gap-3 bg-gray-900/50 border border-gray-800 rounded-xl p-4 hover:border-purple-500/50 hover:bg-gray-900/70 transition-all"
-              >
-                <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                <span className="text-gray-300 text-sm font-medium">{highlight}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+    {highlights.map((highlight, index) => (
+      <motion.div
+        key={highlight} // use highlight text for stable key
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.08 * index, duration: 0.5, ease: 'easeOut' }}
+        className="flex items-center gap-3 bg-gray-900/50 border border-gray-800 rounded-xl p-5 hover:border-purple-500/50 hover:bg-gray-900/70 transition-all duration-300"
+      >
+        <CheckCircle
+          className="w-6 h-6 text-green-400 flex-shrink-0"
+          aria-hidden="true"
+        />
+        <p className="text-gray-300 text-sm font-medium">{highlight}</p>
+      </motion.div>
+    ))}
+  </div>
+</motion.section>
+
       </div>
     </section>
   );

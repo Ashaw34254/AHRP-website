@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ user }, { status: 201 });
 
-  } catch (error) {
+  } catch (error: any) {
     // Check for Prisma-specific errors
     if (error.code === 'P2002') {
       // Unique constraint violation
@@ -117,7 +117,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ user });
 
-  } catch (error) {
+  } catch (error: any) {
     // Check for "Record not found" error
     if (error.code === 'P2025') {
       logDatabaseError(
@@ -166,7 +166,7 @@ export async function externalApiExample() {
 
     return await response.json();
 
-  } catch (error) {
+  } catch (error: any) {
     // Log network errors with additional context
     logApiError(
       error as Error,
@@ -193,11 +193,7 @@ export async function complexOperationExample(userId: string) {
       throw new Error("User not found");
     }
 
-    const posts = await prisma.post.findMany({
-      where: { authorId: userId },
-    });
-
-    return { user, posts };
+    return { user };
 
   } catch (error) {
     // Log with detailed context

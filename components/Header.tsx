@@ -189,7 +189,7 @@ export function Header() {
             <NavbarItem>
               <Button
                 as="a"
-                href="https://discord.gg/ahrp"
+                href="https://discord.gg/VusbA9SpXv"
                 target="_blank"
                 variant="light"
                 className="text-gray-300 hover:text-white font-medium hidden md:flex"

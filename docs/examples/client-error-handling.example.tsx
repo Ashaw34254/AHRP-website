@@ -11,6 +11,10 @@ import { useState, useEffect } from "react";
 import { logError, logApiError } from "@/lib/error-logger";
 import { toast } from "@/lib/toast";
 
+// Placeholder components for examples
+const AdvancedView = () => <div>Advanced</div>;
+const BasicView = () => <div>Basic</div>;
+
 /**
  * Example 1: API Call with Error Handling
  */
@@ -244,7 +248,7 @@ export async function fetchWithTimeout(
 
     return await response.json();
 
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === 'AbortError') {
       const timeoutError = new Error(`Request timeout after ${timeout}ms`);
       logApiError(timeoutError, url, 'GET', 408);
