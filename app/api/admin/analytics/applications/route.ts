@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import type { Application } from "@prisma/client";
 
 export async function GET(request: Request) {
   try {
@@ -36,8 +37,8 @@ export async function GET(request: Request) {
    // const rejectedApplications = applications.filter(a => a.status === "REJECTED").length;
     
     // Calculate average processing time (for reviewed applications)
-    const reviewedApplications = applications.filter(a => a.reviewedAt && a.submittedDate);
-    const totalProcessingTime = reviewedApplications.reduce((sum, app) => {
+    const reviewedApplications = applications.filter((a: Application) => a.reviewedAt && a.submittedDate);
+    const totalProcessingTime = reviewedApplications.reduce((sum: number, app: Application) => {
       const submitted = new Date(app.submittedDate!).getTime();
       const reviewed = new Date(app.reviewedAt!).getTime();
       return sum + (reviewed - submitted);
@@ -48,13 +49,13 @@ export async function GET(request: Request) {
     
     // Group by application type
     const applicationsByType: Record<string, number> = {};
-    applications.forEach(app => {
+    applications.forEach((app: Application) => {
       applicationsByType[app.applicationType] = (applicationsByType[app.applicationType] || 0) + 1;
     });
-    
+
     // Group by status
     const applicationsByStatus: Record<string, number> = {};
-    applications.forEach(app => {
+    applications.forEach((app: Application) => {
       applicationsByStatus[app.status] = (applicationsByStatus[app.status] || 0) + 1;
     });
     
@@ -70,7 +71,7 @@ export async function GET(request: Request) {
       const nextDate = new Date(date);
       nextDate.setDate(nextDate.getDate() + 1);
       
-      const count = applications.filter(app => {
+      const count = applications.filter((app: Application) => {
         const appDate = new Date(app.createdAt);
         return appDate >= date && appDate < nextDate;
       }).length;
@@ -82,7 +83,7 @@ export async function GET(request: Request) {
     }
     
     // Recent activity (last 20 applications)
-    const recentActivity = applications.slice(0, 20).map(app => ({
+    const recentActivity = applications.slice(0, 20).map((app: Application) => ({
       id: app.id,
       applicationType: app.applicationType,
       status: app.status,
