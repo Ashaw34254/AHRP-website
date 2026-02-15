@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       }
       
       // Parse value based on dataType
-      let parsedValue = setting.value;
+      let parsedValue: unknown = setting.value;
       try {
         if (setting.dataType === "boolean") {
           parsedValue = setting.value === "true";

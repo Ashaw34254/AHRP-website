@@ -21,7 +21,7 @@ export async function GET() {
       },
     });
 
-    const formattedOfficers = officers.map((officer) => ({
+    const formattedOfficers = officers.map((officer: typeof officers[number]) => ({
       id: officer.id,
       name: officer.name,
       callsign: officer.callsign,
