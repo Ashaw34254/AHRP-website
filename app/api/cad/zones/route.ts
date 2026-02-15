@@ -19,12 +19,11 @@ export async function POST(request: Request) {
     const zone = await prisma.zone.create({
       data: {
         name: body.name,
-        code: body.code,
-        description: body.description || null,
-        boundaries: body.boundaries || "",
-        status: body.status || "ACTIVE",
-        priority: body.priority || "MEDIUM",
-        assignedOfficers: [],
+        type: body.type || "PATROL",
+        department: body.department || null,
+        coordinates: body.coordinates || "[]",
+        color: body.color || "#3b82f6",
+        isActive: body.isActive !== undefined ? body.isActive : true,
       },
     });
     return NextResponse.json(zone);

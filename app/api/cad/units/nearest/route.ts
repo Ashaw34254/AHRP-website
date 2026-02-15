@@ -18,7 +18,7 @@ interface UnitDistance {
   assignedOfficers: Array<{
     id: string;
     name: string;
-    badge: string;
+    badge: string | null;
   }>;
 }
 
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
         let unitLon: number | null = null;
 
         if (unit.location) {
-          const parts = unit.location.split(",").map((s) => parseFloat(s.trim()));
+          const parts = unit.location.split(",").map((s: string) => parseFloat(s.trim()));
           if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
             unitLat = parts[0];
             unitLon = parts[1];

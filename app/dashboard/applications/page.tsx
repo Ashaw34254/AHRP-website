@@ -27,11 +27,15 @@ interface Application {
   userId: string;
   applicationType: string;
   status: string;
+  isDraft: boolean;
   formData: Record<string, any>;
   createdAt: string;
+  lastSavedAt?: string;
+  submittedDate?: string;
   reviewedBy?: string;
   reviewedAt?: string;
   reviewNotes?: string;
+  feedback?: string;
 }
 
 const statusConfig = {

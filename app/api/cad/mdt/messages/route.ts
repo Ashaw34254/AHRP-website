@@ -20,28 +20,26 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      subject,
-      content,
-      senderName,
-      senderUnit,
-      recipientName,
-      recipientUnit,
-      messageType,
+      fromUnitId,
+      fromCallsign,
+      toUnitId,
+      toCallsign,
+      message: messageText,
+      priority,
     } = body;
 
-    if (!subject || !content || !senderName || !messageType) {
+    if (!fromUnitId || !fromCallsign || !messageText) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const message = await prisma.mDTMessage.create({
       data: {
-        subject,
-        content,
-        senderName,
-        senderUnit: senderUnit || null,
-        recipientName: recipientName || null,
-        recipientUnit: recipientUnit || null,
-        messageType,
+        fromUnitId,
+        fromCallsign,
+        toUnitId: toUnitId || null,
+        toCallsign: toCallsign || null,
+        message: messageText,
+        priority: priority || "NORMAL",
         isRead: false,
       },
     });

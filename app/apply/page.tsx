@@ -391,7 +391,7 @@ export default function ApplyPage() {
             selectedKeys={formData[field.fieldName] ? [formData[field.fieldName]] : []}
             onChange={(e) => updateField(field.fieldName, e.target.value)}
           >
-            {field.options?.map((option) => (
+            {(field.options || []).map((option) => (
               <SelectItem key={option}>
                 {option}
               </SelectItem>

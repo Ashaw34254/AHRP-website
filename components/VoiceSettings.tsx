@@ -172,8 +172,8 @@ export default function VoiceSettings() {
               <Slider
                 value={config.rate}
                 onChange={(value) => updateConfig({ rate: value as number })}
-                min={0.5}
-                max={2.0}
+                minValue={0.5}
+                maxValue={2.0}
                 step={0.1}
                 isDisabled={!isEnabled}
                 color="primary"
@@ -187,8 +187,8 @@ export default function VoiceSettings() {
               <Slider
                 value={config.pitch}
                 onChange={(value) => updateConfig({ pitch: value as number })}
-                min={0.5}
-                max={2.0}
+                minValue={0.5}
+                maxValue={2.0}
                 step={0.1}
                 isDisabled={!isEnabled}
                 color="primary"
@@ -202,8 +202,8 @@ export default function VoiceSettings() {
               <Slider
                 value={config.volume}
                 onChange={(value) => updateConfig({ volume: value as number })}
-                min={0.0}
-                max={1.0}
+                minValue={0.0}
+                maxValue={1.0}
                 step={0.1}
                 isDisabled={!isEnabled}
                 color="primary"
@@ -287,8 +287,8 @@ export default function VoiceSettings() {
                       onChange={(value) =>
                         updateConfig({ smartVolume: { ...config.smartVolume, fadeIn: value as number } })
                       }
-                      min={0}
-                      max={2000}
+                      minValue={0}
+                      maxValue={2000}
                       step={100}
                       color="success"
                     />
@@ -303,8 +303,8 @@ export default function VoiceSettings() {
                       onChange={(value) =>
                         updateConfig({ smartVolume: { ...config.smartVolume, fadeOut: value as number } })
                       }
-                      min={0}
-                      max={2000}
+                      minValue={0}
+                      maxValue={2000}
                       step={100}
                       color="success"
                     />
@@ -645,8 +645,8 @@ export default function VoiceSettings() {
                   onChange={(value) =>
                     updateConfig({ soundEffects: { ...config.soundEffects, volume: value as number } })
                   }
-                  min={0.0}
-                  max={1.0}
+                  minValue={0.0}
+                  maxValue={1.0}
                   step={0.1}
                   isDisabled={!isEnabled || !config.soundEffects.enabled}
                   color="secondary"

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
-import type { Session } from "next-auth";
 import {
   Navbar,
   NavbarBrand,
@@ -24,18 +23,8 @@ import { ChevronDown, LogOut, LayoutDashboard, Shield, Users, Sparkles } from "l
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-// Extend session type to include role
-interface ExtendedSession extends Session {
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    role?: string;
-  };
-}
-
 export function Header() {
-  const { data: session } = useSession() as { data: ExtendedSession | null };
+  const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 

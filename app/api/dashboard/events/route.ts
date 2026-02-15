@@ -107,9 +107,9 @@ export async function POST(request: NextRequest) {
     // Create or update RSVP
     const rsvp = await prisma.eventRSVP.upsert({
       where: {
-        userId_eventId: {
-          userId: session.user.id!,
+        eventId_userId: {
           eventId,
+          userId: session.user.id!,
         },
       },
       create: {

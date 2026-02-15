@@ -212,8 +212,8 @@ export function CADDispatchConsole({
       const pursuitsData = await pursuitsRes.json().catch(() => ({ pursuits: [] }));
       const infringementsData = await infringementsRes.json().catch(() => ({ infringements: [] }));
 
-      let filteredCalls = callsData.calls || [];
-      let filteredUnits = unitsData.units || [];
+      let filteredCalls: Call[] = callsData.calls || [];
+      let filteredUnits: Unit[] = unitsData.units || [];
 
       if (department) {
         filteredUnits = filteredUnits.filter(

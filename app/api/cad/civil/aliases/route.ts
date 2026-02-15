@@ -37,11 +37,6 @@ export async function POST(req: NextRequest) {
             driversLicense: character.licenseStatus === "VALID",
             weaponsPermit: character.firearmPermit,
             image: character.image,
-            height: character.height,
-            weight: character.weight,
-            eyeColor: character.eyeColor,
-            hairColor: character.hairColor,
-            build: character.build,
             aliases: JSON.stringify([alias]),
           },
         });

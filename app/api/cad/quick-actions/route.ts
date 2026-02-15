@@ -23,31 +23,23 @@ export async function POST(request: NextRequest) {
       name,
       description,
       actionType,
-      hotkey,
-      targetEndpoint,
-      defaultPayload,
-      buttonColor,
-      icon,
+      config,
+      department,
       isActive,
-      displayOrder,
     } = body;
 
-    if (!name || !actionType) {
-      return NextResponse.json({ error: "Name and action type are required" }, { status: 400 });
+    if (!name || !actionType || !description) {
+      return NextResponse.json({ error: "Name, description, and action type are required" }, { status: 400 });
     }
 
     const action = await prisma.quickAction.create({
       data: {
         name,
-        description: description || null,
+        description,
         actionType,
-        hotkey: hotkey || null,
-        targetEndpoint: targetEndpoint || null,
-        defaultPayload: defaultPayload || null,
-        buttonColor: buttonColor || "primary",
-        icon: icon || "Zap",
+        config: config ? (typeof config === "string" ? config : JSON.stringify(config)) : "{}",
+        department: department || null,
         isActive: isActive !== undefined ? isActive : true,
-        displayOrder: displayOrder || 0,
       },
     });
 

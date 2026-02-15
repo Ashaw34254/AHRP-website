@@ -149,16 +149,12 @@ export function CADNewCallForm({ onCallCreated, department = "POLICE" }: CADNewC
       
       // Notify if mutual aid is required
       if (notifyDepts.length > 0) {
-        toast.info(`Mutual aid request sent to: ${notifyDepts.join(", ")}`, {
-          duration: 5000,
-        });
+        toast.info(`Mutual aid request sent to: ${notifyDepts.join(", ")}`);
       }
       
       // Suggest units
       if (suggestedUnits.length > 0) {
-        toast.info(`Suggested units: ${suggestedUnits.join(", ")}`, {
-          duration: 4000,
-        });
+        toast.info(`Suggested units: ${suggestedUnits.join(", ")}`);
       }
       
       // Reset form

@@ -45,8 +45,8 @@ interface VoiceConfig {
   };
   smartVolume: {
     enabled: boolean;
-    fadeIn: boolean;
-    fadeOut: boolean;
+    fadeIn: number;
+    fadeOut: number;
     priorityScaling: boolean;
   };
   keyboardShortcuts: {
@@ -164,8 +164,8 @@ const defaultConfig: VoiceConfig = {
   },
   smartVolume: {
     enabled: true,
-    fadeIn: true,
-    fadeOut: true,
+    fadeIn: 500,
+    fadeOut: 500,
     priorityScaling: true,
   },
   keyboardShortcuts: {

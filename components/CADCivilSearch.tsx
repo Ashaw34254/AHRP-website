@@ -47,6 +47,7 @@ interface Citizen {
     isActive: boolean;
   }>;
   vehicles: Array<{
+    id: string;
     plate: string;
     model: string;
     color: string;
@@ -1082,8 +1083,7 @@ export function CADCivilSearch() {
     if (riskData.score > 80) {
       // Critical risk - Code 3 supervisor response required
       toast.error(
-        `CRITICAL ALERT: ${citizen.firstName} ${citizen.lastName} - Risk Score ${riskData.score}. CODE 3 SUPERVISOR RESPONSE REQUIRED.`,
-        { duration: 10000 }
+        `CRITICAL ALERT: ${citizen.firstName} ${citizen.lastName} - Risk Score ${riskData.score}. CODE 3 SUPERVISOR RESPONSE REQUIRED.`
       );
       speak("Code 3. Supervisor response required. High risk individual detected.", {
         priority: "critical",
@@ -1095,8 +1095,7 @@ export function CADCivilSearch() {
     } else if (riskData.score > 50) {
       // High risk - Dispatcher notification
       toast.warning(
-        `High Risk Alert: ${citizen.firstName} ${citizen.lastName} - Risk Score ${riskData.score}. Dispatcher notified.`,
-        { duration: 7000 }
+        `High Risk Alert: ${citizen.firstName} ${citizen.lastName} - Risk Score ${riskData.score}. Dispatcher notified.`
       );
       speak("Dispatcher alert. High risk individual detected. Proceed with caution.", {
         priority: "high",

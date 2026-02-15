@@ -170,8 +170,8 @@ export default function VoiceTestingPage() {
               <Slider
                 value={config.volume}
                 onChange={(value) => updateConfig({ volume: value as number })}
-                min={0}
-                max={1}
+                minValue={0}
+                maxValue={1}
                 step={0.1}
                 color="primary"
               />

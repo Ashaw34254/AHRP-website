@@ -49,7 +49,6 @@ export default function PanicButtonEnhanced({ userCallsign = 'A-247', userLocati
         type: 'panic',
         supervisorOverride: true,
         department: 'POLICE',
-        canSkip: false,
       }
     );
 
@@ -138,7 +137,6 @@ export default function PanicButtonEnhanced({ userCallsign = 'A-247', userLocati
                 type: 'panic',
                 supervisorOverride: true,
                 department: 'POLICE',
-                canSkip: false,
               }
             );
           }

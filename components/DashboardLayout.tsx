@@ -391,7 +391,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {mobileMenuOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-            onPress={() => setMobileMenuOpen(false)}
+            onClick={() => setMobileMenuOpen(false)}
           />
         )}
 

@@ -20,45 +20,34 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      patientName,
-      chiefComplaint,
-      incidentDate,
-      location,
-      transportedTo,
-      respondingUnit,
-      respondingEMT,
-      vitals,
-      treatment,
-      disposition,
-      notes,
       medicalRecordId,
+      callId,
+      incidentDate,
+      chiefComplaint,
+      treatment,
+      medications,
+      vitalSigns,
+      transportedTo,
+      disposition,
+      treatedBy,
     } = body;
 
-    if (!patientName || !chiefComplaint || !incidentDate || !location) {
+    if (!medicalRecordId || !chiefComplaint || !treatment || !treatedBy || !incidentDate) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Generate incident number (format: MI-YYYYMMDD-XXXX)
-    const date = new Date(incidentDate);
-    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const incidentNumber = `MI-${dateStr}-${randomNum}`;
-
     const incident = await prisma.medicalIncident.create({
       data: {
-        incidentNumber,
-        patientName,
-        chiefComplaint,
+        medicalRecordId,
+        callId: callId || null,
         incidentDate: new Date(incidentDate),
-        location,
+        chiefComplaint,
+        treatment,
+        medications: medications || null,
+        vitalSigns: vitalSigns || null,
         transportedTo: transportedTo || null,
-        respondingUnit: respondingUnit || "UNKNOWN",
-        respondingEMT: respondingEMT || "UNKNOWN",
-        vitals: vitals || null,
-        treatment: treatment || null,
         disposition: disposition || "TRANSPORTED",
-        notes: notes || null,
-        medicalRecordId: medicalRecordId || null,
+        treatedBy,
       },
     });
 

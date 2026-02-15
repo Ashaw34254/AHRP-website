@@ -63,21 +63,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // If this was a BOLO hit, create activity log
+    // Log BOLO/stolen hits
     if (result === 'BOLO_HIT' || result === 'STOLEN') {
-      await prisma.activityLog.create({
-        data: {
-          type: 'PLATE_ALERT',
-          description: `ALPR hit on ${plate} - ${result}`,
-          userId: officerId,
-          metadata: JSON.stringify({
-            plate,
-            camera,
-            location,
-            result,
-          }),
-        },
-      });
+      console.log(`ALPR alert: ${plate} - ${result} at ${location}`);
     }
 
     return NextResponse.json(scan, { status: 201 });

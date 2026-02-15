@@ -5,13 +5,20 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    // Generate report number
+    const count = await prisma.civilianReport.count();
+    const reportNumber = `CR-${String(count + 1).padStart(5, "0")}`;
+
     const report = await prisma.civilianReport.create({
       data: {
+        reportNumber,
         reporterName: body.reporterName,
-        reporterContact: body.reporterContact || null,
-        incidentType: body.incidentType,
-        location: body.location || null,
+        reporterEmail: body.reporterEmail || null,
+        reporterPhone: body.reporterPhone || null,
+        type: body.type || body.incidentType,
+        subject: body.subject || body.incidentType,
         description: body.description,
+        location: body.location || null,
         status: "PENDING",
       },
     });

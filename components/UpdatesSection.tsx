@@ -90,7 +90,7 @@ export function UpdatesSection() {
         <div className="space-y-6">
           {updates.map((update, index) => {
             const Icon = update.icon;
-            const config = typeConfig[update.type];
+            const config = typeConfig[update.type as keyof typeof typeConfig];
             
             return (
               <motion.div

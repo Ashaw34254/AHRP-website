@@ -19,21 +19,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, message, alertType, priority, requiresApproval } = body;
+    const { type, unitId, unitCallsign, department, location, reason } = body;
 
-    if (!title || !message) {
-      return NextResponse.json({ error: "Title and message are required" }, { status: 400 });
+    if (!type || !unitId || !unitCallsign || !department) {
+      return NextResponse.json({ error: "Type, unitId, unitCallsign, and department are required" }, { status: 400 });
     }
 
     const alert = await prisma.supervisorAlert.create({
       data: {
-        title,
-        message,
-        alertType: alertType || "GENERAL",
-        priority: priority || "MEDIUM",
-        requiresApproval: requiresApproval || false,
-        createdBy: "SYSTEM", // Replace with actual user from session
-        isDismissed: false,
+        type,
+        unitId,
+        unitCallsign,
+        department,
+        location: location || null,
+        reason: reason || null,
+        status: "ACTIVE",
       },
     });
 

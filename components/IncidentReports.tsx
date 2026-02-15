@@ -50,8 +50,13 @@ interface IncidentReport {
   victims?: string | null;
   witnesses?: string | null;
   evidence?: string | null;
+  priority?: string | null;
   approvedBy?: string | null;
   callId?: string | null;
+  witnessCount?: number;
+  suspectCount?: number;
+  victimCount?: number;
+  evidenceNotes?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -427,11 +432,11 @@ export function IncidentReports({ department }: IncidentReportsProps = { departm
                           <h3 className="text-lg font-bold text-white font-mono">{report.reportNumber}</h3>
                           <Chip
                             size="sm"
-                            color={getPriorityColor(report.priority) as any}
+                            color={getPriorityColor(report.priority || "NORMAL") as any}
                             variant="solid"
                             className="font-bold"
                           >
-                            {report.priority}
+                            {report.priority || "NORMAL"}
                           </Chip>
                           <Chip
                             size="sm"
@@ -460,17 +465,17 @@ export function IncidentReports({ department }: IncidentReportsProps = { departm
                         </div>
 
                         <div className="flex items-center gap-3">
-                          {report.witnessCount > 0 && (
+                          {(report.witnessCount ?? 0) > 0 && (
                             <Badge content={report.witnessCount} color="primary" size="sm">
                               <Chip size="sm" variant="flat">Witnesses</Chip>
                             </Badge>
                           )}
-                          {report.suspectCount > 0 && (
+                          {(report.suspectCount ?? 0) > 0 && (
                             <Badge content={report.suspectCount} color="warning" size="sm">
                               <Chip size="sm" variant="flat">Suspects</Chip>
                             </Badge>
                           )}
-                          {report.victimCount > 0 && (
+                          {(report.victimCount ?? 0) > 0 && (
                             <Badge content={report.victimCount} color="danger" size="sm">
                               <Chip size="sm" variant="flat">Victims</Chip>
                             </Badge>

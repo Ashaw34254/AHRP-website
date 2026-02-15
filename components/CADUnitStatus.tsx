@@ -5,6 +5,7 @@ import { Radio, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { QuickStatusUpdate } from "@/components/QuickStatusUpdate";
 import { TenCodesDropdown } from "@/components/TenCodesDropdown";
+import type { Department } from "@/lib/department-config";
 
 interface Unit {
   id: string;
@@ -212,6 +213,7 @@ export function CADUnitStatus({ department, refreshInterval = 10000 }: CADUnitSt
                   <QuickStatusUpdate
                     unitId={unit.id}
                     currentStatus={unit.status}
+                    department={unit.department as Department}
                     onUpdate={fetchUnits}
                     size="sm"
                   />

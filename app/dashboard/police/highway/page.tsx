@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { 
   Card, CardBody, CardHeader, Button, Input, Select, SelectItem,
   Chip, Tabs, Tab, Spinner, Modal, ModalContent, ModalHeader, 
-  ModalBody, ModalFooter, useDisclosure, Tooltip, Badge, Textarea,
+  ModalBody, ModalFooter, useDisclosure, Tooltip, Textarea,
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Divider
 } from "@heroui/react";
 import { 
@@ -290,13 +290,12 @@ export default function HighwayPage() {
                 Highway Patrol - Traffic Enforcement
               </h1>
               {activePursuits.length > 0 && (
-                <Badge
-                  content="ACTIVE PURSUIT"
+                <Chip
                   color="danger"
                   variant="solid"
                   size="sm"
                   className="animate-pulse"
-                />
+                >ACTIVE PURSUIT</Chip>
               )}
             </div>
             <p className="text-gray-400 mt-1">
@@ -491,7 +490,7 @@ export default function HighwayPage() {
           >
             <TrafficStopsView
               stops={recentStops}
-              onStopSelect={(stop) => {
+              onStopSelect={(stop: TrafficStop) => {
                 setSelectedVehicle(stop.vehicle || null);
                 if (stop.vehicle) onVehicleDetailOpen();
               }}
@@ -505,7 +504,7 @@ export default function HighwayPage() {
                 <AlertTriangle className="w-4 h-4" />
                 Pursuits
                 {activePursuits.length > 0 && (
-                  <Badge content={activePursuits.length} color="danger" size="sm" />
+                  <Chip color="danger" size="sm">{activePursuits.length}</Chip>
                 )}
               </div>
             }

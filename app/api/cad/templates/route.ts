@@ -25,25 +25,25 @@ export async function POST(request: NextRequest) {
       callType,
       priority,
       department,
-      defaultLocation,
-      defaultNotes,
-      isActive,
+      descriptionTemplate,
+      isPublic,
+      createdById,
     } = body;
 
-    if (!name || !callType) {
-      return NextResponse.json({ error: "Name and call type are required" }, { status: 400 });
+    if (!name || !callType || !description || !descriptionTemplate || !createdById) {
+      return NextResponse.json({ error: "Name, description, callType, descriptionTemplate, and createdById are required" }, { status: 400 });
     }
 
     const template = await prisma.callTemplate.create({
       data: {
         name,
-        description: description || null,
+        description,
         callType,
         priority: priority || "MEDIUM",
         department: department || "POLICE",
-        defaultLocation: defaultLocation || null,
-        defaultNotes: defaultNotes || null,
-        isActive: isActive !== undefined ? isActive : true,
+        descriptionTemplate,
+        isPublic: isPublic || false,
+        createdById,
       },
     });
 

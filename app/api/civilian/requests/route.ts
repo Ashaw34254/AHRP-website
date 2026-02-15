@@ -5,13 +5,18 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    // Generate request number
+    const count = await prisma.recordsRequest.count();
+    const requestNumber = `RR-${String(count + 1).padStart(5, "0")}`;
+
     const recordRequest = await prisma.recordsRequest.create({
       data: {
-        requestorName: body.requestorName,
-        requestorEmail: body.requestorEmail,
+        requestNumber,
+        requesterName: body.requesterName || body.requestorName,
+        requesterEmail: body.requesterEmail || body.requestorEmail,
+        requesterPhone: body.requesterPhone || null,
         requestType: body.requestType,
-        subjectName: body.subjectName || null,
-        reason: body.reason || null,
+        recordDetails: body.recordDetails || body.reason || "",
         status: "PENDING",
       },
     });

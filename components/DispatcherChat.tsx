@@ -769,7 +769,7 @@ export function DispatcherChat({ department }: DispatcherChatProps = { departmen
                       ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-2 border-indigo-500/60 shadow-lg shadow-indigo-500/20"
                       : "bg-gray-800/30 border-2 border-transparent hover:bg-gray-800/60 hover:border-gray-700/50 hover:shadow-md"
                   }`}
-                  onPress={() =>
+                  onClick={() =>
                     setSelectedRecipient(
                       selectedRecipient === session.userId ? null : session.userId
                     )
@@ -1078,7 +1078,7 @@ export function DispatcherChat({ department }: DispatcherChatProps = { departmen
                             ? "bg-gradient-to-br from-blue-600 to-blue-700 border-2 border-blue-400/40 shadow-xl"
                             : "bg-gray-800 border-2 border-gray-600/60 shadow-lg"
                         } ${msg.isPinned ? "ring-2 ring-yellow-400/50" : ""} rounded-xl p-4 backdrop-blur-sm hover:shadow-2xl transition-shadow`}
-                        onPress={() => !isOwn && !msg.isRead && markAsRead(msg.id)}
+                        onClick={() => !isOwn && !msg.isRead && markAsRead(msg.id)}
                       >
                         {msg.isPinned && (
                           <div className="absolute -top-2 -left-2 bg-yellow-500 rounded-full p-1">
@@ -1409,7 +1409,7 @@ export function DispatcherChat({ department }: DispatcherChatProps = { departmen
                       <div
                         key={template.id}
                         className="flex items-start justify-between gap-2 p-2 bg-gray-900/50 rounded hover:bg-gray-900 cursor-pointer"
-                        onPress={() => applyTemplate(template)}
+                        onClick={() => applyTemplate(template)}
                       >
                         <div className="flex-1">
                           <p className="text-xs font-semibold text-white">{template.name}</p>
@@ -1433,7 +1433,7 @@ export function DispatcherChat({ department }: DispatcherChatProps = { departmen
                     <div
                       key={idx}
                       className="px-3 py-2 hover:bg-gray-700 rounded cursor-pointer transition"
-                      onPress={() => insertMention(user)}
+                      onClick={() => insertMention(user)}
                     >
                       <p className="text-sm text-white">@{user}</p>
                     </div>

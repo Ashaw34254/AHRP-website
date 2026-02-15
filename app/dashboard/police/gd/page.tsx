@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { 
   Card, CardBody, CardHeader, Button, Input, Select, SelectItem,
   Chip, Tabs, Tab, Spinner, Modal, ModalContent, ModalHeader, 
-  ModalBody, ModalFooter, useDisclosure, Tooltip, Badge, Textarea,
+  ModalBody, ModalFooter, useDisclosure, Tooltip, Textarea,
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell
 } from "@heroui/react";
 import { 
@@ -280,13 +280,12 @@ export default function GeneralDutiesPage() {
                 <Shield className="w-8 h-8 text-blue-500" />
                 General Duties - Patrol Operations
               </h1>
-              <Badge
-                content={isLive ? 'LIVE' : 'PAUSED'}
+              <Chip
                 color={isLive ? 'success' : 'warning'}
                 variant="flat"
                 size="sm"
                 className={isLive ? 'animate-pulse' : ''}
-              />
+              >{isLive ? 'LIVE' : 'PAUSED'}</Chip>
             </div>
             <p className="text-gray-400 mt-1">
               Frontline response and patrol management • Last update: {lastUpdate.toLocaleTimeString()}
@@ -516,7 +515,7 @@ export default function GeneralDutiesPage() {
                 <AlertTriangle className="w-4 h-4" />
                 Incident Queue
                 {incidents.length > 0 && (
-                  <Badge content={incidents.length} color="danger" size="sm" />
+                  <Chip color="danger" size="sm">{incidents.length}</Chip>
                 )}
               </div>
             }

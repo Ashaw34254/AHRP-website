@@ -8,7 +8,9 @@
       "Bash(powershell -ExecutionPolicy Bypass -File:*)",
       "Bash(npx next build:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)"
     ]
   }
 }

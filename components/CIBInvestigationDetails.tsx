@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   Button, Tabs, Tab, Card, CardBody, CardHeader, Input, Textarea,
-  Select, SelectItem, Chip, Spinner, Tooltip, Badge
+  Select, SelectItem, Chip, Spinner, Tooltip
 } from "@heroui/react";
 import {
   FileText, Clock, Paperclip, CheckSquare, User, Users, Shield,
@@ -496,7 +496,7 @@ export function CIBInvestigationDetails({ investigation, isOpen, onClose, onUpda
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   <span>Timeline</span>
-                  {investigation.timeline && <Badge content={investigation.timeline.length} color="primary" />}
+                  {investigation.timeline && <Chip size="sm" color="primary">{investigation.timeline.length}</Chip>}
                 </div>
               }
             >
@@ -514,7 +514,7 @@ export function CIBInvestigationDetails({ investigation, isOpen, onClose, onUpda
                 <div className="flex items-center gap-2">
                   <Paperclip className="w-4 h-4" />
                   <span>Evidence</span>
-                  {investigation.evidence && <Badge content={investigation.evidence.length} color="primary" />}
+                  {investigation.evidence && <Chip size="sm" color="primary">{investigation.evidence.length}</Chip>}
                 </div>
               }
             >
@@ -533,7 +533,7 @@ export function CIBInvestigationDetails({ investigation, isOpen, onClose, onUpda
                 <div className="flex items-center gap-2">
                   <CheckSquare className="w-4 h-4" />
                   <span>Tasks</span>
-                  {investigation.tasks && <Badge content={investigation.tasks.length} color="warning" />}
+                  {investigation.tasks && <Chip size="sm" color="warning">{investigation.tasks.length}</Chip>}
                 </div>
               }
             >
@@ -552,7 +552,7 @@ export function CIBInvestigationDetails({ investigation, isOpen, onClose, onUpda
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   <span>Notes</span>
-                  {investigation.notes && <Badge content={investigation.notes.length} color="primary" />}
+                  {investigation.notes && <Chip size="sm" color="primary">{investigation.notes.length}</Chip>}
                 </div>
               }
             >
