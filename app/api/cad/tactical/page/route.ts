@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     // Update officer statuses to indicate they've been paged
     await prisma.officer.updateMany({
       where: {
-        id: { in: officers.map((o) => o.id) },
+        id: { in: officers.map((o: typeof officers[number]) => o.id) },
       },
       data: {
         dutyStatus: "BUSY", // Or create a "PAGED" status
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       officersPaged: officers.length,
-      officers: officers.map((o) => ({
+      officers: officers.map((o: typeof officers[number]) => ({
         callsign: o.callsign,
         name: o.name,
         team: o.tacticalTeam,
