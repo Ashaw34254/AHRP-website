@@ -57,7 +57,7 @@ export default function Error({
 
   // Categorize error type for better debugging
   const categorizeError = (err: Error): string => {
-    const msg = err.message.toLowerCase();
+    const msg = (err.message || '').toLowerCase();
     if (msg.includes('fetch') || msg.includes('network')) return 'Network Error';
     if (msg.includes('timeout')) return 'Timeout Error';
     if (msg.includes('undefined') || msg.includes('null')) return 'Null Reference Error';
@@ -130,7 +130,7 @@ ${errorDetails.componentStack ? `COMPONENT STACK:\n${errorDetails.componentStack
 
   const getSuggestedFix = (): string[] => {
     if (!errorDetails) return [];
-    const msg = error.message.toLowerCase();
+    const msg = (error.message || '').toLowerCase();
     
     if (msg.includes('fetch') || msg.includes('network')) {
       return [

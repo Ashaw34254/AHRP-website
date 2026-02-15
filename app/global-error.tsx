@@ -45,7 +45,7 @@ export default function GlobalError({
   }, [error]);
 
   const categorizeGlobalError = (err: Error): string => {
-    const msg = err.message.toLowerCase();
+    const msg = (err.message || '').toLowerCase();
     if (msg.includes('chunk') || msg.includes('module')) return 'Module Loading Error';
     if (msg.includes('hydration') || msg.includes('render')) return 'React Rendering Error';
     if (msg.includes('memory')) return 'Memory Error';
